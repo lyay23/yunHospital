@@ -1,0 +1,37 @@
+# 应用配置
+server:
+  port: 8080
+
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/his02?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
+    username: root
+    password: abc123
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+      logic-delete-field: DelMark
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+  # 添加这两个配置项到 mybatis-plus 节点下
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.neuedu.hisweb.entity
+
+# 日志配置
+logging:
+  level:
+    web: debug
+    com.neuedu.his.dao: debug
+
+# 密钥配置
+#secretkey: hisweb
+jwt:
+  secretkey: hisweb  # 应用级别的密钥，用于额外安全验证
+  expireTime: 3600                # JWT过期时间（秒），默认值为1年(31536000)
