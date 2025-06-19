@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    public void addCorsMappings(CorsRegistry registry) { //ldh的代码
         //运行跨域
         registry.addMapping("/**")
                 //放行哪些原始域
@@ -20,18 +20,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .exposedHeaders("*");
     }
 
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        //注册TestInterceptor拦截器
-////        registry.addInterceptor(loginInterceptor())
-////                .excludePathPatterns("/user/login")				//添加不拦截的请求路径
-////                .excludePathPatterns("/user/logout")
-////                .excludePathPatterns("/wechat/loginByCode")
-////                .excludePathPatterns("/wechat/reg/**")
-//////                .excludePathPatterns("/constant/**")
-//////                .excludePathPatterns("/constantitem/**")
-////                .addPathPatterns("/**");						//添加需要拦截的路径
-//    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
