@@ -27,7 +27,9 @@ export const useUserStore=defineStore("user",()=>{
 		}
 		console.log("getUserInfo:end")
 		return userInfo;
-	}) 
+	})
+
+	const isAuth = computed(() => userInfo.value.isAuth)
 	 
 	//function() = actions
 	//设置登录状态，获取登录信息
@@ -70,5 +72,5 @@ export const useUserStore=defineStore("user",()=>{
 		console.log("logOut:end")
 	}
 	
-	return {userInfo,getUserInfo,setAuthenticated,logOut}
+	return {userInfo, isAuth, getUserInfo,setAuthenticated,logOut}
 })

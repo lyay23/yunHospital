@@ -7,10 +7,7 @@ const router = createRouter({
   routes: [
 	{
 	  path: '/',
-	  name: 'Login',
-	  role:0,
-	  component: defineAsyncComponent(() => import(`../components/Login.vue`)),
-	  meta: {title: 'Login'}
+	  redirect: '/home'
 	},
 	{
 	  path: '/login',
@@ -139,19 +136,39 @@ const router = createRouter({
 
 // 全局路由守卫
 router.beforeEach((to, from, next) => {
-	// let userLogin =  sessionStorage.getItem("userLogin");
 	const userStore = useUserStore()
-	// let isAuth=userStore.getUserInfo.value.isAuth;
-	let isAuth=userStore.getUserInfo.value.isAuth;
-	//判断路由的别名不是登录且未进行登录认证，就跳转去登录
-	if(to.name !== 'Login' && !isAuth){
-	  next({ name: 'Login' })
-	}else if(to.name=="Login" && isAuth){
-	//已登录，不允许退回到登录页面
-	   next({ path: '/home' })
-	}
-	else{
-	  next()
+	const isAuth = userStore.isAuth
+	const user = userStore.userInfo
+
+	if (to.path === '/login') {
+		if (isAuth) {
+			next('/home');
+		} else {
+			next();
+		}
+	} else {
+		if (isAuth) {
+			if(to.path==='/home'){
+				if (user && user.userType) {
+					// 根据 userType 重定向到特定页面
+					if (user.userType === 170) {
+						next('/constant');
+					} else if (user.userType === 171) {
+						next('/customer');
+					} else if (user.userType === 172) {
+						next('/docHome');
+					} else {
+						next();
+					}
+				} else {
+					next();
+				}
+			}else{
+				next()
+			}
+		} else {
+			next('/login');
+		}
 	}
 })
 
