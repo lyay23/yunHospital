@@ -1,20 +1,19 @@
 <template>
-	
-	<el-form :model="loginForm" :rules="rules"
-	 ref="ruleForm"  class="login-container" label-position="left"
-	 label-width="80px" v-loading="loading"  status-icon>
-		<el-text class="mx-1" size="large" >系统登录</el-text>
-		<div style="margin: 20px" />
-		<el-form-item label="用户名" prop="userName">
-		    <el-input v-model="loginForm.userName" placeholder="用户名"></el-input>
-		</el-form-item>
-		<el-form-item label="密码" prop="password">
-		    <el-input  type="password" v-model="loginForm.password" placeholder="密码"></el-input>
-		</el-form-item>
-		<el-form-item>
-		    <el-button type="primary" @click.native.prevent="submitClick">Login</el-button>
-		</el-form-item>
-	</el-form>	
+	<div class="login-wrapper">
+		<el-form :model="loginForm" :rules="rules" ref="ruleForm" class="login-container" label-position="left"
+			label-width="80px" v-loading="loading" status-icon>
+			<h3 class="login_title">东软云医院系统登录</h3>
+			<el-form-item label="用户名" prop="userName">
+				<el-input v-model="loginForm.userName" placeholder="用户名"></el-input>
+			</el-form-item>
+			<el-form-item label="密码" prop="password">
+				<el-input type="password" v-model="loginForm.password" placeholder="密码"></el-input>
+			</el-form-item>
+			<div style="display: flex; justify-content: center; width: 100%;">
+					<el-button type="primary" style="width: 40%" @click.native.prevent="submitClick">登录</el-button>
+			</div>
+		</el-form>
+	</div>
 </template>
 
 <script setup>
@@ -30,10 +29,7 @@ import { useUserStore } from '../store/user.js'
 const router = useRouter()
 //获取用户仓库对象
 const userStore=useUserStore()
-const loginForm=ref({
-	userName: 'admin',
-	password: 'admin123'
-})
+const loginForm=ref({})
 
 const rules=ref({
 	userName: [
@@ -68,25 +64,28 @@ const submitClick=()=>{
 </script>
 
 <style>
- .login-container {
-    border-radius: 15px;
-    background-clip: padding-box;
-    margin: 180px auto;
-    width: 350px;
-    padding: 35px 35px 15px 35px;
-    background: #fff;
-    border: 1px solid #eaeaea;
-    box-shadow: 0 0 25px #cac6c6;
-  }
+	.login-wrapper {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		height: 100vh;
+		background-color: #f5f7fa;
+	}
 
-  .login_title {
-    margin: 0px auto 40px auto;
-    text-align: center;
-    color: #505458;
-  }
+	.login-container {
+		border-radius: 15px;
+		background-clip: padding-box;
+		width: 350px;
+		padding: 35px 35px 15px 35px;
+		background: #fff;
+		border: 1px solid #eaeaea;
+		box-shadow: 0 0 25px #cac6c6;
+	}
 
-  .login_remember {
-    margin: 0px 0px 35px 0px;
-    text-align: left;
-  }	
+	.login_title {
+		margin: 0px auto 40px auto;
+		text-align: center;
+		color: #505458;
+	}
 </style>
