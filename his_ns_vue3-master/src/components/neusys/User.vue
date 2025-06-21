@@ -1,8 +1,8 @@
 <template>
 	<!-- 搜索栏 start -->
-	<el-row>
-		<el-col :span="3" style="padding-right: 20px;">
-			<el-select v-model="userType" class="m-2" filterable 
+	<el-row class="search-bar">
+		<div class="search-controls">
+			<el-select v-model="userType" filterable 
 				clearable @clear="loadData(1)"
 				placeholder="用户类型"  @change="loadData(1)" >
 				<el-option v-for="item in userTypes"
@@ -10,10 +10,7 @@
 					:label="item.constantCode+item.constantName"
 					:value="item.id"/>
 			</el-select>
-		</el-col>
-		
-		<el-col :span="3" style="padding-right: 20px;">
-			<el-select v-model="dept" class="m-2" filterable
+			<el-select v-model="dept" filterable
 				clearable @clear="loadData(1)"
 				placeholder="所在科室"  @change="loadData(1)" >
 			    <el-option
@@ -22,9 +19,7 @@
 			      :label="item.deptCode+item.deptName"
 			      :value="item.id"/>
 			</el-select>
-		</el-col>
-		<el-col :span="3" style="padding-right: 20px;">
-			<el-select v-model="docType" class="m-2" filterable
+			<el-select v-model="docType" filterable
 				clearable @clear="loadData(1)"
 				placeholder="医生职称"  @change="loadData(1)" >
 			    <el-option
@@ -33,19 +28,11 @@
 			      :label="item.constantCode+item.constantName"
 			      :value="item.id"/>
 			</el-select>
-			
-		</el-col>
-		<el-col :span="5" style="padding-right: 20px;">
 			<el-input v-model.trim="kw" 
-				  placeholder="请输入用户名或姓名" class="w-100 m-2"/>
-		</el-col>
-		<el-col :span="3">
+				  placeholder="请输入用户名或姓名"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
-		</el-col>
-		<el-col :span="4"></el-col>
-		<el-col :span="3">
-			<el-button type="danger" @click="addDialogVisible=true">新增用户</el-button>
-		</el-col>
+		</div>
+		<el-button type="primary" @click="addDialogVisible=true">新增用户</el-button>
 	</el-row>
 	
 	<div style="margin-top: 40px;"></div>
@@ -55,15 +42,20 @@
 		<el-col :span="24">
 			<el-table :data="data.records" style="width:100%;"
 			 v-loading="loading">
-			    <el-table-column fixed prop="id" label="序号" width="80" align="center" />
+			    <el-table-column fixed type="index" label="序号" align="center" width="80" 
+					:index="index => (data.current - 1) * data.size + index + 1" />
 			    <el-table-column prop="userName" label="用户名"  align="center" />
 				<el-table-column prop="realName" label="姓名" align="center"/>
 				<el-table-column prop="useTypeName" label="用户类型"  align="center" />
 			    <el-table-column prop="docTitle" label="医生职称"  align="center" />
 				<el-table-column prop="dept" label="所在科室"  align="center" />
-				<el-table-column prop="isScheduling" label="排班"  align="center" />
+				<el-table-column prop="isScheduling" label="排班"  align="center" >
+					<template #default="scope">
+						{{ scope.row.isScheduling === 1 ? '是' : '否' }}
+					</template>
+				</el-table-column>
 				<el-table-column prop="registLe" label="挂号级别"  align="center" />
-				<el-table-column fixed="right" label="Operations"  align="center" >
+				<el-table-column fixed="right" label="操作"  align="center" >
 			      <template #default="scope">
 			        <el-button link type="primary" @click="showEdit(scope.row)">编辑</el-button>
 					<el-button link type="danger" @click="del(scope.row.id)">删除</el-button>
@@ -79,10 +71,11 @@
 		<el-col :span="20">
 			<el-pagination background layout="prev, pager, next" 
 			:total="data.total" :page-count="data.pages"
+			v-model:current-page="currentPage"
 			@current-change="handleCurrentChange"/>
 		</el-col>
 		<el-col :span="4">
-			<el-select v-model="ps" class="m-2" placeholder="每页行数" @change="loadData(1)" >
+			<el-select v-model="ps" class="w-20 m-2" placeholder="每页行数" @change="loadData(1)" >
 			    <el-option
 			      v-for="item in pageSizes"
 			      :key="item"
@@ -96,53 +89,50 @@
 	
 	
 	<!-- 编辑数据项对话框 start -->
-	<el-dialog v-model="editDialogVisible" title="编辑" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules" label-width="100px">
-			<el-form-item label="编号"  prop="id" >
-			  <el-input v-model="editform.id" readonly autocomplete="off" />
+	<el-dialog v-model="editDialogVisible" title="编辑" @close="handleClose('edit')">
+	    <el-form :model="form" :rules="rules" ref="editFormRef" label-width="100px">
+			<el-form-item label="用户名" prop="userName" >
+			  <el-input v-model="form.userName"  autocomplete="off" />
 			</el-form-item>
-			<el-form-item label="用户类型"  prop="useType">
-				<el-select v-model="editform.useType" class="m-2" placeholder="用户类型"   >
+			<el-form-item label="姓名"  prop="realName" >
+			  <el-input v-model="form.realName"  autocomplete="off" />
+			</el-form-item>
+			<el-form-item label="用户类型" prop="useType">
+				<el-select v-model="form.useType" placeholder="用户类型">
 					<el-option v-for="item in userTypes"
 						:key="item.id"
-						:label="item.constantCode+item.constantName"
+						:label="item.constantName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>	
-			<el-form-item label="所在科室"  prop="deptID">
-				<el-select v-model="editform.deptID"  filterable class="m-2" placeholder="用户类型"   >
+			<el-form-item label="所在科室" prop="deptID">
+				<el-select v-model="form.deptID" filterable placeholder="所在科室">
 					<el-option v-for="item in depts"
 						:key="item.id"
-						:label="item.deptCode+item.deptName"
+						:label="item.deptName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="医生职称"  prop="docTitleID">
-				<el-select v-model="editform.docTitleID" class="m-2" filterable placeholder="用户类型"   >
+			<el-form-item label="医生职称" prop="docTitleID">
+				<el-select v-model="form.docTitleID" filterable placeholder="医生职称">
 					<el-option v-for="item in docTypes"
 						:key="item.id"
-						:label="item.constantCode+item.constantName"
+						:label="item.constantName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="挂号级别"  prop="registLeID">
-				<el-select v-model="editform.registLeID" class="m-2" filterable placeholder="挂号级别"   >
+			<el-form-item label="挂号级别" prop="registLeID">
+				<el-select v-model="form.registLeID" filterable placeholder="挂号级别">
 					<el-option v-for="item in registLes"
 						:key="item.id"
-						:label="item.registCode+item.registName"
+						:label="item.registName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="用户名" prop="userName" >
-			  <el-input v-model="editform.userName"  autocomplete="off" />
-			</el-form-item>
-			<el-form-item label="姓名"  prop="realName" >
-			  <el-input v-model="editform.realName"  autocomplete="off" />
-			</el-form-item>
-			<el-form-item label="是否排班"  prop="isScheduling" >
-				 <el-radio-group v-model="editform.isScheduling">
-				    <el-radio label="是">是</el-radio>
-				    <el-radio label="否">否</el-radio>
+			<el-form-item label="是否排班" prop="isScheduling" >
+				 <el-radio-group v-model="form.isScheduling">
+				    <el-radio :value="1">是</el-radio>
+				    <el-radio :value="0">否</el-radio>
 				  </el-radio-group>
 			</el-form-item>
 	    </el-form>
@@ -159,53 +149,53 @@
 	  <!-- 编辑数据项对话框  end-->
 	  
 	<!-- 新增常数据项对话框 start -->
-	<el-dialog v-model="addDialogVisible" title="新增" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules" label-width="100px">
-	    	<el-form-item label="编号"  prop="id" >
-	    	  <el-input v-model="editform.id" readonly autocomplete="off" />
+	<el-dialog v-model="addDialogVisible" title="新增" @close="handleClose('add')">
+	    <el-form :model="form" :rules="rules" ref="addFormRef" label-width="100px">
+	    	<el-form-item label="用户名" prop="userName" >
+	    	  <el-input v-model="form.userName"  autocomplete="off" />
 	    	</el-form-item>
-	    	<el-form-item label="用户类型"  prop="useType">
-	    		<el-select v-model="editform.useType" class="m-2" filterable placeholder="用户类型"   >
+			<el-form-item label="密码" prop="password">
+				<el-input v-model="form.password" type="password" show-password autocomplete="off" />
+			</el-form-item>
+	    	<el-form-item label="姓名"  prop="realName" >
+	    	  <el-input v-model="form.realName"  autocomplete="off" />
+	    	</el-form-item>
+			<el-form-item label="用户类型"  prop="useType">
+	    		<el-select v-model="form.useType" filterable placeholder="用户类型">
 	    			<el-option v-for="item in userTypes"
 	    				:key="item.id"
-	    				:label="item.constantCode+item.constantName"
+	    				:label="item.constantName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>	
 	    	<el-form-item label="所在科室"  prop="deptID">
-	    		<el-select v-model="editform.deptID" filterable class="m-2" placeholder="所在科室"   >
+	    		<el-select v-model="form.deptID" filterable placeholder="所在科室">
 	    			<el-option v-for="item in depts"
 	    				:key="item.id"
-	    				:label="item.deptCode+item.deptName"
+	    				:label="item.deptName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>
 	    	<el-form-item label="医生职称"  prop="docTitleID">
-	    		<el-select v-model="editform.docTitleID" filterable class="m-2" placeholder="用户类型"   >
+	    		<el-select v-model="form.docTitleID" filterable placeholder="医生职称">
 	    			<el-option v-for="item in docTypes"
 	    				:key="item.id"
-	    				:label="item.constantCode+item.constantName"
+	    				:label="item.constantName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>
 	    	<el-form-item label="挂号级别"  prop="registLeID">
-	    		<el-select v-model="editform.registLeID" filterable class="m-2" placeholder="挂号级别"   >
+	    		<el-select v-model="form.registLeID" filterable placeholder="挂号级别">
 	    			<el-option v-for="item in registLes"
 	    				:key="item.id"
-	    				:label="item.registCode+item.registName"
+	    				:label="item.registName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>
-	    	<el-form-item label="用户名" prop="userName" >
-	    	  <el-input v-model="editform.userName"  autocomplete="off" />
-	    	</el-form-item>
-	    	<el-form-item label="姓名"  prop="realName" >
-	    	  <el-input v-model="editform.realName"  autocomplete="off" />
-	    	</el-form-item>
 	    	<el-form-item label="是否排班"  prop="isScheduling" >
-	    		 <el-radio-group v-model="editform.isScheduling">
-	    		    <el-radio label="是">是</el-radio>
-	    		    <el-radio label="否">否</el-radio>
+	    		 <el-radio-group v-model="form.isScheduling">
+	    		    <el-radio :value="1">是</el-radio>
+	    		    <el-radio :value="0">否</el-radio>
 	    		  </el-radio-group>
 	    	</el-form-item>
 	    </el-form>
@@ -224,7 +214,7 @@
 <script setup>
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 //加载页码
 const loading=ref(false)
@@ -250,35 +240,37 @@ const dept=ref('')
 const ps=ref(10)
 //行数集
 const pageSizes=[10,20,30,50]
-
+const currentPage = ref(1)
 
 //新增对话框是否显示
 const addDialogVisible = ref(false)
 //编辑对话框是否显示
 const editDialogVisible = ref(false)
-//表单对象
-const editform=ref({
-	"id": '',
+
+// 表单ref
+const addFormRef = ref(null)
+const editFormRef = ref(null)
+
+const defaultForm = {
+	"id": "",
 	"userName": "",
+	"password": "",
 	"realName": "",
-	"useType": '',
-	"useTypeName": "",
-	"docTitleID": '',
-	"docTitle": "",
-	"isScheduling": "",
-	"deptID": '',
-	"dept": "",
-	"registLeID": '',
-	"registLe": ""
-})
+	"useType": "",
+	"docTitleID": "",
+	"isScheduling": 0,
+	"deptID": "",
+	"registLeID": ""
+}
+//表单对象
+const form=ref(JSON.parse(JSON.stringify(defaultForm)))
+
 //表单验证
 const rules=ref({
-	userName: [
-		{ required: true, message: '请输入用户名', trigger: 'blur' }
-	],
-	realName: [
-		{ required: true, message: '请输入姓名', trigger: 'blur' }
-	]
+	userName: [ { required: true, message: '请输入用户名', trigger: 'blur' } ],
+	password: [ { required: true, message: '请输入密码', trigger: 'blur' } ],
+	realName: [ { required: true, message: '请输入姓名', trigger: 'blur' } ],
+	useType: [ { required: true, message: '请选择用户类型', trigger: 'change' } ],
 })
 
 //组件挂载后事件
@@ -358,55 +350,55 @@ function handleCurrentChange (number)  {
 //显示编辑框
 function showEdit(item){
 	editDialogVisible.value=true
-	editform.value=item
+	form.value = { ...item, isScheduling: item.isScheduling === '是' ? 1 : 0 }
 }
-function  closeDialog(){
-	editform.value={
-		"id": '',
-		"userName": "",
-		"realName": "",
-		"useType": '',
-		"useTypeName": "",
-		"docTitleID": '',
-		"docTitle": "",
-		"isScheduling": "",
-		"deptID": '',
-		"dept": "",
-		"registLeID": '',
-		"registLe": ""
-	}
+
+function handleClose(type) {
+  const formRef = type === 'edit' ? editFormRef.value : addFormRef.value;
+  if (formRef) {
+    formRef.resetFields();
+  }
+  form.value = JSON.parse(JSON.stringify(defaultForm));
 }
 
 //保存编辑内容
-function editSave(){
-	console.log(editform.value.deptType)
-	postReq("/user/update",editform.value).then(resp=>{
-		if(resp.data.result){
-			editDialogVisible.value=false
-			loadData(data.value.current)
-			ElMessageBox.alert('修改成功', '提示',{})
-			
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}
-		
-	})
+async function editSave(){
+  if (!editFormRef.value) return;
+  await editFormRef.value.validate((valid) => {
+    if (valid) {
+      // 创建一个副本，移除password字段
+      const submission = { ...form.value };
+      delete submission.password;
+
+      postReq("/user/update", submission).then(resp => {
+        if (resp.data.result) {
+          editDialogVisible.value = false;
+          loadData(data.value.current);
+          ElMessage.success('修改成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '修改失败');
+        }
+      });
+    }
+  });
 }
-//保存编辑内容
-function save(){
-	postReq("/user/add",editform.value).then(resp=>{
-		if(resp.data.result){
-			addDialogVisible.value=false
-			ElMessageBox.alert('新增成功', '提示',{})
-			
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}	
-	})
+//保存新增内容
+async function save(){
+  if (!addFormRef.value) return;
+  await addFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/user/add", form.value).then(resp => {
+        if (resp.data.result) {
+          addDialogVisible.value = false;
+          currentPage.value = 1;
+          loadData(1);
+          ElMessage.success('新增成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '新增失败');
+        }
+      });
+    }
+  });
 }
 
 function del(id){
@@ -438,5 +430,17 @@ function del(id){
 
 </script>
 
-<style>
+<style scoped>
+.search-bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-controls {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
 </style>

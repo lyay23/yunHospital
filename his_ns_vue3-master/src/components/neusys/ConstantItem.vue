@@ -1,35 +1,21 @@
 <template>
 	<!-- 搜索栏 start -->
-	<el-row>
-		<el-col :span="5">
-			<div class="grid-content ep-bg-purple-dark" >
-				<el-select v-model="ctype" class="m-2" filterable 
-					clearable @clear="loadData(1)"
-					placeholder="常数据类别"  @change="loadData(1)" >
-				    <el-option
-				      v-for="item in types"
-				      :key="item.id"
-				      :label="item.constantTypeCode+item.constantTypeName"
-				      :value="item.id"/>
-				</el-select>
-			</div>
-		</el-col>
-	    <el-col :span="5">
-			<div class="grid-content ep-bg-purple-dark" >	
-				<el-input v-model.trim="kw"
-				  placeholder="请输入常数项编码或名称" class="w-100 m-2"/>
-			</div>
-		</el-col>
-		<el-col :span="1">
-		</el-col>
-		<el-col :span="4" class="m-2">
+	<el-row class="search-bar">
+		<div class="search-controls">
+			<el-select v-model="ctype" filterable 
+				clearable @clear="loadData(1)"
+				placeholder="常数据类别"  @change="loadData(1)" >
+				<el-option
+				  v-for="item in types"
+				  :key="item.id"
+				  :label="item.constantTypeCode+item.constantTypeName"
+				  :value="item.id"/>
+			</el-select>
+			<el-input v-model.trim="kw"
+			  placeholder="请输入常数项编码或名称"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
-		</el-col>
-		<el-col :span="5">			
-		</el-col>
-		<el-col :span="4">
-			<el-button type="danger" @click="addDialogVisible=true">新增数据项</el-button>
-		</el-col>
+		</div>
+		<el-button type="primary" @click="addDialogVisible=true">新增数据项</el-button>
 	</el-row>
 	<div style="margin-top: 40px;"></div>
 	<!-- 搜索栏 end -->
@@ -38,11 +24,12 @@
 		<el-col :span="24">
 			<el-table :data="data.records" style="width:100%;"
 				v-loading="loading">
-			    <el-table-column fixed prop="id" label="序号" width="80"  align="center" />
-			    <el-table-column prop="constantTypeName" label="类别名称"  align="center" />
-				<el-table-column prop="constantCode" label="常数据项编码" align="center"/>
-				<el-table-column prop="constantName" label="常数据项名称"  align="center" />
-			    <el-table-column fixed="right" label="Operations"  align="center" >
+				<el-table-column fixed type="index" label="序号" align="center" width="80" 
+					:index="index => (data.current - 1) * data.size + index + 1" />
+			    <el-table-column prop="constantTypeName" label="类别"  align="center" />
+				<el-table-column prop="constantCode" label="编码" align="center"/>
+			    <el-table-column prop="constantName" label="名称"  align="center" />
+			    <el-table-column fixed="right" label="操作"  align="center" >
 			      <template #default="scope">
 			        <el-button link type="primary" @click="showEdit(scope.row)">编辑</el-button>
 					<el-button link type="danger" @click="del(scope.row.id)">删除</el-button>
@@ -58,10 +45,11 @@
 		<el-col :span="20">
 			<el-pagination background layout="prev, pager, next" 
 			:total="data.total" :page-count="data.pages"
+			v-model:current-page="currentPage"
 			@current-change="handleCurrentChange"/>
 		</el-col>
 		<el-col :span="4">
-			<el-select v-model="ps" class="m-2" placeholder="每页行数" @change="loadData(1)" >
+			<el-select v-model="ps" class="w-20 m-2" placeholder="每页行数" @change="loadData(1)" >
 			    <el-option
 			      v-for="item in pageSizes"
 			      :key="item"
@@ -73,14 +61,10 @@
 	<!-- page end -->
 	
 	<!-- 编辑数据项对话框 start -->
-	<el-dialog v-model="editDialogVisible" title="编辑" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules">
-			<el-form-item label="编号" :label-width="formLabelWidth" prop="id" >
-			  <el-input v-model="editform.id" readonly autocomplete="off" />
-			</el-form-item>
-			<el-form-item label="类别编码" :label-width="formLabelWidth" prop="constantTypeCode">
-				<el-select v-model="editform.constantTypeID" class="m-2" filterable 
-					placeholder="常数据类别"  >
+	<el-dialog v-model="editDialogVisible" title="编辑" @close="handleClose('edit')">
+	    <el-form :model="form" :rules="rules" ref="editFormRef" label-width="100px">
+			<el-form-item label="类别" prop="constantTypeID">
+				<el-select v-model="form.constantTypeID" filterable placeholder="常数据类别">
 				    <el-option
 				      v-for="item in types"
 				      :key="item.id"
@@ -88,11 +72,11 @@
 				      :value="item.id"/>
 				</el-select>		
 			</el-form-item> 
-			<el-form-item label="类别编码" :label-width="formLabelWidth" prop="constantTypeCode">
-				<el-input v-model="editform.constantCode" autocomplete="off" />
+			<el-form-item label="项编码" prop="constantCode">
+				<el-input v-model="form.constantCode" autocomplete="off" />
 			</el-form-item>  
-			<el-form-item label="类别名称" :label-width="formLabelWidth" prop="constantTypeName">
-				<el-input v-model="editform.constantName" autocomplete="off" />
+			<el-form-item label="项名称" prop="constantName">
+				<el-input v-model="form.constantName" autocomplete="off" />
 			</el-form-item>	  
 	    </el-form>
 	    <template #footer>
@@ -107,14 +91,10 @@
 	  <!-- 编辑数据项对话框  end-->
 	  
 	<!-- 新增常数据项对话框 start -->
-	<el-dialog v-model="addDialogVisible" title="新增" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules">
-			<el-form-item label="编号" v-show="false" :label-width="formLabelWidth" prop="id" >
-			  <el-input v-model="editform.id" readonly autocomplete="off" />
-			</el-form-item>
-			<el-form-item label="类别编码" :label-width="formLabelWidth" prop="constantTypeCode">
-				<el-select v-model="editform.constantTypeID" class="m-2"  filterable
-					placeholder="常数据类别"  >
+	<el-dialog v-model="addDialogVisible" title="新增" @close="handleClose('add')">
+	    <el-form :model="form" :rules="rules" ref="addFormRef" label-width="100px">
+			<el-form-item label="类别" prop="constantTypeID">
+				<el-select v-model="form.constantTypeID" filterable placeholder="常数据类别">
 				    <el-option
 				      v-for="item in types"
 				      :key="item.id"
@@ -122,11 +102,11 @@
 				      :value="item.id"/>
 				</el-select>		
 			</el-form-item> 
-			<el-form-item label="类别编码" :label-width="formLabelWidth" prop="constantTypeCode">
-				<el-input v-model="editform.constantCode" autocomplete="off" />
+			<el-form-item label="项编码" prop="constantCode">
+				<el-input v-model="form.constantCode" autocomplete="off" />
 			</el-form-item>  
-			<el-form-item label="类别名称" :label-width="formLabelWidth" prop="constantTypeName">
-				<el-input v-model="editform.constantName" autocomplete="off" />
+			<el-form-item label="项名称" prop="constantName">
+				<el-input v-model="form.constantName" autocomplete="off" />
 			</el-form-item>	  
 	    </el-form>
 	    <template #footer>
@@ -144,7 +124,7 @@
 <script setup>
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 //加载页码
 const loading=ref(false)
@@ -163,13 +143,17 @@ const pageSizes=[10,20,30,50]
 //url
 const typeUrl='/constant/page'
 
-
 //新增对话框是否显示
 const addDialogVisible = ref(false)
 //编辑对话框是否显示
 const editDialogVisible = ref(false)
+
+// 表单ref
+const addFormRef = ref(null)
+const editFormRef = ref(null)
+
 //表单对象
-const editform=ref({
+const form=ref({
 	"id": 0,
 	"constantTypeID": '',
 	"constantCode": "",
@@ -177,6 +161,9 @@ const editform=ref({
 })
 //表单验证
 const rules=ref({
+	constantTypeID: [
+		{ required: true, message: '请选择类别', trigger: 'change' }
+	],
 	constantCode: [
 		{ required: true, message: '请输入项编码', trigger: 'blur' }
 	],
@@ -184,6 +171,8 @@ const rules=ref({
 		{ required: true, message: '请输入项名称', trigger: 'blur' }
 	]
 })
+
+const currentPage = ref(1)
 
 //组件挂载后事件
 onMounted(async() => {
@@ -231,47 +220,54 @@ function handleCurrentChange (number)  {
 
 //显示编辑框
 function showEdit(item){
-	editDialogVisible.value=true
-	editform.value=item
+	editDialogVisible.value = true
+	form.value = { ...item }
 }
-function  closeDialog(){
-	editform.value={
-		"id": 0,
-		"constantTypeID": '',
-		"constantCode": "",
-		"constantName": ""
-	}
+
+function handleClose(type) {
+  if (type === 'edit' && editFormRef.value) {
+    editFormRef.value.resetFields()
+  } else if (type === 'add' && addFormRef.value) {
+    addFormRef.value.resetFields()
+  }
+  form.value = { id: 0, constantTypeID: '', constantCode: '', constantName: '' }
 }
 
 //保存编辑内容
-function editSave(){
-	postReq("/constantitem/update",editform.value).then(resp=>{
-		if(resp.data.result){
-			editDialogVisible.value=false
-			loadData(data.value.current)
-			ElMessageBox.alert('修改成功', '提示',{})
-			
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}
-		
-	})
+async function editSave() {
+  if (!editFormRef.value) return
+  await editFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/constantitem/update", form.value).then(resp => {
+        if (resp.data.result) {
+          editDialogVisible.value = false
+          loadData(data.value.current)
+          ElMessage.success('修改成功')
+        } else {
+          ElMessage.error(resp.data.errMsg || '修改失败')
+        }
+      })
+    }
+  })
 }
-//保存编辑内容
-function save(){
-	postReq("/constantitem/add",editform.value).then(resp=>{
-		if(resp.data.result){
-			addDialogVisible.value=false
-			ElMessageBox.alert('新增成功', '提示',{})
-			
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}	
-	})
+
+//保存新增内容
+async function save() {
+  if (!addFormRef.value) return
+  await addFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/constantitem/add", form.value).then(resp => {
+        if (resp.data.result) {
+          addDialogVisible.value = false;
+          currentPage.value = 1;
+          loadData(1);
+          ElMessage.success('新增成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '新增失败')
+        }
+      })
+    }
+  })
 }
 
 function del(id){
@@ -303,5 +299,17 @@ function del(id){
 
 </script>
 
-<style>
+<style scoped>
+.search-bar {
+	display: flex;
+	justify-content: space-between; /* 两端对齐 */
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-controls {
+	display: flex;
+	align-items: center;
+	gap: 15px; /* 使用 gap 设置控件之间的间距 */
+}
 </style>

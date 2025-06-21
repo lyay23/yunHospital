@@ -32,7 +32,7 @@ public interface CustomerMapper extends BaseMapper<Customer> {
                                   or c.idnumber like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%'))
                         </if>
                     </where>
-                    order by c.createdate desc
+                    order by c.id asc
             </script>
             """)
     Page<CustomerVo> selectPage(Page<CustomerVo> page, String keyword);

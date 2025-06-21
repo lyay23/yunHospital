@@ -1,8 +1,8 @@
 <template>
 	<!-- 搜索栏 start -->
-	<el-row>
-		<el-col :span="3" style="padding-right: 20px;">
-			<el-select v-model="ctype" class="m-2" filterable 
+	<el-row class="search-bar">
+		<div class="search-controls">
+			<el-select v-model="ctype" filterable 
 				clearable @clear="loadData(1)"
 				placeholder="科目类型"  @change="loadData(1)" >
 				<el-option v-for="item in types"
@@ -10,10 +10,7 @@
 					:label="item.constantCode+item.constantName"
 					:value="item.id"/>
 			</el-select>
-		</el-col>
-		
-		<el-col :span="3" style="padding-right: 20px;">
-			<el-select v-model="dept" class="m-2" filterable
+			<el-select v-model="dept" filterable
 				clearable @clear="loadData(1)"
 				placeholder="执行科室"  @change="loadData(1)" >
 			    <el-option
@@ -22,9 +19,7 @@
 			      :label="item.deptCode+item.deptName"
 			      :value="item.id"/>
 			</el-select>
-		</el-col>
-		<el-col :span="3" style="padding-right: 20px;">
-			<el-select v-model="expens" class="m-2" filterable
+			<el-select v-model="expens" filterable
 				clearable @clear="loadData(1)"
 				placeholder="费用科目"  @change="loadData(1)" >
 			    <el-option
@@ -33,19 +28,11 @@
 			      :label="item.expCode+item.expName"
 			      :value="item.id"/>
 			</el-select>
-			
-		</el-col>
-		<el-col :span="5" style="padding-right: 20px;">
 			<el-input v-model.trim="kw" 
-				  placeholder="请输入费用编码或名称" class="w-100 m-2"/>
-		</el-col>
-		<el-col :span="3">
+				  placeholder="请输入费用编码或名称"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
-		</el-col>
-		<el-col :span="3"></el-col>
-		<el-col :span="4">
-			<el-button type="danger" @click="addDialogVisible=true">新增非药品收费项目</el-button>
-		</el-col>
+		</div>
+		<el-button type="primary" @click="addDialogVisible=true">新增非药品收费项目</el-button>
 	</el-row>
 	
 	<div style="margin-top: 40px;"></div>
@@ -55,16 +42,16 @@
 		<el-col :span="24">
 			<el-table :data="data.records" style="width:100%;"
 			 v-loading="loading">
-			    <el-table-column fixed prop="id" label="序号" width="80" align="center" />
-			    <el-table-column prop="itemCode" label="项目编码"  align="center" />
-				<el-table-column prop="itemName" label="项目名称" align="center"/>
-				<el-table-column prop="format" label="规格"  align="center" />
-			    <el-table-column prop="price" label="单价"  align="center" />
+				<el-table-column fixed type="index" label="序号" align="center" width="80" 
+					:index="index => (data.current - 1) * data.size + index + 1" />
+			    <el-table-column prop="recordTypeName" label="项目类型"  align="center" />
+				<el-table-column prop="itemCode" label="项目编码" align="center"/>
+			    <el-table-column prop="itemName" label="项目名称"  align="center" />
+				<el-table-column prop="format" label="规格" align="center"/>
+				<el-table-column prop="price" label="单价" align="center"/>
+				<el-table-column prop="expClassName" label="费用科目"  align="center" />
 				<el-table-column prop="deptName" label="执行科室"  align="center" />
-				<el-table-column prop="mnemonicCode" label="助记码"  align="center" />
-				<el-table-column prop="recordTypeName" label="项目类型"  align="center" />
-			
-				<el-table-column fixed="right" label="Operations"  align="center" >
+			    <el-table-column fixed="right" label="操作"  align="center" >
 			      <template #default="scope">
 			        <el-button link type="primary" @click="showEdit(scope.row)">编辑</el-button>
 					<el-button link type="danger" @click="del(scope.row.id)">删除</el-button>
@@ -80,10 +67,11 @@
 		<el-col :span="20">
 			<el-pagination background layout="prev, pager, next" 
 			:total="data.total" :page-count="data.pages"
+			v-model:current-page="currentPage"
 			@current-change="handleCurrentChange"/>
 		</el-col>
 		<el-col :span="4">
-			<el-select v-model="ps" class="m-2" placeholder="每页行数" @change="loadData(1)" >
+			<el-select v-model="ps" class="w-20 m-2" placeholder="每页行数" @change="loadData(1)" >
 			    <el-option
 			      v-for="item in pageSizes"
 			      :key="item"
@@ -97,49 +85,48 @@
 	
 	
 	<!-- 编辑数据项对话框 start -->
-	<el-dialog v-model="editDialogVisible" title="编辑" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules" label-width="100px">
-			<el-form-item label="编号"  prop="id" >
-			  <el-input v-model="editform.id" readonly autocomplete="off" />
-			</el-form-item>
-			<el-form-item label="项目类型"  prop="recordType">
-				<el-select v-model="editform.recordType" class="m-2" placeholder="项目类型"   >
+	<el-dialog v-model="editDialogVisible" title="编辑" @close="handleClose('edit')">
+	    <el-form :model="form" :rules="rules" ref="editFormRef" label-width="100px">
+			<el-form-item label="项目类型" prop="recordType">
+				<el-select v-model="form.recordType" placeholder="项目类型">
 					<el-option v-for="item in types"
 						:key="item.id"
-						:label="item.constantCode+item.constantName"
+						:label="item.constantName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>	
-			<el-form-item label="执行科室"  prop="deptID">
-				<el-select v-model="editform.deptID"  filterable class="m-2" placeholder="执行科室"   >
+			<el-form-item label="执行科室" prop="deptID">
+				<el-select v-model="form.deptID" filterable placeholder="执行科室">
 					<el-option v-for="item in depts"
 						:key="item.id"
-						:label="item.deptCode+item.deptName"
+						:label="item.deptName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="费用科目"  prop="docTitleID">
-				<el-select v-model="editform.expClassID" class="m-2" filterable placeholder="费用科目"   >
+			<el-form-item label="费用科目" prop="expClassID">
+				<el-select v-model="form.expClassID" filterable placeholder="费用科目">
 					<el-option v-for="item in expenss"
 						:key="item.id"
-						:label="item.expCode+item.expName"
+						:label="item.expName"
 						:value="item.id"/>
 				</el-select>
 			</el-form-item>
 		
 			<el-form-item label="项目编码" prop="itemCode" >
-			  <el-input v-model="editform.itemCode"  autocomplete="off" />
+			  <el-input v-model="form.itemCode"  autocomplete="off" />
 			</el-form-item>
 			<el-form-item label="项目名称"  prop="itemName" >
-			  <el-input v-model="editform.itemName"  autocomplete="off" />
+			  <el-input v-model="form.itemName"  autocomplete="off" />
 			</el-form-item>
 			<el-form-item label="规格"  prop="format" >
-			  <el-input v-model="editform.format"  autocomplete="off" />
+			  <el-input v-model="form.format"  autocomplete="off" />
 			</el-form-item>
 			<el-form-item label="单价"  prop="price" >
-			  <el-input v-model="editform.price"  autocomplete="off" />
+			  <el-input v-model.number="form.price"  autocomplete="off" />
 			</el-form-item>
-			
+			<el-form-item label="助记码"  prop="mnemonicCode" >
+			  <el-input v-model="form.mnemonicCode"  autocomplete="off" />
+			</el-form-item>
 	    </el-form>
 	    
 		<template #footer>
@@ -154,47 +141,47 @@
 	  <!-- 编辑数据项对话框  end-->
 	  
 	<!-- 新增常数据项对话框 start -->
-	<el-dialog v-model="addDialogVisible" title="新增" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules" label-width="100px">
-	    	<el-form-item label="编号"  prop="id" >
-	    	  <el-input v-model="editform.id" readonly autocomplete="off" />
-	    	</el-form-item>
+	<el-dialog v-model="addDialogVisible" title="新增" @close="handleClose('add')">
+	    <el-form :model="form" :rules="rules" ref="addFormRef" label-width="100px">
 	    	<el-form-item label="项目类型"  prop="recordType">
-	    		<el-select v-model="editform.recordType" class="m-2" placeholder="项目类型"   >
+	    		<el-select v-model="form.recordType" placeholder="项目类型">
 	    			<el-option v-for="item in types"
 	    				:key="item.id"
-	    				:label="item.constantCode+item.constantName"
+	    				:label="item.constantName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>	
 	    	<el-form-item label="执行科室"  prop="deptID">
-	    		<el-select v-model="editform.deptID"  filterable class="m-2" placeholder="执行科室"   >
+	    		<el-select v-model="form.deptID" filterable placeholder="执行科室">
 	    			<el-option v-for="item in depts"
 	    				:key="item.id"
-	    				:label="item.deptCode+item.deptName"
+	    				:label="item.deptName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>
-	    	<el-form-item label="费用科目"  prop="docTitleID">
-	    		<el-select v-model="editform.expClassID" class="m-2" filterable placeholder="费用科目"   >
+	    	<el-form-item label="费用科目"  prop="expClassID">
+	    		<el-select v-model="form.expClassID" filterable placeholder="费用科目">
 	    			<el-option v-for="item in expenss"
 	    				:key="item.id"
-	    				:label="item.expCode+item.expName"
+	    				:label="item.expName"
 	    				:value="item.id"/>
 	    		</el-select>
 	    	</el-form-item>	
 	    	<el-form-item label="项目编码" prop="itemCode" >
-	    	  <el-input v-model="editform.itemCode"  autocomplete="off" />
+	    	  <el-input v-model="form.itemCode"  autocomplete="off" />
 	    	</el-form-item>
 	    	<el-form-item label="项目名称"  prop="itemName" >
-	    	  <el-input v-model="editform.itemName"  autocomplete="off" />
+	    	  <el-input v-model="form.itemName"  autocomplete="off" />
 	    	</el-form-item>
 	    	<el-form-item label="规格"  prop="format" >
-	    	  <el-input v-model="editform.format"  autocomplete="off" />
+	    	  <el-input v-model="form.format"  autocomplete="off" />
 	    	</el-form-item>
 	    	<el-form-item label="单价"  prop="price" >
-	    	  <el-input v-model="editform.price"  autocomplete="off" />
+	    	  <el-input v-model.number="form.price"  autocomplete="off" />
 	    	</el-form-item>
+			<el-form-item label="助记码"  prop="mnemonicCode" >
+			  <el-input v-model="form.mnemonicCode"  autocomplete="off" />
+			</el-form-item>
 	    </el-form>
 	    <template #footer>
 	      <span class="dialog-footer">
@@ -211,7 +198,7 @@
 <script setup>
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 //加载页码
 const loading=ref(false)
@@ -234,37 +221,41 @@ const expens=ref('')
 const ps=ref(10)
 //行数集
 const pageSizes=[10,20,30,50]
-
+const currentPage = ref(1)
 
 //新增对话框是否显示
 const addDialogVisible = ref(false)
 //编辑对话框是否显示
 const editDialogVisible = ref(false)
+
+// 表单ref
+const addFormRef = ref(null)
+const editFormRef = ref(null)
+
 //表单对象
-const editform=ref({
+const form=ref({
 	"id": "",
 	"itemCode": "",
 	"itemName": "",
 	"format": "",
-	"price": "",
+	"price": null,
 	"expClassID": "",
-	"expName": "",
 	"deptID": "",
-	"deptName": "",
 	"mnemonicCode": "",
-	"creationDate": "",
-	"lastUpdateDate": "",
-	"recordType": "",
-	"recordTypeName": ""
+	"recordType": ""
 })
+
 //表单验证
 const rules=ref({
-	userName: [
-		{ required: true, message: '请输入用户名', trigger: 'blur' }
+	itemCode: [{ required: true, message: '请输入项目编码', trigger: 'blur' }],
+	itemName: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
+	price: [
+		{ required: true, message: '请输入单价', trigger: 'blur' },
+		{ type: 'number', message: '单价必须为数字' }
 	],
-	realName: [
-		{ required: true, message: '请输入姓名', trigger: 'blur' }
-	]
+	expClassID: [{ required: true, message: '请选择费用科目', trigger: 'change' }],
+	deptID: [{ required: true, message: '请选择执行科室', trigger: 'change' }],
+	recordType: [{ required: true, message: '请选择项目类型', trigger: 'change' }]
 })
 
 //组件挂载后事件
@@ -346,54 +337,55 @@ function handleCurrentChange (number)  {
 //显示编辑框
 function showEdit(item){
 	editDialogVisible.value=true
-	editform.value=item
+	form.value = { ...item }
 }
-function  closeDialog(){
-	editform.value={
-		"id": '',
-		"userName": "",
-		"realName": "",
-		"useType": '',
-		"useTypeName": "",
-		"docTitleID": '',
-		"docTitle": "",
-		"isScheduling": "",
-		"deptID": '',
-		"dept": "",
-		"registLeID": '',
-		"registLe": ""
-	}
+
+function handleClose(type) {
+  const formRef = type === 'edit' ? editFormRef.value : addFormRef.value;
+  if (formRef) {
+    formRef.resetFields();
+  }
+  form.value = {
+    id: '', itemCode: '', itemName: '', format: '', price: null,
+    expClassID: '', deptID: '', mnemonicCode: '', recordType: ''
+  };
 }
 
 //保存编辑内容
-function editSave(){
-	console.log(editform.value.deptType)
-	postReq("/fmeditem/update",editform.value).then(resp=>{
-		if(resp.data.result){
-			editDialogVisible.value=false
-			loadData(data.value.current)
-			ElMessageBox.alert('修改成功', '提示',{})		
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}
-		
-	})
+async function editSave(){
+  if (!editFormRef.value) return;
+  await editFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/fmeditem/update", form.value).then(resp => {
+        if (resp.data.result) {
+          editDialogVisible.value = false;
+          loadData(data.value.current);
+          ElMessage.success('修改成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '修改失败');
+        }
+      });
+    }
+  });
 }
-//保存编辑内容
-function save(){
-	postReq("/fmeditem/add",editform.value).then(resp=>{
-		if(resp.data.result){
-			addDialogVisible.value=false
-			ElMessageBox.alert('新增成功', '提示',{})
-			
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}	
-	})
+
+//保存新增内容
+async function save(){
+  if (!addFormRef.value) return;
+  await addFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/fmeditem/add", form.value).then(resp => {
+        if (resp.data.result) {
+          addDialogVisible.value = false;
+          currentPage.value = 1;
+          loadData(1);
+          ElMessage.success('新增成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '新增失败');
+        }
+      });
+    }
+  });
 }
 
 function del(id){
@@ -424,5 +416,17 @@ function del(id){
 
 </script>
 
-<style>
+<style scoped>
+.search-bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-controls {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
 </style>

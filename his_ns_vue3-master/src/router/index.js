@@ -18,10 +18,8 @@ const router = createRouter({
 	},
 	{
 		path:'/home',
-		name:'系统信息',
-		component:defineAsyncComponent(() => import(`../components/home.vue`)),
+		component:defineAsyncComponent(() => import(`../components/Home.vue`)),
 		role:170,
-		meta: {title: '系统信息'},
 		children:[
 			{
 				path:'/constant',
@@ -87,10 +85,8 @@ const router = createRouter({
 	},
 	{
 	  path: '/home',
-	  name: '挂号收费',
 	  role:171,
-	  component: defineAsyncComponent(() => import(`../components/home.vue`)),
-	  meta: {title: '挂号收费'},
+	  component: defineAsyncComponent(() => import(`../components/Home.vue`)),
 	  children:[
 		  {
 			path:'/customer',
@@ -117,10 +113,8 @@ const router = createRouter({
 	},
 	{
 	  path: '/home',
-	  name: '门诊医生',
 	  role:172,
-	  component: defineAsyncComponent(() => import(`../components/home.vue`)),
-	  meta: {title: '门诊医生'},
+	  component: defineAsyncComponent(() => import(`../components/Home.vue`)),
 	  children:[
 		  {
 			path:'/docHome',

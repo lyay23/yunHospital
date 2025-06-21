@@ -1,22 +1,12 @@
 <template>
 	<!-- 搜索栏 start -->
-	<el-row>
-	    <el-col :span="5">
-			<div class="grid-content ep-bg-purple-dark" >
-				 <el-input v-model.trim="kw"
-				  placeholder="请输入费用科目编码或名称" class="w-100 m-2"/>
-			</div>
-		</el-col>
-		<el-col :span="1">
-		</el-col>
-		<el-col :span="4" class="m-2">
+	<el-row class="search-bar">
+		<div class="search-controls">
+			 <el-input v-model.trim="kw"
+			  placeholder="请输入费用科目编码或名称"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
-		</el-col>
-		<el-col :span="10">			
-		</el-col>
-		<el-col :span="4">
-			<el-button type="danger" @click="addDialogVisible=true">新增常数类别</el-button>
-		</el-col>
+		</div>
+		<el-button type="primary" @click="addDialogVisible=true">新增常数类别</el-button>
 	</el-row>
 	<div style="margin-top: 40px;"></div>
 	<!-- 搜索栏 end -->
@@ -25,10 +15,11 @@
 		<el-col :span="24">
 			<el-table :data="data.records" style="width:100%;"
 			 v-loading="loading">
-			    <el-table-column fixed prop="id" label="序号" align="center" width="80" />
-			    <el-table-column prop="expCode" label="科目编号"  align="center" />
+			    <el-table-column fixed type="index" label="序号" align="center" width="80" 
+					:index="index => (data.current - 1) * data.size + index + 1" />
+			    <el-table-column prop="expCode" label="科目编码"  align="center" />
 			    <el-table-column prop="expName" label="科目名称"  align="center" />
-			    <el-table-column fixed="right" label="Operations"  align="center" >
+			    <el-table-column fixed="right" label="操作"  align="center" >
 			      <template #default="scope">
 			        <el-button link type="primary" @click="showEdit(scope.row)">编辑</el-button>
 					<el-button link type="danger" @click="del(scope.row.id)">删除</el-button>
@@ -44,6 +35,7 @@
 		<el-col :span="20">
 			<el-pagination background layout="prev, pager, next" 
 			:total="data.total" :page-count="data.pages"
+			v-model:current-page="currentPage"
 			@current-change="handleCurrentChange"/>
 		</el-col>
 		<el-col :span="4">
@@ -60,16 +52,13 @@
 	<!-- page end -->
 	
 	<!-- 编辑常数据类别对话框 start -->
-	<el-dialog v-model="editDialogVisible" title="编辑" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules" label-width="100px">
-			<el-form-item label="编号"  prop="id" >
-			  <el-input v-model="editform.id" readonly autocomplete="off" />
-			</el-form-item>
+	<el-dialog v-model="editDialogVisible" title="编辑" @close="handleClose('edit')">
+	    <el-form :model="form" :rules="rules" ref="editFormRef" label-width="100px">
 	      <el-form-item label="科目编码" prop="expCode">
-	        <el-input v-model="editform.expCode" autocomplete="off" />
+	        <el-input v-model="form.expCode" autocomplete="off" />
 	      </el-form-item>  
 		  <el-form-item label="科目名称" prop="expName">
-		    <el-input v-model="editform.expName" autocomplete="off" />
+		    <el-input v-model="form.expName" autocomplete="off" />
 		  </el-form-item>	  
 	    </el-form>
 	    <template #footer>
@@ -84,16 +73,13 @@
 	  <!-- 编辑常数据类别对话框  end-->
 	  
 	<!-- 新增常数据类别对话框 start -->
-	<el-dialog v-model="addDialogVisible" title="新增" @close="closeDialog">
-	    <el-form :model="editform" :rules="rules" label-width="100px">
-			<el-form-item label="编号" v-show="false"  prop="id" >
-			  <el-input v-model="editform.id" readonly autocomplete="off" />
-			</el-form-item>
+	<el-dialog v-model="addDialogVisible" title="新增" @close="handleClose('add')">
+	    <el-form :model="form" :rules="rules" ref="addFormRef" label-width="100px">
 	      <el-form-item label="科目编码"  prop="expCode">
-	        <el-input v-model="editform.expCode" autocomplete="off" />
+	        <el-input v-model="form.expCode" autocomplete="off" />
 	      </el-form-item>  
 		  <el-form-item label="科目名称"  prop="expName">
-		    <el-input v-model="editform.expName" autocomplete="off" />
+		    <el-input v-model="form.expName" autocomplete="off" />
 		  </el-form-item>	  
 	    </el-form>
 	    <template #footer>
@@ -114,7 +100,7 @@
 <script setup>
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import router from '../../router';
 
 //data start
@@ -123,12 +109,16 @@ const data = ref({})
 const kw=ref('')
 const ps=ref(10)
 const pageSizes=[10,20,30,50]
-
-
+const currentPage = ref(1)
 
 const addDialogVisible = ref(false)
 const editDialogVisible = ref(false)
-const editform=ref({
+
+// 表单ref
+const addFormRef = ref(null)
+const editFormRef = ref(null)
+
+const form=ref({
 	"id": "",
 	"expCode": "",
 	"expName": ""
@@ -174,47 +164,53 @@ function handleCurrentChange (number)  {
 
 //显示编辑框
 function showEdit(item){
-	editDialogVisible.value=true
-	editform.value=item
-}
-function  closeDialog(){
-	editform.value={
-		"id": "",
-		"expCode": "",
-		"expName": ""
-	}
+	editDialogVisible.value = true
+	form.value = { ...item }
 }
 
-//保存编辑内容
-function editSave(){
-	postReq("/expenseclass/update",editform.value).then(resp=>{
-		if(resp.data.result){
-			editDialogVisible.value=false
-			loadData(data.value.current)
-			ElMessageBox.alert('修改成功', '提示',{})
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}
-		
-	})
+function handleClose(type) {
+  const formRef = type === 'edit' ? editFormRef.value : addFormRef.value;
+  if (formRef) {
+    formRef.resetFields();
+  }
+  form.value = { id: '', expCode: '', expName: '' };
 }
 
 //保存编辑内容
-function save(){
-	postReq("/expenseclass/add",editform.value).then(resp=>{
-		if(resp.data.result){
-			addDialogVisible.value=false
-			ElMessageBox.alert('新增成功', '提示',{})
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-				
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}	
-	})
+async function editSave(){
+  if (!editFormRef.value) return;
+  await editFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/expenseclass/update", form.value).then(resp => {
+        if (resp.data.result) {
+          editDialogVisible.value = false;
+          loadData(data.value.current);
+          ElMessage.success('修改成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '修改失败');
+        }
+      });
+    }
+  });
+}
+
+//保存新增内容
+async function save(){
+  if (!addFormRef.value) return;
+  await addFormRef.value.validate((valid) => {
+    if (valid) {
+      postReq("/expenseclass/add", form.value).then(resp => {
+        if (resp.data.result) {
+          addDialogVisible.value = false;
+          currentPage.value = 1;
+          loadData(1);
+          ElMessage.success('新增成功');
+        } else {
+          ElMessage.error(resp.data.errMsg || '新增失败');
+        }
+      });
+    }
+  });
 }
 
 function del(id){
@@ -248,5 +244,17 @@ function del(id){
 
 </script>
 
-<style>
+<style scoped>
+.search-bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-controls {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
 </style>

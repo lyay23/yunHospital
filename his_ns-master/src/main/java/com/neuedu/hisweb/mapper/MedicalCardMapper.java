@@ -30,7 +30,7 @@ public interface MedicalCardMapper extends BaseMapper<MedicalCard> {
                      inner join constantitem ct on mc.cardtype=ct.id
                      left join customer c on mc.customerId=c.id
                      left join constantitem cr on mc.relationship=cr.ID
-                     inner join constantitem cc on mc.channel=cc.ID
+                     left join constantitem cc on mc.channel=cc.ID
                     <where>
                         and mc.delMark=1
                          <if test='keyword != null and keyword!=""'>

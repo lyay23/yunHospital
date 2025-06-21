@@ -1,8 +1,8 @@
 <template>
 	<!-- 搜索栏 start -->
-	<el-row>
-		<el-col :span="3"  style="padding-right: 20px;">
-			<el-select v-model="dept" class="m-2" filterable
+	<el-row class="search-bar">
+		<div class="search-controls">
+			<el-select v-model="dept" filterable
 				clearable @clear="loadData(1)"
 				placeholder="所属科室"  @change="loadData(1)" >
 				<el-option
@@ -11,8 +11,6 @@
 				  :label="item.deptCode+item.deptName"
 				  :value="item.id"/>
 			</el-select>
-		</el-col>
-		<el-col :span="8"  style="padding-right: 20px;">
 			<el-date-picker
 					v-model="sdate"
 					type="daterange"
@@ -22,19 +20,11 @@
 					:size="size"
 					format="YYYY/MM/DD"
 					value-format="YYYY-MM-DD"/>
-		</el-col>
-		<el-col :span="4" style="padding-right: 20px;">
 			<el-input v-model.trim="kw"
-				placeholder="请输入姓名或排班名" class="w-100 m-2"/>
-		</el-col>
-		<el-col :span="4">
+				placeholder="请输入姓名或排班名"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
-		</el-col>
-		<el-col :span="2">
-		</el-col>
-		<el-col :span="3">
-			<el-button type="danger" @click="addDialogVisible=true">新增排班计划</el-button>
-		</el-col>
+		</div>
+		<el-button type="primary" @click="addDialogVisible=true">新增排班计划</el-button>
 	</el-row>
 	<div style="margin-top: 40px;"></div>
 	<!-- 搜索栏 end -->
@@ -50,7 +40,7 @@
 				<el-table-column prop="noon" label="午别"  align="center" />
 				<el-table-column prop="registName" label="挂号级别"  align="center" />
 				<el-table-column prop="registQuota" label="挂号限额"  align="center" />
-			    <el-table-column fixed="right" label="Operations"  align="center" >
+			    <el-table-column fixed="right" label="操作"  align="center" >
 			      <template #default="scope">
 			        <el-button link type="primary" @click="showEdit(scope.row)">编辑</el-button>
 					<el-button link type="danger" @click="del(scope.row.id)">删除</el-button>
@@ -80,23 +70,57 @@
 	</el-row>
 	<!-- page end -->
 	
-	
+	<!-- 编辑排班对话框 start -->
+	<el-dialog v-model="editDialogVisible" title="编辑排班" @close="handleClose">
+	    <el-form :model="form" :rules="editRules" ref="editFormRef" label-width="100px">
+			<el-form-item label="医生姓名" prop="realName" >
+			  <el-input v-model="form.realName" disabled />
+			</el-form-item>
+			<el-form-item label="排班日期" prop="schedDate" >
+			  <el-date-picker
+			          v-model="form.schedDate"
+			          type="date"
+			          placeholder="选择一个日期"
+			          format="YYYY-MM-DD"
+			          value-format="YYYY-MM-DD"
+			        />
+			</el-form-item>
+			<el-form-item label="午别" prop="noon" >
+			  <el-select v-model="form.noon" placeholder="选择午别">
+			      <el-option label="上午" value="上午" />
+			      <el-option label="下午" value="下午" />
+			  </el-select>
+			</el-form-item>
+			<el-form-item label="挂号限额" prop="registQuota">
+				<el-input-number v-model="form.registQuota" :min="0" />
+			</el-form-item>
+	    </el-form>
+	    <template #footer>
+	      <span class="dialog-footer">
+	        <el-button @click="editDialogVisible = false">取消</el-button>
+	        <el-button type="primary" @click="editSave">
+	          保存
+	        </el-button>
+	      </span>
+	    </template>
+	</el-dialog>
+	<!-- 编辑排班对话框 end -->
 
 <!-- 新增常数据项对话框 start -->
-	<el-dialog v-model="addDialogVisible" title="新增" @close="closeDialog">
-	   <el-form :model="plans" :rules="rules" label-width="100">
-	   	<el-form-item label="所属科室"  prop="deptID">
-	   		<el-select v-model="plans.deptId" class="m-2" filterable 
-				clearable placeholder="所属科室"  @change="loadRules(1)"  >
+	<el-dialog v-model="addDialogVisible" title="新增排班计划" @close="closeDialog" width="60%">
+	   <el-form :model="plans" :rules="formRules" label-width="100px">
+	   	<el-form-item label="所属科室"  prop="deptId">
+	   		<el-select v-model="plans.deptId" filterable 
+				clearable placeholder="所属科室"  @change="loadRules"  >
 	   		    <el-option
 	   		      v-for="item in depts"
 	   		     :key="item.id"
-	   		     :label="item.deptCode+item.deptName"
+	   		     :label="item.deptName"
 	   		     :value="item.id"/>
 	   		</el-select>		
 	   	</el-form-item> 
-		<el-form-item label="排班规则"  prop="">
-	   	<el-table :data="rules" style="width:100%;"  v-loading="loading"   
+		<el-form-item label="排班规则"  prop="ruleSelection">
+	   	<el-table :data="rules" style="width:100%;"  v-loading="loadingRules"   
 			@selection-change="handleSelectionChange">
 			<el-table-column type="selection" width="50"  align="left"/>
 	   	    <el-table-column prop="ruleName" label="规则名称"  align="center" />
@@ -105,12 +129,12 @@
 	   		<el-table-column prop="week" label="规则" width="150"  align="center" />
 	   	  </el-table>
 		</el-form-item>
-		<el-form-item label="日期"  prop="newDate">
+		<el-form-item label="排班日期"  prop="ndate">
 			<el-date-picker v-model="plans.ndate"
 					type="daterange"
-					range-separator="To"
-					start-placeholder="Start date"
-					end-placeholder="End date"
+					range-separator="至"
+					start-placeholder="开始日期"
+					end-placeholder="结束日期"
 					:size="size"
 					format="YYYY/MM/DD"
 					value-format="YYYY-MM-DD"/>		
@@ -120,7 +144,7 @@
 	      <span class="dialog-footer">
 	        <el-button @click="addDialogVisible = false">取消</el-button>
 	        <el-button type="primary" :disabled="plans.ruleSelection.length==0" @click="save">
-	          新增排班计划
+	          生成排班计划
 	        </el-button>
 	      </span>
 	    </template>
@@ -131,11 +155,13 @@
 <script setup>
 import { ref,onMounted,watchEffect} from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox } from 'element-plus'	
+import { ElMessage, ElMessageBox } from 'element-plus'	
 import {nextDay,isBefore,getDay,formatDate} from '../../utils/utils'
+import router from '../../router';
 
 //加载页码
 const loading=ref(false)
+const loadingRules=ref(false)
 //分页信息
 const data = ref({})
 //搜索栏 下拉框数据集
@@ -151,65 +177,103 @@ const sdate=ref(["",""])
 const ps=ref(10)
 //行数集
 const pageSizes=[10,20,30,50]
+const currentPage = ref(1)
 
 //新增排班计划 对话框
 //新增对话框是否显示
 const addDialogVisible = ref(false)
-//新增排班计划
-const plans=ref({
-	deptId:"",
-	start:"",
-	end:"",
-	ndate:["",""],
-	ruleSelection:[]
+
+// 编辑排班计划对话框
+const editDialogVisible = ref(false)
+const editFormRef = ref(null)
+const form = ref({
+	id: '',
+	realName: '',
+	schedDate: '',
+	noon: '',
+	registQuota: 0
 })
-const schedulings=ref([])
+const editRules = ref({
+	registQuota: [
+		{ required: true, message: '请输入挂号限额', trigger: 'blur' },
+		{ type: 'number', message: '挂号限额必须为数字'}
+	],
+	schedDate: [
+		{ required: true, message: '请选择排班日期', trigger: 'change' }
+	],
+	noon: [
+		{ required: true, message: '请选择午别', trigger: 'change' }
+	]
+})
+
+const defaultPlans = {
+	deptId:"",
+	ndate:[],
+	ruleSelection:[]
+}
+//新增排班计划
+const plans=ref(JSON.parse(JSON.stringify(defaultPlans)))
+
+const formRules=ref({
+	deptId: [{ required: true, message: '请选择科室', trigger: 'change' }],
+	ndate: [{ required: true, message: '请选择排班日期范围', trigger: 'change' }],
+	ruleSelection: [{ required: true, type: 'array', message: '请至少选择一个排班规则', trigger: 'change' }]
+})
 
 function save(){
-	var next=new Date(plans.value.ndate[0])
-	var end=new Date(plans.value.ndate[1])
-	
-	plans.value.ruleSelection.forEach((item,index)=>{
-		var next=new Date(plans.value.ndate[0])
-		var end=new Date(plans.value.ndate[1])
-		while(isBefore(next,end)){
-			var day=getDay(next)
-			if(item.week[(day-1)*2]==1){
-				schedulings.value.push({
-					id:0,
-					schedDate:formatDate(next),
-					deptID:plans.value.deptId,
-					ruleID:item.id,
-					userID:item.userID,
-					noon:"上午"
+	const schedulings = []
+	const [startDate, endDate] = plans.value.ndate
+	if (!startDate || !endDate) {
+		ElMessage.error('请选择有效的日期范围');
+		return;
+	}
+
+	let currentDate = new Date(startDate)
+	const finalDate = new Date(endDate)
+
+	plans.value.ruleSelection.forEach(rule => {
+		let iterDate = new Date(currentDate)
+		while(isBefore(iterDate, finalDate)){
+			const day = getDay(iterDate) // 假设 getDay 返回 1-7 (周一到周日)
+			const weekPattern = rule.week;
+
+			// 上午
+			if(weekPattern[(day-1)*2] === '1'){
+				schedulings.push({
+					schedDate: formatDate(iterDate),
+					deptID: plans.value.deptId,
+					userID: rule.userID,
+					noon: "上午"
 				})
 			}
-			if(item.week[(day-1)*2+1]==1){
-				schedulings.value.push({
-					id:0,
-					schedDate:formatDate(next),
-					deptID:plans.value.deptId,
-					ruleID:item.id,
-					userID:item.userID,
-					noon:"下午"
+			// 下午
+			if(weekPattern[(day-1)*2+1] === '1'){
+				schedulings.push({
+					schedDate: formatDate(iterDate),
+					deptID: plans.value.deptId,
+					userID: rule.userID,
+					noon: "下午"
 				})
 			}
-			next=new Date(nextDay(next))
+			iterDate = new Date(nextDay(iterDate))
 		}	
 	})
-	postReq("/scheduling/add",schedulings.value).then(resp=>{
+
+	if (schedulings.length === 0) {
+		ElMessage.warning('根据所选规则和日期，没有生成任何排班计划。');
+		return;
+	}
+
+	postReq("/scheduling/add", schedulings).then(resp => {
 		if(resp.data.result){
-			addDialogVisible.value=false
-			loadData(data.value.current)
-			ElMessageBox.alert('添加成功', '提示',{})
-			
+			addDialogVisible.value = false
+			loadData(1)
+			ElMessage.success(`成功生成 ${schedulings.length} 条排班计划`)
 		}else{
-			if(resp.result.errMsg=='未登录')
-				router.push('/login')
-				
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
+			ElMessage.error(resp.data.errMsg || '生成排班计划失败')
 		}
-		
+	}).catch(err => {
+		ElMessage.error('请求失败')
 	})
 }
 
@@ -221,7 +285,7 @@ onMounted(async() => {
 
 //加载科室数据
 async function loadDeptData(){
-	let url=`/department/page?&count=200&pn=1`
+	let url=`/department/page?count=200&pn=1`
 	const result = await fetchData(url,null);
 	if(result.result){
 		depts.value=result.data.records 
@@ -255,21 +319,23 @@ async function loadData(pn){
 	}
 }
 
-//加载排班数据
+//加载排班规则
 async function loadRules(){
-	loading.value=true
-	let url=`/rule/page?count=1000&pn=1`
-	if(dept!='')
-		url+=`&deptId=${plans.value.deptId}`
-	
+	if (!plans.value.deptId) {
+		rules.value = [];
+		return;
+	}
+	loadingRules.value = true;
+	let url=`/rule/page?count=200&pn=1&deptid=${plans.value.deptId}`
 	const result = await fetchData(url,null);
 	if(result.result){
 		rules.value=result.data.records 
-		loading.value=false
 	}else{
-		if(result.errMsg=='未登录')
+		if(result.errMsg=='未登录'){
 			router.push('/login')
+		}
 	}
+	loadingRules.value = false;
 }
 
 //分页
@@ -283,9 +349,89 @@ function handleSelectionChange(val){
 	//console.log(plans.value.ruleSelection)
 }
 
+function closeDialog(){
+	plans.value = JSON.parse(JSON.stringify(defaultPlans));
+	rules.value = [];
+}
+
+// 显示编辑框
+function showEdit(row) {
+	form.value = { 
+		id: row.id,
+		realName: row.realName,
+		schedDate: row.schedDate,
+		noon: row.noon,
+		registQuota: row.registQuota
+	};
+	editDialogVisible.value = true;
+}
+
+// 关闭编辑/新增对话框
+function handleClose() {
+	if(editFormRef.value){
+		editFormRef.value.resetFields()
+	}
+	form.value = { id: '', realName: '', schedDate: '', noon: '', registQuota: 0 }
+}
+
+// 保存编辑
+async function editSave() {
+	if (!editFormRef.value) return;
+	await editFormRef.value.validate((valid) => {
+		if (valid) {
+			postReq("/scheduling/update", form.value).then(resp => {
+				if(resp.data.result){
+					editDialogVisible.value = false
+					loadData(data.value.current)
+					ElMessage.success('修改成功')
+				} else {
+					if(resp.data.errMsg=='未登录') router.push('/login')
+					ElMessage.error(resp.data.errMsg || '修改失败')
+				}
+			})
+		}
+	})
+}
+
+//删除
+function del(id){
+	ElMessageBox.confirm(
+	    '确认是否删除?',
+	    'Warning',
+	    {
+	      confirmButtonText: 'OK',
+	      cancelButtonText: 'Cancel',
+	      type: 'warning',
+	    }
+	)
+	.then(() => {
+		var formData = new FormData();
+		formData.append("id", id);
+		postReq("/scheduling/del",formData).then(resp=>{
+			if(resp.data.result){
+				loadData(data.value.current)
+				ElMessage.success('删除成功')
+			}else{
+				if(resp.data.errMsg=='未登录') router.push('/login')
+				ElMessage.error(resp.data.errMsg || '删除失败')
+			}
+		})
+	})
+}
 
 </script>
 
-<style>
-	
+<style scoped>
+.search-bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-controls {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
 </style>

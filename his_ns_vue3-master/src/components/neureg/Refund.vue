@@ -35,7 +35,7 @@
 				<el-table-column prop="deptName" label="科室"  align="center" />
 				<el-table-column prop="doctorName" label="医生"  align="center" />
 				<el-table-column prop="registName" label="号别"  align="center" />
-				<el-table-column fixed="right" label="Operations"  align="center" >
+				<el-table-column fixed="right" label="操作"  align="center" >
 				  <template #default="scope">
 					<el-button link type="danger" @click="refund(scope.row)">退号</el-button>
 				  </template>

@@ -47,8 +47,11 @@ public class CustomerController {
     @PostMapping("/add")
     public JsonResult<Customer>addUser(@RequestBody Customer customer){
         boolean rs= iService.save(customer);
-        if(rs)return new JsonResult<Customer>(customer);
-        else return new JsonResult<>("添加失败");
+        if(rs) {
+            return new JsonResult<Customer>(customer);
+        } else {
+            return new JsonResult<>("添加失败");
+        }
     }
 
     @PostMapping("/update")
@@ -59,8 +62,8 @@ public class CustomerController {
     }
 
 
-    @PostMapping("/del")
-    public JsonResult<Customer> delUser(@RequestParam(value = "id",required = true) Integer id){
+    @PostMapping("/del/{id}")
+    public JsonResult<Customer> delUser(@PathVariable(value = "id") Integer id){
         boolean rs= iService.removeById(id);
         if(rs){
             JsonResult<Customer> jsonResult= new JsonResult<>();
