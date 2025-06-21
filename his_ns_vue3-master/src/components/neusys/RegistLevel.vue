@@ -253,10 +253,10 @@ async function save(){
 
 function del(id){
 	ElMessageBox.confirm(
-	    '确认是否删除?','Warning',
+	    '确认是否删除?','警告',
 	    {
-	      confirmButtonText: 'OK',
-	      cancelButtonText: 'Cancel',
+	      confirmButtonText: '确认',
+	      cancelButtonText: '取消',
 	      type: 'warning',
 	    }
 	)

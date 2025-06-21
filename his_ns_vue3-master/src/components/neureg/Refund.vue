@@ -125,10 +125,10 @@ function handleCurrentChange (number)  {
 function refund(item){
 	ElMessageBox.confirm(
 	    '确认是否退号?',
-	    'Warning',
+	    '提醒',
 	    {
-	      confirmButtonText: 'OK',
-	      cancelButtonText: 'Cancel',
+	      confirmButtonText: '确认',
+	      cancelButtonText: '取消',
 	      type: 'warning',
 	    }
 	)

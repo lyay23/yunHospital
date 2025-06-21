@@ -14,12 +14,14 @@
 			<el-date-picker
 					v-model="sdate"
 					type="daterange"
-					range-separator="To"
-					start-placeholder="Start date"
-					end-placeholder="End date"
+					range-separator="至"
+					start-placeholder="开始时间"
+					end-placeholder="结束时间"
 					:size="size"
 					format="YYYY/MM/DD"
-					value-format="YYYY-MM-DD"/>
+					value-format="YYYY-MM-DD" 
+					style="width: 100%;"
+					/>
 			<el-input v-model.trim="kw"
 				placeholder="请输入姓名或排班名"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
@@ -34,7 +36,7 @@
 			<el-table :data="data.records" style="width:100%;"
 			 v-loading="loading">
 			    <el-table-column fixed prop="id" label="序号" width="80"  align="center" />
-			    <el-table-column prop="schedDate" label="日期"  align="center" />
+			    <el-table-column prop="schedDate" label="日期"   align="center" />
 				<el-table-column prop="deptName" label="所属科室" align="center"/>
 				<el-table-column prop="realName" label="姓名" align="center"/>
 				<el-table-column prop="noon" label="午别"  align="center" />
@@ -220,6 +222,47 @@ const formRules=ref({
 	ruleSelection: [{ required: true, type: 'array', message: '请至少选择一个排班规则', trigger: 'change' }]
 })
 
+function loadData(pageNo = 1) {
+	loading.value = true
+	currentPage.value = pageNo
+
+	const params = new URLSearchParams()
+	params.append('pn', pageNo)
+	params.append('count', ps.value)
+
+	if (kw.value) {
+		params.append('keyword', kw.value)
+	}
+	if (dept.value) {
+		params.append('deptId', dept.value)
+	}
+
+	if (sdate.value && sdate.value.length === 2) {
+		params.append('start', sdate.value[0])
+		params.append('end', sdate.value[1])
+	}
+	
+	fetchData(`/scheduling/page?${params.toString()}`)
+		.then(res => {
+			if (res.result) {
+				data.value = res.data
+			} else {
+				if (res.errMsg === '未登录') {
+					router.push('/login')
+				} else {
+					ElMessage.error(res.errMsg || '数据加载失败')
+				}
+			}
+		})
+		.catch(err => {
+			console.error(err)
+			ElMessage.error('请求异常，请稍后重试')
+		})
+		.finally(() => {
+			loading.value = false
+		})
+}
+
 function save(){
 	const schedulings = []
 	const [startDate, endDate] = plans.value.ndate
@@ -295,29 +338,6 @@ async function loadDeptData(){
 			router.push('/login')
 		}
 	}	
-}
-
-//加载数据
-async function loadData(pn){
-	loading.value=true
-	let url=`/scheduling/page?count=${ps.value}&pn=${pn}`
-	if(kw!='')
-		url+=`&keyword=${kw.value}`
-
-	if(dept!='')
-		url+=`&deptId=${dept.value}`
-
-	if(sdate.value[0]!=''&&sdate.value[1]!='')
-		url+=`&start=${sdate.value[0]}&end=${sdate.value[1]}`
-	
-	const result = await fetchData(url,null);
-	if(result.result){
-		data.value = result.data
-		loading.value=false
-	}else{
-		if(result.errMsg=='未登录')
-			router.push('/login')
-	}
 }
 
 //加载排班规则
@@ -398,10 +418,10 @@ async function editSave() {
 function del(id){
 	ElMessageBox.confirm(
 	    '确认是否删除?',
-	    'Warning',
+	    '警告',
 	    {
-	      confirmButtonText: 'OK',
-	      cancelButtonText: 'Cancel',
+	      confirmButtonText: '确认',
+	      cancelButtonText: '取消',
 	      type: 'warning',
 	    }
 	)
