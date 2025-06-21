@@ -28,7 +28,8 @@
 			      :label="item.constantCode+item.constantName"
 			      :value="item.id"/>
 			</el-select>
-			<el-input v-model.trim="kw" 
+			<el-input v-model.trim="kw"
+				  clearable @clear="loadData(1)"
 				  placeholder="请输入用户名或姓名"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
 		</div>
@@ -251,19 +252,19 @@ const editDialogVisible = ref(false)
 const addFormRef = ref(null)
 const editFormRef = ref(null)
 
-const defaultForm = {
-	"id": "",
-	"userName": "",
-	"password": "",
-	"realName": "",
-	"useType": "",
-	"docTitleID": "",
-	"isScheduling": 0,
-	"deptID": "",
-	"registLeID": ""
-}
 //表单对象
-const form=ref(JSON.parse(JSON.stringify(defaultForm)))
+const form=ref({})
+const defaultForm = {
+	id: null,
+	userName: '',
+	password: '',
+	realName: '',
+	useType: '',
+	deptID: '',
+	docTitleID: '',
+	isScheduling: 0,
+	registLeID: ''
+}
 
 //表单验证
 const rules=ref({
@@ -271,68 +272,56 @@ const rules=ref({
 	password: [ { required: true, message: '请输入密码', trigger: 'blur' } ],
 	realName: [ { required: true, message: '请输入姓名', trigger: 'blur' } ],
 	useType: [ { required: true, message: '请选择用户类型', trigger: 'change' } ],
+	deptID: [ { required: true, message: '请选择所在科室', trigger: 'change' } ],
 })
 
 //组件挂载后事件
 onMounted(async() => {
   loadData(1)
-  //科室
-  loadDeptData()
-  //医生职称
-  loadTypeData(8,100,docTypes)
-  //用户类型
-  loadTypeData(13,100,userTypes)
-  //挂号级别
-  loadRegLevelData()
+  loadDepts()
+  loadConstant(13,userTypes) //用户类型
+  loadConstant(8,docTypes) //医生职称
+  loadRegistLe()
 });
 
-
-async function loadTypeData(cid,count,ay){
-	let url=`/constantitem/page?ctype=${cid}&count=${count}&pn=1`
+//加载挂号级别
+async function loadRegistLe(){
+	let url=`/registlevel/page?count=1000&pn=1`
 	const result = await fetchData(url,null);
-	if(result.result){
-		ay.value=result.data.records 
-	}else{
-		if(result.errMsg=='未登录')
-			router.push('/login')
-	}	
-}
-
-async function loadRegLevelData(){
-	let url=`/registlevel/page?count=100&pn=1`
-	const result = await fetchData(url,null);
-	if(result.result){
+	if(result.result)
 		registLes.value=result.data.records 
-	}else{
-		if(result.errMsg=='未登录')
-			router.push('/login')
-	}	
 }
-
-async function loadDeptData(){
-	let url=`/department/page?&count=200&pn=1`
+//获取常数据类别
+async function loadConstant(cid,ay){
+	let url=`/constantitem/page?ctype=${cid}&count=1000&pn=1`
 	const result = await fetchData(url,null);
-	if(result.result){
+	if(result.result)
+		ay.value=result.data.records 
+}
+//加载科室
+async function loadDepts(){
+	let url=`/department/page?count=1000&pn=1`
+	const result = await fetchData(url,null);
+	if(result.result)
 		depts.value=result.data.records 
-	}else{
-		if(result.errMsg=='未登录'){
-			router.push('/login')
-		}
-	}	
 }
 
-//加载用户数据
+//加载数据
 async function loadData(pn){
 	loading.value=true
-	let url=`/user/page?count=${ps.value}&pn=${pn}`
-	if(kw!='')
-		url+=`&keyword=${kw.value}`
-	if(userType!='')
-		url+=`&userType=${userType.value}`
-	if(dept!='')
-		url+=`&dept=${dept.value}`
-	if(docType!='')
-		url+=`&docType=${docType.value}`
+	currentPage.value = pn
+	
+	let params = new URLSearchParams()
+	params.append('pn', pn)
+	params.append('count', ps.value)
+	
+	if(kw.value) params.append('keyword', kw.value)
+	if(userType.value) params.append('userType', userType.value)
+	if(docType.value) params.append('docType', docType.value)
+	if(dept.value) params.append('dept', dept.value)
+	
+	let url=`/user/page?${params.toString()}`
+	
 	const result = await fetchData(url,null);
 	if(result.result){
 		data.value = result.data
@@ -340,91 +329,94 @@ async function loadData(pn){
 	}else{
 		if(result.errMsg=='未登录')
 			router.push('/login')
-	}
+	}	
 }
 
 //分页
 function handleCurrentChange (number)  {
 	loadData(number)
 }
-//显示编辑框
-function showEdit(item){
-	editDialogVisible.value=true
-	form.value = { ...item, isScheduling: item.isScheduling === '是' ? 1 : 0 }
-}
-
-function handleClose(type) {
-  const formRef = type === 'edit' ? editFormRef.value : addFormRef.value;
-  if (formRef) {
-    formRef.resetFields();
-  }
-  form.value = JSON.parse(JSON.stringify(defaultForm));
-}
-
-//保存编辑内容
-async function editSave(){
-  if (!editFormRef.value) return;
-  await editFormRef.value.validate((valid) => {
-    if (valid) {
-      // 创建一个副本，移除password字段
-      const submission = { ...form.value };
-      delete submission.password;
-
-      postReq("/user/update", submission).then(resp => {
-        if (resp.data.result) {
-          editDialogVisible.value = false;
-          loadData(data.value.current);
-          ElMessage.success('修改成功');
-        } else {
-          ElMessage.error(resp.data.errMsg || '修改失败');
-        }
-      });
-    }
-  });
-}
-//保存新增内容
-async function save(){
-  if (!addFormRef.value) return;
-  await addFormRef.value.validate((valid) => {
-    if (valid) {
-      postReq("/user/add", form.value).then(resp => {
-        if (resp.data.result) {
-          addDialogVisible.value = false;
-          currentPage.value = 1;
-          loadData(1);
-          ElMessage.success('新增成功');
-        } else {
-          ElMessage.error(resp.data.errMsg || '新增失败');
-        }
-      });
-    }
-  });
-}
 
 function del(id){
 	ElMessageBox.confirm(
-	    '确认是否删除?',
-	    '警告',
+	    '您确定要删除该条记录吗?',
+	    '提示',
 	    {
-	      confirmButtonText: '确认',
+	      confirmButtonText: '确定',
 	      cancelButtonText: '取消',
 	      type: 'warning',
 	    }
 	  )
-	.then(() => {
-		var formData = new FormData();
-		formData.append("id", id);
-		postReq("/user/del",formData).then(resp=>{
-			if(resp.data.result){
-				loadData(data.value.current)
-				ElMessageBox.alert('删除成功', '提示',{})
-				
-			}else{
-				if(result.errMsg=='未登录')
-					router.push('/login')
-				ElMessageBox.alert(resp.data.errMsg, '提示',{})
-			}
-		})
+	    .then(() => {
+			postReq(`/user/del?id=${id}`,null).then(resp=>{
+				if(resp.data.result){
+					ElMessage({
+						type: 'success',
+						message: '删除成功',
+					})
+					loadData(data.value.current);
+				}else{
+					ElMessage.error(resp.data.errMsg)
+				}
+			})
+	    })
+	    .catch(() => {
+	      ElMessage({
+	        type: 'info',
+	        message: '删除已取消',
+	      })
+	    })
+}
+
+//显示编辑框
+function showEdit(item){
+	form.value={ ...item }
+	editDialogVisible.value=true
+}
+
+function handleClose(type) {
+  const formRef = type === 'add' ? addFormRef.value : editFormRef.value;
+  if (formRef) {
+    formRef.resetFields();
+  }
+}
+
+//保存编辑内容
+async function editSave(){
+	editFormRef.value.validate((valid) => {
+		if (valid) {
+			postReq("/user/update",form.value).then(resp=>{
+				if(resp.data.result){
+					editDialogVisible.value=false;
+					loadData(data.value.current)
+					ElMessage.success('修改成功')
+				}else{
+					ElMessage.error(resp.data.errMsg)
+				}
+			})
+		}
+	})
+}
+//显示新增框
+const showAdd = () => {
+	form.value = { ...defaultForm }
+	addDialogVisible.value = true
+}
+//新增
+async function save(){
+	addFormRef.value.validate((valid) => {
+		if (valid) {
+			postReq("/user/add",form.value).then(resp=>{
+				if(resp.data.result){
+					addDialogVisible.value=false;
+					currentPage.value = 1
+					loadData(1);
+					ElMessage.success('新增成功')
+				}else{
+					ElMessage.error(resp.data.errMsg)
+				}
+			})
+		}
 	})
 }
 
