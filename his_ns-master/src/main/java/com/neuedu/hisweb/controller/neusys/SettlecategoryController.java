@@ -35,7 +35,7 @@ public class SettlecategoryController {
                     .or().like(Settlecategory::getSettleName,keyword);
         }
         queryWrapper.orderByAsc(Settlecategory::getSequenceNo);
-        iService.page(page);
+        iService.page(page,queryWrapper);
 
         return new JsonResult<Page>(page);
     }
