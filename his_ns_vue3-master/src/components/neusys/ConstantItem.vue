@@ -12,6 +12,7 @@
 				  :value="item.id"/>
 			</el-select>
 			<el-input v-model.trim="kw"
+			  clearable @clear="loadData(1)"
 			  placeholder="请输入常数项编码或名称"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
 		</div>
@@ -194,16 +195,16 @@ async function loadTypeData(){
 //加载数据
 async function loadData(pn){
 	loading.value=true
-	let url=`/constantitem/page?count=${ps.value}&pn=${pn}`
-	if(kw!='')
-	{
-		url+=`&keyword=${kw.value}`
-	}
-	if(ctype!='')
-	{
-		url+=`&ctype=${ctype.value}`
-	}
-	const result = await fetchData(url,null);
+	currentPage.value = pn
+	
+	let params = new URLSearchParams()
+	params.append('pn', pn)
+	params.append('count', ps.value)
+	
+	if(kw.value) params.append('keyword', kw.value)
+	if(ctype.value) params.append('ctype', ctype.value)
+	
+	const result = await fetchData(`/constantitem/page?${params.toString()}`,null);
 	if(result.result){
 		data.value = result.data
 		loading.value=false

@@ -71,7 +71,7 @@
 	<el-dialog v-model="editDialogVisible" title="编辑" @close="handleClose('edit')">
 	    <el-form :model="form" :rules="rules" ref="editFormRef" label-width="100px">
 			<el-form-item label="卡号" prop="cardNo" >
-			  <el-input v-model="form.cardNo"  autocomplete="off" />
+			  <el-input v-model="form.cardNo"  autocomplete="off" disabled/>
 			</el-form-item>
 			<el-form-item label="姓名" prop="realname">
 				<el-input v-model="form.realname" autocomplete="off" />

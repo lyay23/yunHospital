@@ -22,7 +22,7 @@
 							{{ scope.row.gender == 71 ? "男" : "女" }}
 						</template>
 					</el-table-column>
-					<el-table-column prop="idnumber" label="身份证" align="center" />
+					<el-table-column prop="idnumber" label="身份证" align="center"  width="200"/>
 					<el-table-column prop="birthdate" label="出生日期" align="center" />
 					<el-table-column prop="phone" label="手机" align="center" />
 					<el-table-column prop="createdate" label="注册日期" align="center" />
