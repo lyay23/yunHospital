@@ -12,6 +12,7 @@
 				  :value="item.id"/>
 			</el-select>
 			<el-input v-model.trim="kw"
+			  clearable @clear="loadData(1)"
 			  placeholder="请输入疾病分类编码或名称"/>
 			<el-button type="primary" @click="loadData(1)" >查询</el-button>
 		</div>
@@ -200,10 +201,10 @@ async function loadTypeData(cid,count,ay){
 async function loadData(pn){
 	loading.value=true
 	let url=`/disecategory/page?count=${ps.value}&pn=${pn}`
-	if(kw!='')
+	if(kw.value)
 		url+=`&keyword=${kw.value}`
 
-	if(ctype!='')
+	if(ctype.value)
 		url+=`&ctype=${ctype.value}`
 	
 	const result = await fetchData(url,null);
