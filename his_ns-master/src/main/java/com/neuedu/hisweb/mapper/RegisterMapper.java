@@ -47,7 +47,7 @@ public interface RegisterMapper extends BaseMapper<Register> {
                             and date(r.visitDate)=#{regDate,jdbcType=VARCHAR}
                         </if>
                          <if test='keyword != null and keyword!=""'>
-                            and (m.idnumber` like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
+                            and (m.idnumber like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
                             or m.RealName like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
                             or m.phone like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
                             or r.CaseNumber like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%'))

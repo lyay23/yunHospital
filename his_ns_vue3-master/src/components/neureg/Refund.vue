@@ -22,14 +22,14 @@
 			<el-table :data="data.records" style="width:100%;"
 			 v-loading="loading">
 				
-			    <el-table-column prop="caseNumber" label="病历号" align="center" width="70" />
+			    <el-table-column prop="caseNumber" label="病历号" align="center" width="90" />
 			    <el-table-column prop="realName" label="姓名"  align="center" width="100" />
 			    <el-table-column prop="gender" label="性别"   width="70" align="center">
 					<template #default="scope">
 					    {{scope.row.gender==71?"男":"女"}}
 					</template>
 				</el-table-column>
-			    <el-table-column prop="idNumber" label="身份证"  align="center" />
+			    <el-table-column prop="idNumber" label="身份证"  align="center" width="180" />
 				<el-table-column prop="visitDate" label="挂号日期"  align="center" />
 			    <el-table-column prop="noon" label="午别"  align="center" />
 				<el-table-column prop="deptName" label="科室"  align="center" />
@@ -70,7 +70,7 @@
 <script setup>
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import router from '../../router';
 import { formatDate } from '../../utils/utils.js'
 import { useUserStore } from '../../store/user.js'
@@ -85,6 +85,7 @@ const deptId=ref('')
 //每页行数
 const ps=ref(10)
 const pageSizes=[10,20,30,50]
+const currentPage = ref(1)
 
 
 
@@ -96,22 +97,30 @@ onMounted(async () => {
 
 //加载数据
 async function loadData(pn){
-	loading.value=true
-	var date=formatDate(new Date())
-	let url=`/register/page?count=${ps.value}&pn=${pn}&state=1&regDate=${date}`
-	if(kw!='')
-		url+=`&keyword=${kw.value}`
-	if(deptId!='')
-		url+`&deptId=${deptId}`
-	
-	const result = await fetchData(url,null);
-	if(result.result){
-		data.value = result.data
-		loading.value=false
-	}else{
-		if(result.errMsg=='未登录')
-			router.push('/login')		
-	}	
+	loading.value = true
+	try {
+		currentPage.value = pn
+		var date=formatDate(new Date())
+		
+		const params = new URLSearchParams()
+		params.append('pn', pn)
+		params.append('count', ps.value)
+		params.append('state', 1)
+		params.append('regDate', date)
+		
+		if(kw.value) params.append('keyword', kw.value)
+		if(deptId.value) params.append('deptId', deptId.value)
+		
+		const result = await fetchData(`/register/page?${params.toString()}`,null);
+		if(result.result){
+			data.value = result.data
+		}else{
+			if(result.errMsg=='未登录')
+				router.push('/login')		
+		}	
+	} finally {
+		loading.value = false
+	}
 }
 
 
@@ -139,14 +148,15 @@ function refund(item){
 		}
 		postReq("/register/backOff",param).then(resp=>{
 			if(resp.data.result){
-				loadData(data.value.current)
-				ElMessageBox.alert('退号成功', '提示',{})
-				
+				ElMessage.success('退号成功')
+				// 如果删除的是当前页的最后一条数据，则加载前一页
+				if (data.value.records.length === 1 && data.value.current > 1) {
+					loadData(data.value.current - 1)
+				} else {
+					loadData(data.value.current)
+				}
 			}else{
-				if(result.errMsg=='未登录')
-					router.push('/login')
-					
-				ElMessageBox.alert(resp.data.errMsg, '提示',{})
+				ElMessage.error(resp.data.errMsg || '退号失败')
 			}
 			
 		})

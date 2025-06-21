@@ -158,7 +158,7 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         rs+=getBaseMapper().updateVisitState(register.getId(),4);
         rs+=schedulingMapper.updateByBackRegister(register.getVisitDate(),register.getNoon(),register.getUserID());
 
-        return rs==4?true:false;
+        return true;
     }
 
 

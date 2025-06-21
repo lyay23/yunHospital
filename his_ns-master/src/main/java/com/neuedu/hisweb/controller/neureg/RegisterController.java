@@ -57,7 +57,11 @@ public class RegisterController {
     @PostMapping("/backOff")
     public JsonResult<Register>  backOff(@RequestBody RegParam param){
         boolean rs= iService.updateRegisterState(param);
-        if(rs)return new JsonResult<Register>(rs);
+        if(rs){
+            JsonResult<Register> jsonResult= new JsonResult<>();
+            jsonResult.setResult(true);
+            return jsonResult;
+        }
         else return new JsonResult<>("退号失败");
     }
 
