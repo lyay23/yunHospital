@@ -181,7 +181,7 @@ onMounted(async () => {
 async function loadData(pn){
 	loading.value=true
 	let url=`/registlevel/page?count=${ps.value}&pn=${pn}`
-	if(kw!='')
+	if(kw.value)
 		url+=`&keyword=${kw.value}`
 	
 	const result = await fetchData(url,null);
@@ -253,30 +253,33 @@ async function save(){
 
 function del(id){
 	ElMessageBox.confirm(
-	    '确认是否删除?','警告',
+	    '您确定要删除该条记录吗?',
+	    '提示',
 	    {
-	      confirmButtonText: '确认',
+	      confirmButtonText: '确定',
 	      cancelButtonText: '取消',
 	      type: 'warning',
 	    }
-	)
-	.then(() => {
-		var formData = new FormData();
-		formData.append("id", id);
-		postReq("/registlevel/del",formData).then(resp=>{
-			if(resp.data.result){
-				loadData(data.value.current)
-				ElMessageBox.alert('删除成功', '提示',{})
-				
-			}else{
-				if(result.errMsg=='未登录')
-					router.push('/login')
-					
-				ElMessageBox.alert(resp.data.errMsg, '提示',{})
-			}
-			
-		})
-	})
+	  )
+	    .then(() => {
+			postReq(`/registlevel/del?id=${id}`,null).then(resp=>{
+				if(resp.data.result){
+					ElMessage({
+						type: 'success',
+						message: '删除成功',
+					})
+					loadData(data.value.current);
+				}else{
+					ElMessage.error(resp.data.errMsg)
+				}
+			})
+	    })
+	    .catch(() => {
+	      ElMessage({
+	        type: 'info',
+	        message: '删除已取消',
+	      })
+	    })
 }
 
 </script>
