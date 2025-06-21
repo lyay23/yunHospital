@@ -49,7 +49,7 @@
 			    <el-table-column prop="itemName" label="项目名称"  align="center" />
 				<el-table-column prop="format" label="规格" align="center"/>
 				<el-table-column prop="price" label="单价" align="center"/>
-				<el-table-column prop="expClassName" label="费用科目"  align="center" />
+				<el-table-column prop="expName" label="费用科目"  align="center" />
 				<el-table-column prop="deptName" label="执行科室"  align="center" />
 			    <el-table-column fixed="right" label="操作"  align="center" >
 			      <template #default="scope">
@@ -196,57 +196,55 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from 'vue'
-import { fetchData,postReq } from '../../utils/api'
+import { ref, onMounted } from 'vue'
+import { fetchData, postReq } from '../../utils/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import router from '../../router'
 
-//加载页码
-const loading=ref(false)
-//分页信息
+// 加载状态
+const loading = ref(false)
+
+// 分页和表格数据
 const data = ref({})
-//搜索栏 下拉框数据集
-//项目类型集合
-const types=ref([])
-//科室集合
-const depts=ref([])
-//费用科目
-const expenss=ref([])
-//搜索栏 文本框
-const kw=ref('')
-//搜索栏 下拉框选中值
-const ctype=ref('')
-const dept=ref('')
-const expens=ref('')
-//每页行数
-const ps=ref(10)
-//行数集
-const pageSizes=[10,20,30,50]
+const ps = ref(10)
+const pageSizes = [10, 20, 30, 50]
 const currentPage = ref(1)
 
-//新增对话框是否显示
+// 搜索栏 v-model
+const kw = ref('')
+const ctype = ref('')
+const dept = ref('')
+const expens = ref('')
+
+// 搜索栏下拉框数据源
+const types = ref([])
+const depts = ref([])
+const expenss = ref([])
+
+// 对话框可见性
 const addDialogVisible = ref(false)
-//编辑对话框是否显示
 const editDialogVisible = ref(false)
 
-// 表单ref
+// 表单 ref
 const addFormRef = ref(null)
 const editFormRef = ref(null)
 
-//表单对象
-const form=ref({
-	"id": "",
-	"itemCode": "",
-	"itemName": "",
-	"format": "",
-	"price": null,
-	"expClassID": "",
-	"deptID": "",
-	"mnemonicCode": "",
-	"recordType": ""
-})
+// 表单对象
+const form = ref({})
+const defaultForm = {
+	id: '',
+	itemCode: '',
+	itemName: '',
+	format: '',
+	price: null,
+	expClassID: '',
+	deptID: '',
+	mnemonicCode: '',
+	recordType: ''
+}
 
-//表单验证
-const rules=ref({
+// 表单验证规则
+const rules = ref({
 	itemCode: [{ required: true, message: '请输入项目编码', trigger: 'blur' }],
 	itemName: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
 	price: [
@@ -258,160 +256,135 @@ const rules=ref({
 	recordType: [{ required: true, message: '请选择项目类型', trigger: 'change' }]
 })
 
-//组件挂载后事件
-onMounted(async() => {
-  loadData(1)
-  //科室
-  loadDeptData()
-  //项目类型
-  loadTypeData(15,100,types)
-  //费用科目
-  loadExpenseData()
-});
+// 加载表格数据
+function loadData(pageNo = 1) {
+	loading.value = true
+	currentPage.value = pageNo
 
-async function loadTypeData(cid,count,ay){
-	let url=`/constantitem/page?ctype=${cid}&count=${count}&pn=1`
-	const result = await fetchData(url,null);
-	if(result.result){
-		ay.value=result.data.records 
-	}else{
-		if(result.errMsg=='未登录'){
-			router.push('/login')
-		}
-	}	
+	const params = new URLSearchParams()
+	params.append('pn', pageNo)
+	params.append('count', ps.value)
+	
+	if (kw.value) params.append('keyword', kw.value)
+	if (ctype.value) params.append('ctype', ctype.value)
+	if (dept.value) params.append('dept', dept.value)
+	if (expens.value) params.append('expClassId', expens.value)
+	
+	fetchData(`/fmeditem/page?${params.toString()}`)
+		.then(res => {
+			if (res.result) {
+				data.value = res.data
+			} else if (res.errMsg === '未登录') {
+				router.push('/login')
+			} else {
+				ElMessage.error(res.errMsg || '数据加载失败')
+			}
+		})
+		.catch(err => {
+			console.error(err)
+			ElMessage.error('请求异常，请稍后重试')
+		})
+		.finally(() => {
+			loading.value = false
+		})
 }
 
-
-
-async function loadExpenseData(){
-	let url=`/expenseclass/page?count=1000&pn=1`
-	const result = await fetchData(url,null);
-	if(result.result){
-		expenss.value=result.data.records 
-	}else{
-		if(result.errMsg=='未登录'){
-			router.push('/login')
-		}
-	}	
+// 加载下拉框数据
+const loadDepts = async () => {
+    const res = await fetchData('/department/page?count=1000')
+	if(res.result) depts.value = res.data.records
+}
+const loadTypes = async () => {
+	const res = await fetchData('/constantitem/page?ctype=15&count=100&pn=1')
+	if(res.result) types.value = res.data.records
+}
+const loadExpenss = async () => {
+	const res = await fetchData('/expenseclass/page?count=1000')
+	if(res.result) expenss.value = res.data.records
 }
 
-async function loadDeptData(){
-	let url=`/department/page?&count=200&pn=1`
-	const result = await fetchData(url,null);
-	if(result.result){
-		depts.value=result.data.records 
-	}else{
-		if(result.errMsg=='未登录'){
-			router.push('/login')
-		}
-	}	
+// 组件挂载
+onMounted(() => {
+	loadData()
+	loadDepts()
+	loadTypes()
+	loadExpenss()
+})
+
+// 分页改变
+function handleCurrentChange(pageNo) {
+	loadData(pageNo)
 }
 
-//加载用户数据
-async function loadData(pn){
-	loading.value=true
-	let url=`/fmeditem/page?count=${ps.value}&pn=${pn}`
-	if(kw!='')
-		url+=`&keyword=${kw.value}`
-	if(ctype!='')
-		url+=`&ctype=${ctype.value}`
-	if(dept!='')
-		url+=`&dept=${dept.value}`
-	if(expens!='')
-		url+=`&expClassId=${expens.value}`
-		
-	const result = await fetchData(url,null);
-	if(result.result){
-		data.value = result.data
-		loading.value=false
-	}else{
-		if(result.errMsg=='未登录')
-			router.push('/login')
+// 对话框关闭
+const handleClose = (type) => {
+	if(type === 'add' && addFormRef.value) {
+		addFormRef.value.resetFields()
+	}
+	if(type === 'edit' && editFormRef.value) {
+		editFormRef.value.resetFields()
 	}
 }
 
-//分页
-function handleCurrentChange (number)  {
-	loadData(number)
-}
-//显示编辑框
-function showEdit(item){
-	editDialogVisible.value=true
-	form.value = { ...item }
-}
-
-function handleClose(type) {
-  const formRef = type === 'edit' ? editFormRef.value : addFormRef.value;
-  if (formRef) {
-    formRef.resetFields();
-  }
-  form.value = {
-    id: '', itemCode: '', itemName: '', format: '', price: null,
-    expClassID: '', deptID: '', mnemonicCode: '', recordType: ''
-  };
+// 新增
+const save = () => {
+	addFormRef.value.validate(valid => {
+		if (valid) {
+			postReq('/fmeditem/add', form.value).then(res => {
+				if (res) {
+					ElMessage.success('新增成功')
+					addDialogVisible.value = false
+					loadData(1)
+				} else {
+					ElMessage.error('新增失败')
+				}
+			})
+		}
+	})
 }
 
-//保存编辑内容
-async function editSave(){
-  if (!editFormRef.value) return;
-  await editFormRef.value.validate((valid) => {
-    if (valid) {
-      postReq("/fmeditem/update", form.value).then(resp => {
-        if (resp.data.result) {
-          editDialogVisible.value = false;
-          loadData(data.value.current);
-          ElMessage.success('修改成功');
-        } else {
-          ElMessage.error(resp.data.errMsg || '修改失败');
-        }
-      });
-    }
-  });
+// 显示编辑
+const showEdit = (row) => {
+	form.value = { ...row }
+	editDialogVisible.value = true
 }
 
-//保存新增内容
-async function save(){
-  if (!addFormRef.value) return;
-  await addFormRef.value.validate((valid) => {
-    if (valid) {
-      postReq("/fmeditem/add", form.value).then(resp => {
-        if (resp.data.result) {
-          addDialogVisible.value = false;
-          currentPage.value = 1;
-          loadData(1);
-          ElMessage.success('新增成功');
-        } else {
-          ElMessage.error(resp.data.errMsg || '新增失败');
-        }
-      });
-    }
-  });
+// 编辑保存
+const editSave = () => {
+	editFormRef.value.validate(valid => {
+		if(valid) {
+			postReq('/fmeditem/update', form.value).then(res => {
+				if (res) {
+					ElMessage.success('修改成功')
+					editDialogVisible.value = false
+					loadData(currentPage.value)
+				} else {
+					ElMessage.error('修改失败')
+				}
+			})
+		}
+	})
 }
 
-function del(id){
-	ElMessageBox.confirm(
-	    '确认是否删除?','警告',
-	    {
-	      confirmButtonText: '确认',
-	      cancelButtonText: '取消',
-	      type: 'warning',
-	    }
-	  )
-	.then(() => {
-		var formData = new FormData();
-		formData.append("id", id);
-		postReq("/fmeditem/del",formData).then(resp=>{
-			if(resp.data.result){
-				loadData(data.value.current)
-				ElMessageBox.alert('删除成功', '提示',{})
-				
-			}else{
-				if(result.errMsg=='未登录')
-					router.push('/login')
-				ElMessageBox.alert(resp.data.errMsg, '提示',{})
+// 删除
+const del = (id) => {
+	ElMessageBox.confirm('确认删除该项目吗?', '提示', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning'
+	}).then(() => {
+		postReq(`/fmeditem/del?id=${id}`).then(res => {
+			if (!res.errMsg) {
+				ElMessage.success('删除成功')
+				if (data.value.records.length === 1 && currentPage.value > 1) {
+					currentPage.value--
+				}
+				loadData(currentPage.value)
+			} else {
+				ElMessage.error(res.errMsg)
 			}
 		})
-	})
+	}).catch(() => { /* 取消操作 */ })
 }
 
 </script>

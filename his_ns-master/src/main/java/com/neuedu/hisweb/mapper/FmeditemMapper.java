@@ -42,6 +42,7 @@ public interface FmeditemMapper extends BaseMapper<Fmeditem> {
                             or `ItemName` like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
                         </if>
                     </where>
+                    order by CreationDate desc
             </script>
             """)
     Page<FmeditemVo> selectPage(Page<FmeditemVo> page, String keyword, String expClassId, String dept, String ctype);

@@ -57,10 +57,10 @@ public class FmeditemController {
 
 
     @PostMapping("/del")
-    public JsonResult<Fmeditem> delUser(@RequestParam(value = "id",required = true) Integer id){
+    public JsonResult<Object> delUser(@RequestParam(value = "id",required = true) Integer id){
         boolean rs= iService.removeById(id);
         if(rs){
-            JsonResult<Fmeditem> jsonResult= new JsonResult<>();
+            JsonResult<Object> jsonResult= new JsonResult<>();
             jsonResult.setResult(true);
             return jsonResult;
         }
