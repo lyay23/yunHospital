@@ -243,7 +243,8 @@ function save(){
 					schedDate: formatDate(iterDate),
 					deptID: plans.value.deptId,
 					userID: rule.userID,
-					noon: "上午"
+					noon: "上午",
+					ruleID: rule.id
 				})
 			}
 			// 下午
@@ -252,29 +253,29 @@ function save(){
 					schedDate: formatDate(iterDate),
 					deptID: plans.value.deptId,
 					userID: rule.userID,
-					noon: "下午"
+					noon: "下午",
+					ruleID: rule.id
 				})
 			}
-			iterDate = new Date(nextDay(iterDate))
-		}	
-	})
-
-	if (schedulings.length === 0) {
-		ElMessage.warning('根据所选规则和日期，没有生成任何排班计划。');
-		return;
-	}
-
-	postReq("/scheduling/add", schedulings).then(resp => {
-		if(resp.data.result){
-			addDialogVisible.value = false
-			loadData(1)
-			ElMessage.success(`成功生成 ${schedulings.length} 条排班计划`)
-		}else{
-			ElMessage.error(resp.data.errMsg || '生成排班计划失败')
+			iterDate = nextDay(iterDate)
 		}
-	}).catch(err => {
-		ElMessage.error('请求失败')
 	})
+
+	if (schedulings.length > 0) {
+		postReq("/scheduling/add", schedulings).then(resp => {
+			if(resp.data.result){
+				addDialogVisible.value = false
+				loadData(1)
+				ElMessage.success('排班计划生成成功')
+			} else {
+				ElMessage.error(resp.data.errMsg || '排班计划生成失败')
+			}
+		}).catch(error => {
+			ElMessage.error('请求失败')
+		})
+	} else {
+		ElMessage.warning('根据您的规则和日期范围，没有生成任何排班条目。')
+	}
 }
 
 //组件挂载后事件

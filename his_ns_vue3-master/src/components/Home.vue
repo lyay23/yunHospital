@@ -4,16 +4,18 @@
 			<!--头部 start-->
 			<el-header class="top-header">
 				<el-text class="home_title">东软云医院HIS系统</el-text>
-				<div class="home_userinfoContainer" >
-					 <el-dropdown  @command="handleCommand">
+				<div class="home_userinfoContainer">
+					<el-dropdown @command="handleCommand">
 						<el-button type="primary">
 							<el-avatar size="small" style="margin-right:10px ;"
 								src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-								{{userStore.getUserInfo.value.realName}}<el-icon class="el-icon--right"><arrow-down /></el-icon>				
+							{{userStore.getUserInfo.value.realName}}<el-icon class="el-icon--right">
+								<arrow-down />
+							</el-icon>
 						</el-button>
 						<template #dropdown>
 							<el-dropdown-menu>
-							  <el-dropdown-item command="settings" >我的设置</el-dropdown-item>
+								<el-dropdown-item command="settings">我的设置</el-dropdown-item>
 								<el-dropdown-item command="logout">退出登录</el-dropdown-item>
 							</el-dropdown-menu>
 						</template>
@@ -37,10 +39,8 @@
 				<!--左侧边栏 end  -->
 
 				<el-main class="main-content">
-					<el-tabs v-model="editableTabsValue" type="card" closable @edit="handleTabsEdit"
-						@tab-click="clickTag">
-						<el-tab-pane v-for="item in editableTabs" :key="item.name" :label="item.title"
-							:name="item.name">
+					<el-tabs v-model="editableTabsValue" type="card" closable @edit="handleTabsEdit" @tab-click="clickTag">
+						<el-tab-pane v-for="item in editableTabs" :key="item.name" :label="item.title" :name="item.name">
 							<router-view v-slot="{ Component }">
 								<keep-alive>
 									<component :is="Component" />
@@ -167,7 +167,7 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style scoped>
 /* Reset browser defaults */
 html,
 body {

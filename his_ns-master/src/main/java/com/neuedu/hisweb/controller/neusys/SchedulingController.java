@@ -50,12 +50,17 @@ public class SchedulingController {
     public JsonResult<Scheduling> addScheduling(@RequestBody Collection<Scheduling> schedulings){
         try {
             boolean rs= iService.saveBatch(schedulings);
-            if(rs)return new JsonResult<Scheduling>(true);
-            else return new JsonResult<>("修改失败");
+            if(rs){
+                JsonResult<Scheduling> result = new JsonResult<>();
+                result.setResult(true);
+                return result;
+            } else {
+                return new JsonResult<>("新增失败");
+            }
         }catch (Exception ex){
-            return  new JsonResult<>("排班计划已存在");
+            // 考虑记录日志 ex.printStackTrace();
+            return  new JsonResult<>("新增失败，可能存在重复的排班数据。");
         }
-
     }
 
     @PostMapping("/update")

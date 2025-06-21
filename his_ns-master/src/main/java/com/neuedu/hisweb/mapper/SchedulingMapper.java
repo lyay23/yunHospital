@@ -68,7 +68,4 @@ public interface SchedulingMapper extends BaseMapper<Scheduling> {
     @Update("update scheduling set regNum=regNum-1 where schedDate=date(#{visitDate}) and noon=#{noon} and userId=#{doctorId} ")
     int updateByBackRegister(String visitDate,String noon,Integer doctorId);
 
-
-    @Delete("delete from scheduling where schedDate = #{schedDate} AND noon =#{noon} AND userID = #{userID}")
-    int delete(Scheduling scheduling);
 }

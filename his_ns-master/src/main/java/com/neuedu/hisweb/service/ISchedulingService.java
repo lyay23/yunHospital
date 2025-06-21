@@ -17,5 +17,4 @@ import java.util.Collection;
  */
 public interface ISchedulingService extends IService<Scheduling> {
     Page<SchedulingVo> selectPage(Page<SchedulingVo> page, String keyword, String deptId, String userId,String regLevel,String noon,String start, String end);
-    boolean removeBatch(Collection<Scheduling> entityList);
 }
