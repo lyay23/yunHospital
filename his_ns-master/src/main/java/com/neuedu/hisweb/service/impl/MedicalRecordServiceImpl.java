@@ -13,6 +13,7 @@ import com.neuedu.hisweb.service.IMedicalRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -118,6 +119,33 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
             }
             return medicalRecordMapper.insert(medicalRecord) > 0;
         }
+    }
+
+    @Override
+    @Transactional
+    public Boolean finish(Integer rid) {
+        // 1. Update Register state
+        Register register = registerMapper.selectById(rid);
+        if (register == null) {
+            return false;
+        }
+        register.setVisitState(3); // 3-诊毕
+        int updatedRows = registerMapper.updateById(register);
+        if (updatedRows == 0) {
+            return false;
+        }
+
+        // 2. Update MedicalRecord state if it exists
+        LambdaQueryWrapper<MedicalRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MedicalRecord::getRegistID, rid);
+        MedicalRecord medicalRecord = medicalRecordMapper.selectOne(queryWrapper);
+
+        if (medicalRecord != null) {
+            medicalRecord.setCaseState(3); // 3-诊毕
+            medicalRecordMapper.updateById(medicalRecord);
+        }
+
+        return true;
     }
 
 }

@@ -2,8 +2,11 @@ package com.neuedu.hisweb.controller.neudoc;
 
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.entity.MedicalRecord;
+import com.neuedu.hisweb.entity.Register;
+import com.neuedu.hisweb.entity.vo.RegParam;
 import com.neuedu.hisweb.service.IMedicalRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +41,12 @@ public class MedicalRecordController {
     public  JsonResult<MedicalRecord> save(@RequestBody MedicalRecord medicalRecord){
        Boolean rs= iMedicalRecordService.saveMedicalRecord(medicalRecord);
        return new JsonResult<MedicalRecord>(rs);
+    }
+
+    @RequestMapping(value = "/finish", method = RequestMethod.POST)
+    public JsonResult<Object> finish(@RequestBody Register register) {
+        Boolean result = iMedicalRecordService.finish(register.getId());
+        return new JsonResult<>(result);
     }
 
     /**

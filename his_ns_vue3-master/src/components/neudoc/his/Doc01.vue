@@ -168,8 +168,14 @@ function refresh() {
     }
 }
 
+function clearForm() {
+    medicalRecord.value = {};
+    currentRid.value = null;
+}
+
 defineExpose({
-    loadMedicalRecord
+    loadMedicalRecord,
+    clearForm
 })
 
 </script>

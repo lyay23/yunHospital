@@ -45,7 +45,7 @@
 			<el-col :span="24" style="margin-top: 20px;">
 				<el-tag size="mini" style="width: 100%">已诊患者：</el-tag>
 				<el-table :data="data2.records" style="width:100%;"
-					v-loading="loading2">
+					v-loading="loading2" @row-click="handleDiagnosedRowClick">
 					<el-table-column prop="caseNumber" label="病历号" align="center"/>
 					<el-table-column prop="realName" label="姓名"  align="center" />
 					<el-table-column prop="gender" label="性别"   width="70" align="center">
@@ -68,7 +68,7 @@
 			<el-tag :span="20" style="margin-left: 20px; margin-right: 20px;">
 				{{patientInfo}}
 			</el-tag>
-			<el-button type="primary" size="small" v-if="isOver" :span="2">
+			<el-button type="primary" size="small" v-if="isOver" :span="2" @click="finishConsultation">
 				诊毕
 			</el-button>
 		</el-row>
@@ -120,6 +120,7 @@ import router from '../../router';
 import { formatDate } from '../../utils/utils.js'
 import { Search,Refresh } from '@element-plus/icons-vue'	
 import { useUserStore } from '../../store/user.js'
+import { ElMessageBox, ElMessage } from 'element-plus'
 
 
 
@@ -136,6 +137,7 @@ const medicalRecordComp = ref(null)
 const kw=ref('')
 //是否显示患者列表
 const isShowMenu=ref(true)
+const currentPatient = ref(null)
 //看诊人信息
 const patientInfo=ref('')
 //是否显示诊毕
@@ -174,7 +176,7 @@ async function loadData2(pn){
 	loading2.value=true
 	var loginUser=JSON.parse(sessionStorage.getItem("user"))
 	var date=formatDate(new Date())
-	let url=`/register/page?count=100&pn=${pn}&state=2&regDate=${date}`
+	let url=`/register/page?count=100&pn=${pn}&state=3&regDate=${date}`
 	url+=`&deptId=${userStore.getUserInfo.value.deptID}`
 	url+=`&docId=${userStore.getUserInfo.value.id}`
 	if(kw!='')
@@ -199,10 +201,53 @@ const handleClick=()=>{
 const handleRowClick=(val, column, event)=>{
 	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
 	isOver.value=true
+	currentPatient.value = val;
 	if (medicalRecordComp.value) {
 	    medicalRecordComp.value.loadMedicalRecord(val.id);
 	}
 	
+}
+
+const handleDiagnosedRowClick=(val, column, event)=>{
+	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
+	isOver.value=false
+	currentPatient.value = val;
+	if (medicalRecordComp.value) {
+	    medicalRecordComp.value.loadMedicalRecord(val.id);
+	}
+}
+
+async function finishConsultation() {
+    if (!currentPatient.value) {
+        ElMessage.warning('请先选择一位患者');
+        return;
+    }
+
+    ElMessageBox.confirm(
+        '确认要结束本次诊断吗?',
+        '提醒',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+    )
+    .then(async () => {
+        const resp = await postReq("/neudoc/finish", currentPatient.value);
+        if(resp.data.result){
+            ElMessage.success('操作成功');
+            loadData(1); 
+            loadData2(1);
+            patientInfo.value = '';
+            currentPatient.value = null;
+            isOver.value = false;
+            if (medicalRecordComp.value) {
+                medicalRecordComp.value.clearForm();
+            }
+        } else {
+            ElMessage.error(resp.data.errMsg || '操作失败');
+        }
+    })
 }
 
 
