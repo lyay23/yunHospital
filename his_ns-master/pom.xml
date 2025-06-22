@@ -13,9 +13,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>his-web</name>
     <description>his-web</description>
-    <properties>
-        <java.version>21</java.version>
-    </properties>
 
     <dependencies>
         <dependency>

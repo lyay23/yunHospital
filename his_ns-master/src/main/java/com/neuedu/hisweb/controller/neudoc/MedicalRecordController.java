@@ -6,6 +6,7 @@ import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.entity.MedicalRecord;
 import com.neuedu.hisweb.service.IMedicalRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +32,12 @@ public class MedicalRecordController {
     public JsonResult<MedicalRecord> getMedicalRecord(Integer rid) {
         MedicalRecord medicalRecord = iMedicalRecordService.getByRid(rid);
         return new JsonResult<MedicalRecord>(medicalRecord);
+    }
+
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    public  JsonResult<MedicalRecord> save(@RequestBody MedicalRecord medicalRecord){
+       Boolean rs= iMedicalRecordService.saveMedicalRecord(medicalRecord);
+       return new JsonResult<MedicalRecord>(rs);
     }
 
     /**

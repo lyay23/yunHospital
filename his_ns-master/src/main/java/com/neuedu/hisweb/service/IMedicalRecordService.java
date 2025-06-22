@@ -21,4 +21,6 @@ public interface IMedicalRecordService extends IService<MedicalRecord> {
 
 
      MedicalRecord getByRid(Integer rid);
+
+    Boolean saveMedicalRecord(MedicalRecord medicalRecord);
 }

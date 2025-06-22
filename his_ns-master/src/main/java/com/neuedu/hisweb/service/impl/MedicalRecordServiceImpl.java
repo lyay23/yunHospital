@@ -32,10 +32,14 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
     private MedicalDiseaseMapper medicalDiseaseMapper;
     @Autowired
     private RegisterMapper registerMapper;
+    @Autowired
+    private MedicalRecordMapper medicalRecordMapper;
 
     @Override
     public MedicalRecord getByRid(Integer rid) {
-        return getBaseMapper().getOneByRid(rid);
+        LambdaQueryWrapper<MedicalRecord> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(MedicalRecord::getRegistID,rid);
+        return medicalRecordMapper.selectOne(queryWrapper);
     }
 
 
@@ -69,7 +73,7 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
 ////                num += medicalDiseaseMapper.insertBatchSomeColumn(medicalRecord.getMedicalDiseases());
 //            }
 //        }
-//        //如果是“提交”，改变患者状态为"已经诊断"
+//        //如果是"提交"，改变患者状态为"已经诊断"
 //        if("2".equals(medicalRecord.getCaseState())){
 //            num += registerMapper.updateVisitState(medicalRecord.getRegistID(),2);
 //        }
@@ -90,5 +94,30 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
 //        }
 //        return rs;
 //    }
+
+    @Override
+    public Boolean saveMedicalRecord(MedicalRecord medicalRecord) {
+        LambdaQueryWrapper<MedicalRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MedicalRecord::getRegistID, medicalRecord.getRegistID());
+        MedicalRecord existingRecord = medicalRecordMapper.selectOne(queryWrapper);
+
+        if(existingRecord != null){
+            // An existing record is found. Update it.
+            medicalRecord.setId(existingRecord.getId()); 
+            return medicalRecordMapper.updateById(medicalRecord) > 0;
+        }else{
+            // No existing record. Insert a new one.
+            Register register = registerMapper.selectById(medicalRecord.getRegistID());
+            if (register != null) {
+                medicalRecord.setCaseNumber(register.getCaseNumber());
+            } else {
+                return false;
+            }
+            if(medicalRecord.getCaseState() == null){
+                 medicalRecord.setCaseState(1);
+            }
+            return medicalRecordMapper.insert(medicalRecord) > 0;
+        }
+    }
 
 }
