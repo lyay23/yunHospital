@@ -107,6 +107,7 @@ async function loadData(pn){
 		params.append('count', ps.value)
 		params.append('state', 1)
 		params.append('regDate', date)
+		params.append('_', new Date().getTime())
 		
 		if(kw.value) params.append('keyword', kw.value)
 		if(deptId.value) params.append('deptId', deptId.value)
