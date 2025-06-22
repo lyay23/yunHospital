@@ -6,7 +6,7 @@
 			  <el-tag size="mini" style="width: 100%;">患者选择：</el-tag>
 			</el-col>
 			<el-col :span="12" style="text-align: right">
-				<el-button type="primary" :icon="Refresh" size="small"  
+				<el-button type="primary" :icon="Refresh" size="small"  @click="refreshPatientLists"
 					style="margin-right: 5px"></el-button>
 			</el-col>
 		</el-row>
@@ -15,7 +15,7 @@
 			<el-col :span="24" >
 				<el-input v-model="kw" placeholder="请输入内容" class="input-with-select">
 					<template #prepend>患者名:</template>
-					<template #append><el-button :icon="Search" /></template>
+					<template #append><el-button :icon="Search" @click="searchPatients"/></template>
 				</el-input>	
 			</el-col>
 		</el-row>
@@ -157,7 +157,7 @@ async function loadData(pn){
 	let url=`/register/page?count=100&pn=${pn}&state=1&regDate=${date}`
 	url+=`&deptId=${userStore.getUserInfo.value.deptID}`
 	url+=`&docId=${userStore.getUserInfo.value.id}`
-	if(kw!='')
+	if(kw.value)
 		url+=`&keyword=${kw.value}`
 
 	const result = await fetchData(url,null);
@@ -174,12 +174,12 @@ async function loadData(pn){
 //加载当天已就诊患者数据
 async function loadData2(pn){
 	loading2.value=true
-	var loginUser=JSON.parse(sessionStorage.getItem("user"))
+	// var loginUser=JSON.parse(sessionStorage.getItem("user"))
 	var date=formatDate(new Date())
 	let url=`/register/page?count=100&pn=${pn}&state=3&regDate=${date}`
 	url+=`&deptId=${userStore.getUserInfo.value.deptID}`
 	url+=`&docId=${userStore.getUserInfo.value.id}`
-	if(kw!='')
+	if(kw.value)
 		url+=`&keyword=${kw.value}`
 
 	const result = await fetchData(url,null);
@@ -217,6 +217,17 @@ const handleDiagnosedRowClick=(val, column, event)=>{
 	}
 }
 
+function searchPatients() {
+    loadData(1);
+    loadData2(1);
+}
+
+function refreshPatientLists() {
+    kw.value = '';
+    loadData(1);
+    loadData2(1);
+}
+
 async function finishConsultation() {
     if (!currentPatient.value) {
         ElMessage.warning('请先选择一位患者');
@@ -248,10 +259,90 @@ async function finishConsultation() {
             ElMessage.error(resp.data.errMsg || '操作失败');
         }
     })
+    .catch(() => {
+        // catch cancel action
+    });
 }
-
-
 </script>
 
-<style>
+<style scoped>
+/* Reset browser defaults */
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	/* Prevent body scrolling */
+}
+
+/* Use a more predictable box-sizing model */
+* {
+	box-sizing: border-box;
+}
+
+.home_container {
+	height: 100vh;
+	width: 100%;
+}
+
+/* Override Element Plus container behavior for our layout */
+.main-container,
+.content-container {
+	display: block;
+	height: 100%;
+	width: 100%;
+}
+
+.top-header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 60px;
+	padding: 0 20px;
+	background-color: #20a0ff;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	z-index: 100;
+}
+
+.sidebar {
+	position: fixed;
+	top: 60px;
+	left: 0;
+	bottom: 0;
+	width: 200px;
+	background-color: #fff;
+	border-right: 1px solid #e6e6e6;
+	overflow-y: hidden;
+	/* This will hide the scrollbar */
+	z-index: 99;
+}
+
+.el-menu-vertical {
+	height: 100%;
+	/* Make menu fill the sidebar */
+	border-right: none;
+}
+
+.main-content {
+	margin-top: 60px;
+	margin-left: 200px;
+	padding: 20px;
+	height: calc(100vh - 60px);
+	/* Full height minus header */
+	overflow-y: auto;
+	/* Allow main content to scroll */
+	width: calc(100% - 200px);
+}
+
+.home_title {
+	color: #fff;
+	font-size: 22px;
+	font-weight: bold;
+}
 </style>
