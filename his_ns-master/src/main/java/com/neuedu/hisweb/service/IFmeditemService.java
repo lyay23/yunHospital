@@ -5,6 +5,8 @@ import com.neuedu.hisweb.entity.Fmeditem;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.neuedu.hisweb.entity.vo.FmeditemVo;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -14,5 +16,5 @@ import com.neuedu.hisweb.entity.vo.FmeditemVo;
  * @since 2023-07-31
  */
 public interface IFmeditemService extends IService<Fmeditem> {
-    Page<FmeditemVo> selectPage(Page<FmeditemVo> page, String keyword, String expClassId, String dept, String ctype);
+    Page<FmeditemVo> selectPage(Page<FmeditemVo> page, String keyword, List<String> expClassIds, String dept);
 }

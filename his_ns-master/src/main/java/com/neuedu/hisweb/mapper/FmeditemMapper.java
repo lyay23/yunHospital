@@ -7,6 +7,8 @@ import com.neuedu.hisweb.entity.vo.FmeditemVo;
 import com.neuedu.hisweb.entity.vo.UserVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
+import java.util.List;
 
 /**
  * <p>
@@ -25,26 +27,27 @@ public interface FmeditemMapper extends BaseMapper<Fmeditem> {
                    from fmeditem f
                    INNER JOIN expenseclass e on f.ExpClassID=e.ID
                    INNER JOIN department d on f.DeptId=d.ID
-                   INNER JOIN constantitem ci on f.RecordType=ci.ID
+                   LEFT JOIN constantitem ci on f.RecordType=ci.ID
                     <where>
                         and f.DelMark=1
-                        <if test='expClassId != null and expClassId!=""' >
-                            and `ExpClassID`=#{expClassId}
+                        <if test='expClassIds != null and expClassIds.size() > 0' >
+                            and `ExpClassID` in
+                            <foreach collection="expClassIds" item="item" open="(" separator="," close=")">
+                                #{item}
+                            </foreach>
                         </if>
                         <if test='dept != null and dept!=""' >
                             and deptid=#{dept}
                         </if>
-                        <if test='ctype != null and ctype!=""' >
-                            and RecordType=#{ctype}
-                        </if>
                         <if test='keyword != null and keyword!=""'>
-                            and `ItemCode` like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
+                            and (`ItemCode` like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
                             or `ItemName` like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%')
+                            or `MnemonicCode` like CONCAT(CONCAT('%', #{keyword,jdbcType=VARCHAR}), '%'))
                         </if>
                     </where>
                     order by CreationDate desc
             </script>
             """)
-    Page<FmeditemVo> selectPage(Page<FmeditemVo> page, String keyword, String expClassId, String dept, String ctype);
+    Page<FmeditemVo> selectPage(Page<FmeditemVo> page, @Param("keyword") String keyword, @Param("expClassIds") List<String> expClassIds, @Param("dept") String dept);
 
 }

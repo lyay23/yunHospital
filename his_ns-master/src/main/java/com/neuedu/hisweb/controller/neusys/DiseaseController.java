@@ -32,7 +32,7 @@ public class DiseaseController {
 
     @GetMapping(value = "/page")
     public JsonResult<IPage<DiseaseVo>> getDiseasePage(@RequestParam(value = "pn", defaultValue = "1") Integer pn,
-                                                       @RequestParam(value = "count", defaultValue = "10") Integer count,
+                                            @RequestParam(value = "count", defaultValue = "10") Integer count,
                                                        String keyword,
                                                        @RequestParam(value = "ctype",required = false) Integer ctype,
                                                        @RequestParam(value = "dicaType",required = false) Integer dicaType) {

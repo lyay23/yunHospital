@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -32,11 +34,10 @@ public class FmeditemController {
     public JsonResult<Page> getFmeditemPage(@RequestParam(value = "pn", defaultValue = "1") Integer pn,
                                         @RequestParam(value = "count", defaultValue = "10") Integer count,
                                         @RequestParam(value = "keyword",required = false)String keyword,
-                                        @RequestParam(value = "expClassId",required = false)String expClassId,
-                                        @RequestParam(value = "dept",required = false)String dept,
-                                        @RequestParam(value = "ctype",required = false)String ctype){
+                                        @RequestParam(value = "expClassIds",required = false) List<String> expClassIds,
+                                        @RequestParam(value = "dept",required = false)String dept){
         Page<FmeditemVo> page=Page.of(pn,count);
-        iService.selectPage(page,keyword,expClassId,dept,ctype);
+        iService.selectPage(page,keyword,expClassIds,dept);
         return new JsonResult<Page>(page);
     }
 
