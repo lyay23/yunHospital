@@ -2,6 +2,7 @@ package com.neuedu.hisweb.controller.neusys;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.Disease;
 import com.neuedu.hisweb.entity.JsonResult;
@@ -29,14 +30,17 @@ public class DiseaseController {
     @Autowired
     private IDiseaseService iService;
 
-    @GetMapping("/page")
-    public JsonResult<Page> getConstantPage(@RequestParam(value = "pn", defaultValue = "1") Integer pn,
-                                            @RequestParam(value = "count", defaultValue = "10") Integer count,
-                                            @RequestParam(value = "keyword",required = false)String keyword,
-                                            @RequestParam(value = "ctype",required = false)String ctype){
-        Page<DiseaseVo> page=Page.of(pn,count);
-        iService.selectPage(page,keyword,ctype);
-        return new JsonResult<Page>(page);
+    @GetMapping(value = "/page")
+    public JsonResult<IPage<DiseaseVo>> getDiseasePage(@RequestParam(value = "pn", defaultValue = "1") Integer pn,
+                                                       @RequestParam(value = "count", defaultValue = "10") Integer count,
+                                                       String keyword,
+                                                       @RequestParam(value = "ctype",required = false) Integer ctype,
+                                                       @RequestParam(value = "dicaType",required = false) Integer dicaType) {
+
+        Page<DiseaseVo> page=new Page<>(pn,count);
+        IPage<DiseaseVo> result = iService.selectPage(page, keyword, ctype,dicaType);
+
+        return new JsonResult<>(result);
     }
 
 

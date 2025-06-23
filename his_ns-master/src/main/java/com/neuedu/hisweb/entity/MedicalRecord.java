@@ -3,7 +3,10 @@ package com.neuedu.hisweb.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
@@ -17,7 +20,8 @@ import java.util.List;
  * @since 2023-11-21
  */
 @Data
-@TableName("MedicalRecord")
+@EqualsAndHashCode(callSuper = false)
+@TableName("medicalrecord")
 public class MedicalRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,12 +35,14 @@ public class MedicalRecord implements Serializable {
     /**
      * 病历号
      */
+    @TableField(value = "CaseNumber", insertStrategy = FieldStrategy.ALWAYS)
     private String caseNumber;
 
     /**
      * 挂号ID
      */
-    private Integer registID;
+    @TableField("RegistID")
+    private Integer registId;
 
     /**
      * 主诉
@@ -107,7 +113,7 @@ public class MedicalRecord implements Serializable {
         return "Medicalrecord{" +
         "id=" + id +
         ", caseNumber=" + caseNumber +
-        ", registID=" + registID +
+        ", registId=" + registId +
         ", readme=" + readme +
         ", present=" + present +
         ", presentTreat=" + presentTreat +

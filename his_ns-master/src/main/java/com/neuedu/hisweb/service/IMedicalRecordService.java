@@ -12,7 +12,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author lynn
- * @since 2023-11-21
+ * @since 2023-08-09
  */
 public interface IMedicalRecordService extends IService<MedicalRecord> {
     //MedicalRecordVo getOne(Integer rid, Integer type);
@@ -20,5 +20,7 @@ public interface IMedicalRecordService extends IService<MedicalRecord> {
 
 
 
-     MedicalRecord getByRid(Integer rid);
+     MedicalRecordVo getMedicalRecordByRegistId(Integer registId);
+
+    boolean saveMedicalRecord(MedicalRecordVo medicalRecord);
 }

@@ -18,8 +18,12 @@ public class JsonResult<T> {
 
 
    public JsonResult(T data) {
+        if (data != null) {
         this.result = true;
         this.data = data;
+        } else {
+            this.result = false;
+        }
     }
 
     public JsonResult(Boolean rs) {
@@ -73,5 +77,19 @@ public class JsonResult<T> {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    public static <T> JsonResult<T> success(T data) {
+        JsonResult<T> result = new JsonResult<>();
+        result.setResult(true);
+        result.setData(data);
+        return result;
+    }
+
+    public static <T> JsonResult<T> error(String message) {
+        JsonResult<T> result = new JsonResult<>();
+        result.setResult(false);
+        result.setErrMsg(message);
+        return result;
     }
 }

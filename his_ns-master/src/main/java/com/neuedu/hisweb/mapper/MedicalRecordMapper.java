@@ -2,11 +2,20 @@ package com.neuedu.hisweb.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.MedicalRecord;
 import com.neuedu.hisweb.entity.vo.MedicalRecordVo;
 import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Param;
 
-@Mapper
+/**
+ * <p>
+ *  Mapper 接口
+ * </p>
+ *
+ * @author lynn
+ * @since 2023-11-21
+ */
 public interface MedicalRecordMapper extends BaseMapper<MedicalRecord>   {
 
 
@@ -34,4 +43,8 @@ public interface MedicalRecordMapper extends BaseMapper<MedicalRecord>   {
 //            @Result(column = "CaseState",property = "caseState"),
 //    })
     MedicalRecord getOneByRid(@Param("rid") Integer rid);
+
+    MedicalRecordVo getByRid(Integer rid);
+
+    MedicalRecordVo getMedicalRecordByRegistId(@Param("registId") Integer registId);
 }

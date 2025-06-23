@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.hisweb.mapper.DiseaseMapper">
+
+    <resultMap id="diseaseMap" type="com.neuedu.hisweb.entity.vo.DiseaseVo">
+        <id property="id" column="ID"/>
+        <result property="diseaseCode" column="DiseaseCode"/>
+        <result property="diseaseName" column="DiseaseName"/>
+        <result property="diseaseICD" column="DiseaseICD"/>
+        <result property="diseCategoryID" column="DiseCategoryID"/>
+        <association property="disecategory" javaType="com.neuedu.hisweb.entity.Disecategory">
+            <id property="id" column="cid"/>
+            <result property="dicaName" column="dicaName"/>
+            <result property="dicaCode" column="dicaCode"/>
+        </association>
+    </resultMap>
+    <select id="selectPage" resultMap="diseaseMap">
+        select d.*,dc.id as cid,dc.DicaName,dc.DicaCode from disease d
+        join disecategory dc on d.DiseCategoryID=dc.id
+        <where>
+            <if test="dicaType!=null">
+                and dc.DicaType=#{dicaType}
+            </if>
+            <if test="keyword!=null and keyword!=''">
+                and (d.DiseaseName like concat('%',#{keyword},'%') or d.DiseaseCode like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+
+    </select>
+</mapper> 

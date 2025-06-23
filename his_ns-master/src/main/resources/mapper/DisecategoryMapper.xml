@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.hisweb.mapper.DisecategoryMapper">
+    <select id="selectPage" resultType="com.neuedu.hisweb.entity.vo.DisecategoryVo">
+        select c.* ,i.ConstantName as dicaTypeName
+        from disecategory c left join constantitem i on c.DicaType=i.ID
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (c.DicaCode like concat('%',#{keyword},'%') or c.DicaName like concat('%',#{keyword},'%'))
+            </if>
+            <if test="dicaName != null and dicaName != ''">
+                and c.DicaName like concat('%',#{dicaName},'%')
+            </if>
+            <if test="dicaType != null">
+                and c.DicaType = #{dicaType}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAll" resultType="com.neuedu.hisweb.entity.vo.DisecategoryVo">
+        select * from disecategory
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (DicaCode like concat('%',#{keyword},'%') or DicaName like concat('%',#{keyword},'%'))
+            </if>
+            <if test="dicaName != null and dicaName != ''">
+                and DicaName like concat('%',#{dicaName},'%')
+            </if>
+        </where>
+    </select>
+</mapper> 

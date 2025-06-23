@@ -1,8 +1,9 @@
 package com.neuedu.hisweb.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.neuedu.hisweb.entity.Disease;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.neuedu.hisweb.entity.Disease;
 import com.neuedu.hisweb.entity.vo.DiseaseVo;
 
 /**
@@ -10,9 +11,11 @@ import com.neuedu.hisweb.entity.vo.DiseaseVo;
  *  服务类
  * </p>
  *
- * @author lynn
- * @since 2023-07-31
+ * @author litu
+ * @since 2023-03-10
  */
 public interface IDiseaseService extends IService<Disease> {
-    Page<DiseaseVo> selectPage(Page<DiseaseVo> page, String keyword, String ctype);
+
+    IPage<DiseaseVo> selectPage(Page<DiseaseVo> page, String keyword, Integer ctype, Integer dicaType);
+
 }

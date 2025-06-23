@@ -3,7 +3,9 @@ package com.neuedu.hisweb.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -17,7 +19,8 @@ import java.time.LocalDateTime;
  * @since 2023-11-21
  */
 @Data
-@TableName("MedicalDisease")
+@EqualsAndHashCode(callSuper = false)
+@TableName("medicaldisease")
 public class MedicalDisease implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,12 +34,14 @@ public class MedicalDisease implements Serializable {
     /**
      * 病历ID
      */
-    private Integer medicalID;
+    @TableField("MedicalID")
+    private Integer medicalId;
 
     /**
      * 挂号ID
      */
-    private Integer registID;
+    @TableField("RegistID")
+    private Integer registId;
 
     /**
      * 疾病ID
@@ -63,8 +68,8 @@ public class MedicalDisease implements Serializable {
     public String toString() {
         return "Medicaldisease{" +
         "id=" + id +
-        ", medicalID=" + medicalID +
-        ", registID=" + registID +
+        ", medicalID=" + medicalId +
+        ", registID=" + registId +
         ", diseaseID=" + diseaseID +
         ", diagnoseType=" + diagnoseType +
         ", getSiskDate=" + getSiskDate +

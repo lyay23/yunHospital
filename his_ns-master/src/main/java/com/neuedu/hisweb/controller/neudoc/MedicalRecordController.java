@@ -4,11 +4,12 @@ package com.neuedu.hisweb.controller.neudoc;
 
 import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.entity.MedicalRecord;
+import com.neuedu.hisweb.entity.Register;
+import com.neuedu.hisweb.entity.vo.MedicalRecordVo;
 import com.neuedu.hisweb.service.IMedicalRecordService;
+import com.neuedu.hisweb.service.IRegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -24,13 +25,32 @@ public class MedicalRecordController {
 
     @Autowired
     private IMedicalRecordService iMedicalRecordService;
+    @Autowired
+    private IRegisterService iRegisterService;
     /**
-     * 医生根据病历号CaseNumber，得到患者的病历信息
+     * 医生根据挂号ID，得到患者的病历信息
      */
-    @RequestMapping(value = "/getMedicalRecord", method = RequestMethod.GET)
-    public JsonResult<MedicalRecord> getMedicalRecord(Integer rid) {
-        MedicalRecord medicalRecord = iMedicalRecordService.getByRid(rid);
-        return new JsonResult<MedicalRecord>(medicalRecord);
+    @GetMapping("/getMedicalRecord")
+    public JsonResult<MedicalRecordVo> getMedicalRecordByRegistId(@RequestParam("registId") Integer registId) {
+        MedicalRecordVo medicalRecord = iMedicalRecordService.getMedicalRecordByRegistId(registId);
+        return JsonResult.success(medicalRecord);
+    }
+
+    @PostMapping("/save")
+    public JsonResult saveMedicalRecord(@RequestBody MedicalRecordVo medicalRecord) {
+        try {
+            boolean success = iMedicalRecordService.saveMedicalRecord(medicalRecord);
+            return success ? JsonResult.success(null) : JsonResult.error("保存失败");
+        } catch (Exception e) {
+            return JsonResult.error("保存异常: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/finish")
+    public JsonResult finish(@RequestBody Register register) {
+        register.setVisitState(3); //3-已诊
+        boolean success = iRegisterService.updateById(register);
+        return success ? JsonResult.success(null) : JsonResult.error("操作失败");
     }
 
     /**

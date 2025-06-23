@@ -7,6 +7,9 @@ import com.neuedu.hisweb.entity.vo.ConstantItemVo;
 import com.neuedu.hisweb.entity.vo.DiseaseVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 /**
  * <p>
@@ -35,7 +38,8 @@ public interface DiseaseMapper extends BaseMapper<Disease> {
                     </where>
             </script>
             """)
-    Page<DiseaseVo> selectPage(Page<DiseaseVo> page, String keyword, String ctype);
+    Page<DiseaseVo> selectPage(Page<DiseaseVo> page, @Param("keyword") String keyword, @Param("ctype") Integer ctype, @Param("dicaType") Integer dicaType);
 
+    IPage<DiseaseVo> selectPage(Page<DiseaseVo> page, @Param("ew") QueryWrapper<DiseaseVo> wrapper);
 
 }

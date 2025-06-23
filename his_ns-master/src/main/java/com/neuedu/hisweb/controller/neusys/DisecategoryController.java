@@ -11,6 +11,8 @@ import com.neuedu.hisweb.entity.vo.DiseaseVo;
 import com.neuedu.hisweb.entity.vo.DisecategoryVo;
 import com.neuedu.hisweb.service.IDiseaseService;
 import com.neuedu.hisweb.service.IDisecategoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,17 +29,23 @@ import org.springframework.stereotype.Controller;
 @RestController
 @RequestMapping("/disecategory")
 public class DisecategoryController {
+
+    private static final Logger logger = LoggerFactory.getLogger(DisecategoryController.class);
+
     @Autowired
     private IDisecategoryService iService;
 
     @GetMapping("/page")
-    public JsonResult<Page> getConstantPage(@RequestParam(value = "pn", defaultValue = "1") Integer pn,
+    public JsonResult<Page<DisecategoryVo>> getConstantPage(@RequestParam(value = "pn", defaultValue = "1") Integer pn,
                                             @RequestParam(value = "count", defaultValue = "10") Integer count,
                                             @RequestParam(value = "keyword",required = false)String keyword,
-                                            @RequestParam(value = "ctype",required = false)String ctype){
-        Page<DisecategoryVo> page=Page.of(pn,count);
-        iService.selectPage(page,keyword,ctype);
-        return new JsonResult<Page>(page);
+                                                      @RequestParam(value = "dicaName",required = false)String dicaName,
+                                                      @RequestParam(value = "dicaType",required = false)Integer dicaType){
+
+        logger.info("请求参数: pn={}, count={}, keyword={}, dicaName={}, dicaType={}", pn, count, keyword, dicaName, dicaType);
+        Page<DisecategoryVo> page = iService.selectPage(pn,count,keyword,dicaName,dicaType);
+        logger.info("返回数据: {}", page.getRecords());
+        return JsonResult.success(page);
     }
 
 

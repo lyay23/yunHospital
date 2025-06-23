@@ -1,6 +1,5 @@
 package com.neuedu.hisweb.mapper;
 
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.neuedu.hisweb.entity.MedicalDisease;
 import com.neuedu.hisweb.entity.vo.MedicalDiseaseVo;
@@ -16,7 +15,7 @@ import java.util.List;
  * </p>
  *
  * @author lynn
- * @since 2023-11-21
+ * @since 2023-08-09
  */
 @Mapper
 public interface MedicalDiseaseMapper extends BaseMapper<MedicalDisease> {

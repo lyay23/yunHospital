@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.hisweb.mapper.MedicalRecordMapper">
+    <resultMap id="MedicalRecordVoResultMap" type="com.neuedu.hisweb.entity.vo.MedicalRecordVo">
+        <id property="id" column="id"/>
+        <result property="caseNumber" column="CaseNumber"/>
+        <result property="registId" column="RegistID"/>
+        <result property="readme" column="Readme"/>
+        <result property="present" column="Present"/>
+        <result property="presentTreat" column="PresentTreat"/>
+        <result property="history" column="History"/>
+        <result property="allergy" column="Allergy"/>
+        <result property="physique" column="Physique"/>
+        <result property="proposal" column="Proposal"/>
+        <result property="careful" column="Careful"/>
+        <result property="checkResult" column="CheckResult"/>
+        <result property="diagnosis" column="Diagnosis"/>
+        <result property="handling" column="Handling"/>
+        <result property="caseState" column="CaseState"/>
+        <collection property="medicalDiseases" ofType="com.neuedu.hisweb.entity.vo.MedicalDiseaseVo">
+            <id property="id" column="md_id"/>
+            <result property="medicalID" column="MedicalID"/>
+            <result property="diseaseID" column="DiseaseID"/>
+            <result property="diagnoseType" column="DiagnoseType"/>
+            <result property="getSiskDate" column="GetSiskDate"/>
+            <result property="diagnoseCate" column="DiagnoseCate"/>
+            <association property="disease" javaType="com.neuedu.hisweb.entity.Disease">
+                <id property="id" column="d_id"/>
+                <result property="diseaseCode" column="DiseaseCode"/>
+                <result property="diseaseName" column="DiseaseName"/>
+                <result property="diseaseICD" column="DiseaseICD"/>
+                <result property="diseCategoryID" column="DiseCategoryID"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="getMedicalRecordByRegistId" resultMap="MedicalRecordVoResultMap">
+        select mr.*,
+               md.ID as md_id,md.MedicalID,md.DiseaseID,md.DiagnoseType,md.GetSiskDate,md.DiagnoseCate,
+               d.ID as d_id,d.DiseaseCode,d.DiseaseName,d.DiseaseICD,d.DiseCategoryID
+        from medicalrecord mr
+        left join medicaldisease md on mr.ID = md.MedicalID
+        left join disease d on md.DiseaseID = d.ID
+        where mr.RegistID = #{registId}
+    </select>
+</mapper> 

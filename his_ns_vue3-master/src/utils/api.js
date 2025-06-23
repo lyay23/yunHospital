@@ -15,7 +15,7 @@ export const postReq = (url, params) => {
 export const getReq = (url,params) => {
   return  axios({
     method: 'get',
-    data:params,
+    params:params,
     url: `${base}${url}`,
 	headers: {
 	  'token': localStorage.getItem("token"),

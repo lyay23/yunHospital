@@ -7,6 +7,9 @@ import com.neuedu.hisweb.entity.vo.DiseaseVo;
 import com.neuedu.hisweb.entity.vo.DisecategoryVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -36,5 +39,7 @@ public interface DisecategoryMapper extends BaseMapper<Disecategory> {
                     ORDER BY sequenceNo asc
             </script>
             """)
-    Page<DisecategoryVo> selectPage(Page<DisecategoryVo> page, String keyword, String ctype);
+    Page<DisecategoryVo> selectPage(Page<DisecategoryVo> page, @Param("keyword") String keyword, @Param("dicaName") String dicaName, @Param("dicaType") Integer dicaType);
+
+    List<DisecategoryVo> selectAll(@Param("keyword") String keyword);
 }

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neuedu.hisweb.entity.Disease;
+import com.neuedu.hisweb.entity.Disecategory;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,7 +20,7 @@ import java.io.Serializable;
  * @since 2023-07-31
  */
 @Data
-public class DiseaseVo implements Serializable {
+public class DiseaseVo extends Disease {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,16 +52,12 @@ public class DiseaseVo implements Serializable {
 
     private String diseCategoryName;
 
+    private Disecategory disecategory;
 
     @Override
     public String toString() {
         return "DiseaseVo{" +
-                "id=" + id +
-                ", diseaseCode='" + diseaseCode + '\'' +
-                ", diseaseName='" + diseaseName + '\'' +
-                ", diseaseICD='" + diseaseICD + '\'' +
-                ", diseCategoryID=" + diseCategoryID +
-                ", diseCategoryName='" + diseCategoryName + '\'' +
-                '}';
+                "diseCategoryName='" + diseCategoryName + '\'' +
+                "} " + super.toString();
     }
 }

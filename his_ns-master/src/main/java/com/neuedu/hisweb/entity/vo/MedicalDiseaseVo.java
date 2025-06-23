@@ -3,10 +3,14 @@ package com.neuedu.hisweb.entity.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.neuedu.hisweb.entity.MedicalDisease;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import com.neuedu.hisweb.entity.Disease;
 
 /**
  * <p>
@@ -17,7 +21,8 @@ import java.time.LocalDateTime;
  * @since 2023-11-21
  */
 @Data
-public class MedicalDiseaseVo implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class MedicalDiseaseVo extends MedicalDisease implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,13 +60,14 @@ public class MedicalDiseaseVo implements Serializable {
     /**
      * 发病日期
      */
-    private String getSiskDate;
+    private LocalDateTime getSiskDate;
 
     /**
      * 诊断种类 1-初诊 2-终诊
      */
     private Integer diagnoseCate;
 
+    private Disease disease;
 
     @Override
     public String toString() {

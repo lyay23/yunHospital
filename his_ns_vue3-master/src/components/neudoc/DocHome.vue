@@ -139,7 +139,7 @@ const kw=ref('')
 const isShowMenu=ref(true)
 const currentPatient = ref(null)
 //看诊人信息
-const patientInfo=ref('')
+const patientInfo=ref('请先选择一位患者')
 //是否显示诊毕
 const isOver=ref(true)
 
@@ -247,11 +247,11 @@ async function finishConsultation() {
         const resp = await postReq("/neudoc/finish", currentPatient.value);
         if(resp.data.result){
             ElMessage.success('操作成功');
-            loadData(1); 
+            loadData(1);
             loadData2(1);
-            patientInfo.value = '';
-            currentPatient.value = null;
+            patientInfo.value = '请先选择一位患者';
             isOver.value = false;
+            currentPatient.value = null;
             if (medicalRecordComp.value) {
                 medicalRecordComp.value.clearForm();
             }

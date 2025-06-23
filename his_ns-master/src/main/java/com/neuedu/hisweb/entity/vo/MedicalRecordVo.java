@@ -3,8 +3,11 @@ package com.neuedu.hisweb.entity.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.neuedu.hisweb.entity.MedicalDisease;
+import com.neuedu.hisweb.entity.MedicalRecord;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,7 +21,8 @@ import java.util.List;
  * @since 2023-11-21
  */
 @Data
-public class MedicalRecordVo implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class MedicalRecordVo extends MedicalRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,7 +40,7 @@ public class MedicalRecordVo implements Serializable {
     /**
      * 挂号ID
      */
-    private Integer registID;
+    private Integer registId;
 
     /**
      * 主诉
@@ -100,15 +104,12 @@ public class MedicalRecordVo implements Serializable {
 
     private List<MedicalDiseaseVo> medicalDiseases;
 
-
-
-
     @Override
     public String toString() {
         return "Medicalrecord{" +
         "id=" + id +
         ", caseNumber=" + caseNumber +
-        ", registID=" + registID +
+        ", registId=" + registId +
         ", readme=" + readme +
         ", present=" + present +
         ", presentTreat=" + presentTreat +
