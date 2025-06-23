@@ -29,7 +29,7 @@
 			    <el-table-column prop="realname" label="姓名"  align="center" width="100" />
 			    <el-table-column prop="gender" label="性别"   width="70" align="center">
 					<template #default="scope">
-					    {{scope.row.gender==1?"男":"女"}}
+					    {{scope.row.gender==71?"男":"女"}}
 					</template>
 				</el-table-column>
 			    <el-table-column prop="idnumber" label="身份证"  align="center" />
