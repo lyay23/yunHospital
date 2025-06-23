@@ -5,13 +5,13 @@
 		<el-row style="background-color: #EAF1F5;margin-top: -20px">
 			<el-col :span="8" style="margin-top: 4px;"></el-col>
 			<el-col :span="4" >
-				<el-button type="text" size="small" class="el-icon-tickets" @click="save">暂存</el-button>
+				<el-button type="text" size="small" class="el-icon-tickets" @click="save" :disabled="isFormDisabled">暂存</el-button>
 			</el-col>
 			<el-col :span="4" >
-				<el-button type="text" size="small" class="el-icon-success" @click="submit">提交</el-button>
+				<el-button type="text" size="small" class="el-icon-success" @click="submit" :disabled="isFormDisabled">提交</el-button>
 			</el-col>
 			<el-col :span="4" >
-				<el-button type="text" size="small" class="el-icon-printer" @click="clearAll">清空所有</el-button>
+				<el-button type="text" size="small" class="el-icon-printer" @click="clearAll" :disabled="isFormDisabled">清空所有</el-button>
 			</el-col>
 			<el-col :span="4" >
 				<el-button type="text" size="small" class="el-icon-circle-plus-outline" @click="refresh">刷新</el-button>
@@ -25,57 +25,57 @@
 
 		<el-form-item label="主诉">
 			<el-input type="textarea" :rows="1" v-model="medicalRecord.readme" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 		<el-form-item label="现病史">
 			<el-input type="textarea" :rows="2" v-model="medicalRecord.present" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 		<el-form-item label="现病治疗情况">
 			<el-input type="textarea" :rows="2" v-model="medicalRecord.presentTreat" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 		<el-form-item label="既往史">
 			<el-input type="textarea" :rows="2" v-model="medicalRecord.history" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 		<el-form-item label="过敏史">
 			<el-input type="textarea" :rows="2" v-model="medicalRecord.allergy" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 		<el-form-item label="体格检查">
 			<el-input type="textarea" :rows="2" v-model="medicalRecord.physique" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 
 		<el-form-item label="评估/诊断">
 			<el-input type="textarea" :rows="3" :value="diagnosisSummary" readonly
-				:disabled="isSaved"></el-input>
-			<el-button type="primary" @click="openAssessmentDialog" :disabled="isSaved">评估/诊断</el-button>
+				:disabled="isFormDisabled"></el-input>
+			<el-button type="primary" @click="openAssessmentDialog" :disabled="isFormDisabled">评估/诊断</el-button>
 		</el-form-item>
 
 		<el-form-item label="检查建议">
 			<el-input type=
 			"textarea" :rows="2" v-model="medicalRecord.proposal" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 
 		<el-form-item label="注意事项">
 			<el-input type=
 			"textarea" :rows="2" v-model="medicalRecord.careful" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 
 		<el-form-item label="检查结果">
 			<el-input type=
 			"textarea" :rows="2" v-model="medicalRecord.checkResult" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 
 		<el-form-item label="处理意见">
 			<el-input type=
 			"textarea" :rows="2" v-model="medicalRecord.handling" 
-				:disabled="isSaved"></el-input>
+				:disabled="isFormDisabled"></el-input>
 		</el-form-item>
 		
 	</el-form>
@@ -161,9 +161,16 @@
 </template>
 
 <script setup>
-import { ref,onMounted, defineExpose, watch, computed } from 'vue'
+import { ref,onMounted, defineExpose, watch, computed, defineProps } from 'vue'
 import { getReq,postReq } from '../../../utils/api'
 import { ElMessageBox, ElMessage } from 'element-plus'
+
+const props = defineProps({
+    isDiagnosed: {
+        type: Boolean,
+        default: false
+    }
+});
 
 const westernDiseases = ref([]);
 const chineseDiseases = ref([]);
@@ -195,6 +202,10 @@ const isSaved=ref(false)//是否保存
 const medicalRecord=ref({})//病历首案
 const currentRid = ref(null)//病历首案
 const eastTable=ref(null)
+
+const isFormDisabled = computed(() => {
+  return isSaved.value || props.isDiagnosed;
+});
 
 onMounted(async () => {
 	// No initial data loading needed here
@@ -325,6 +336,7 @@ function confirmDiseaseSelection() {
 //获取病人病历首页信息信息
 async function loadMedicalRecord(rid){
 	// First, clear the state of the previous patient.
+	isSaved.value = false; // Reset the save state for the new patient
 	medicalRecord.value = { registId: rid };
 	westernDiseases.value = [];
 	chineseDiseases.value = [];

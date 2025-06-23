@@ -76,7 +76,7 @@
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
 			     @tab-click="handleClick">
 			    <el-tab-pane label="病历首页">
-					<medicalrecord ref="medicalRecordComp"></medicalrecord>
+					<medicalrecord ref="medicalRecordComp" :is-diagnosed="isDiagnosed"></medicalrecord>
 				</el-tab-pane>
 			    <el-tab-pane label="检查申请">
 					检查申请
@@ -138,6 +138,7 @@ const kw=ref('')
 //是否显示患者列表
 const isShowMenu=ref(true)
 const currentPatient = ref(null)
+const isDiagnosed = ref(false);
 //看诊人信息
 const patientInfo=ref('请先选择一位患者')
 //是否显示诊毕
@@ -202,6 +203,7 @@ const handleRowClick=(val, column, event)=>{
 	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
 	isOver.value=true
 	currentPatient.value = val;
+	isDiagnosed.value = false;
 	if (medicalRecordComp.value) {
 	    medicalRecordComp.value.loadMedicalRecord(val.id);
 	}
@@ -212,6 +214,7 @@ const handleDiagnosedRowClick=(val, column, event)=>{
 	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
 	isOver.value=false
 	currentPatient.value = val;
+	isDiagnosed.value = true;
 	if (medicalRecordComp.value) {
 	    medicalRecordComp.value.loadMedicalRecord(val.id);
 	}
