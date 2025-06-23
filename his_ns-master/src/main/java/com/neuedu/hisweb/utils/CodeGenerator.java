@@ -42,7 +42,7 @@ public class CodeGenerator {
                 .globalConfig(builder -> {
                     builder.author(AUTHOR)
                             .outputDir(OUTPUT_DIR)
-                            .fileOverride()
+                            .enableFileOverride()
                             .disableOpenDir()
                             .dateType(DateType.ONLY_DATE)
                             .commentDate("yyyy-MM-dd");

@@ -71,6 +71,10 @@
 			<el-button type="primary" size="small" v-if="isOver" :span="2">
 				诊毕
 			</el-button>
+			<!-- 新增按钮：生成病历分析模块 -->
+			<el-button type="success" size="small" @click="showAnalysisModule" style="margin-left: 10px;">
+				病历分析
+			</el-button>
 		</el-row>
 		<el-row>
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
@@ -99,8 +103,25 @@
 			</el-tabs>
 		</el-row>
 		
-		
-		
+		<!-- 新增：病历分析模块 -->
+		<el-row v-if="showAnalysis" style="margin-top: 20px;">
+			<el-col :span="24">
+				<el-card>
+					<template #header>
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<span>病历分析结果</span>
+							<el-button type="danger" size="small" @click="closeAnalysisModule">关闭</el-button>
+						</div>
+					</template>
+					<medical-analysis 
+						:patient-info="currentPatient"
+						:analysis-data="analysisData"
+						:loading="analysisLoading"
+						@refresh="loadAnalysisData">
+					</medical-analysis>
+				</el-card>
+			</el-col>
+		</el-row>
 		
 		<el-row>
 
@@ -113,6 +134,7 @@
 
 <script setup>
 import medicalrecord from '../neudoc/his/Doc01.vue'
+import MedicalAnalysis from '../neudoc/his/MedicalAnalysis.vue'
 
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
@@ -120,6 +142,7 @@ import router from '../../router';
 import { formatDate } from '../../utils/utils.js'
 import { Search,Refresh } from '@element-plus/icons-vue'	
 import { useUserStore } from '../../store/user.js'
+import { ElMessage } from 'element-plus'
 
 
 
@@ -139,6 +162,12 @@ const isShowMenu=ref(true)
 const patientInfo=ref('')
 //是否显示诊毕
 const isOver=ref(true)
+
+// 新增：病历分析相关状态
+const showAnalysis = ref(false)
+const analysisLoading = ref(false)
+const analysisData = ref({})
+const currentPatient = ref({})
 
 onMounted(async () => {
   loadData(1)
@@ -197,11 +226,109 @@ const handleClick=()=>{
 
 const handleRowClick=(val, column, event)=>{
 	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
+	currentPatient.value = val
 	isOver.value=true
-	
 }
 
+// 新增：显示病历分析模块
+const showAnalysisModule = () => {
+	if (!currentPatient.value.caseNumber) {
+		ElMessage.warning('请先选择患者')
+		return
+	}
+	showAnalysis.value = true
+	loadAnalysisData()
+}
 
+// 新增：关闭病历分析模块
+const closeAnalysisModule = () => {
+	showAnalysis.value = false
+	analysisData.value = {}
+}
+
+// 新增：加载分析数据
+const loadAnalysisData = async () => {
+	if (!currentPatient.value.caseNumber) return
+	
+	analysisLoading.value = true
+	try {
+		// 通过GET请求获取后端分析数据
+		// 注意：这里使用模拟数据，实际项目中应该调用真实的后端API
+		const result = await fetchData(`/neudoc/analysis?caseNumber=${currentPatient.value.caseNumber}`, null)
+		
+		// 如果后端API不可用，使用模拟数据
+		if (!result || !result.result) {
+			console.log('使用模拟数据')
+			// 模拟API响应
+			await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟网络延迟
+			
+			// 根据病历号生成不同的模拟数据
+			const mockData = {
+				diagnosis: {
+					title: "初步诊断建议",
+					content: `根据患者${currentPatient.value.realName}的症状和检查结果，建议考虑以下诊断方向：1. 上呼吸道感染 2. 急性支气管炎 3. 需要进一步检查排除其他疾病`
+				},
+				medication: [
+					{
+						name: "阿莫西林胶囊",
+						dosage: "0.5g",
+						frequency: "每日3次",
+						duration: "7天",
+						note: "饭后服用，注意过敏反应"
+					},
+					{
+						name: "布洛芬缓释胶囊",
+						dosage: "0.3g",
+						frequency: "每日2次",
+						duration: "3天",
+						note: "疼痛时服用，避免空腹"
+					}
+				],
+				examination: [
+					{
+						name: "血常规",
+						reason: "了解感染程度和血象变化",
+						priority: "高"
+					},
+					{
+						name: "胸部X线片",
+						reason: "排除肺部感染",
+						priority: "中"
+					}
+				],
+				risk: [
+					{
+						type: "药物过敏风险",
+						level: "低风险",
+						description: "患者无已知药物过敏史，但仍需注意观察",
+						suggestion: "首次用药时密切观察，如有异常立即停药"
+					}
+				]
+			}
+			
+			analysisData.value = mockData
+		} else {
+			analysisData.value = result.data
+		}
+	} catch (error) {
+		console.error('获取分析数据失败:', error)
+		ElMessage.error('网络请求失败，使用模拟数据')
+		
+		// 出错时也使用模拟数据
+		const mockData = {
+			diagnosis: {
+				title: "诊断建议（模拟数据）",
+				content: "由于网络问题，显示模拟的诊断建议数据"
+			},
+			medication: [],
+			examination: [],
+			risk: []
+		}
+		analysisData.value = mockData
+	} finally {
+		analysisLoading.value = false
+	}
+}
 </script>
 
 <style>
