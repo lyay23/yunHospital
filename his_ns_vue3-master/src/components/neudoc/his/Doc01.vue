@@ -166,6 +166,10 @@ import { getReq,postReq } from '../../../utils/api'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 const props = defineProps({
+    patient: {
+        type: Object,
+        default: null
+    },
     isDiagnosed: {
         type: Boolean,
         default: false
@@ -447,6 +451,14 @@ const diagnosisSummary = computed(() => {
     }
     return summary || '无';
 });
+
+watch(() => props.patient, (newPatient) => {
+    if (newPatient && newPatient.id) {
+        loadMedicalRecord(newPatient.id);
+    } else {
+        clearForm();
+    }
+}, { immediate: true, deep: true });
 
 watch([westernDiseases, chineseDiseases], () => {
     isWestActive.value = chineseDiseases.value.length === 0;
