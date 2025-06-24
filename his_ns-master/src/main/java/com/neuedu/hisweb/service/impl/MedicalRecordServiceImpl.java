@@ -60,8 +60,12 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
                 baseMapper.updateById(medicalRecord);
             } else {
                 if(medicalRecord.getRegistId() != null) {
-                    // 使用挂号ID作为病历号
-                    medicalRecord.setCaseNumber(medicalRecord.getRegistId().toString());
+                    //根据挂号ID查询挂号信息
+                    Register register = registerMapper.selectById(medicalRecord.getRegistId());
+                    if (register != null) {
+                        //设置正确的病历号
+                        medicalRecord.setCaseNumber(register.getCaseNumber());
+                    }
                 }
                 baseMapper.insert(medicalRecord);
             }

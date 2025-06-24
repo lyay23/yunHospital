@@ -88,11 +88,29 @@
             <version>4.13.2</version>
         </dependency>
 
+
+        <!--        webflux-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <!-- 移除 Ollama4j，使用简单的 HTTP 客户端 -->
+        <!--
+        <dependency>
+            <groupId>com.github.amithkoujalgi</groupId>
+            <artifactId>ollama4j</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        -->
+
+        <!-- 添加 Reactor Core 支持响应式编程 -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
@@ -118,7 +136,7 @@
             </snapshots>
         </repository>
 
-<!--        添加阿里云仓库（加速依赖下载）-->
+        <!--        添加阿里云仓库（加速依赖下载）-->
         <repository>
             <id>aliyun</id>
             <url>https://maven.aliyun.com/repository/public</url>

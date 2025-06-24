@@ -16,6 +16,14 @@ ollama:
   model: deepseek-r1:7b
   timeout: 60000
 
+
+# 百炼云部署配置
+# 百炼云部署配置
+bailian:
+  api-key: ${DASHSCOPE_API_KEY}
+  base-url:  https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
+  model: qwen-turbo
+
 # MyBatis-Plus 配置
 mybatis-plus:
   configuration:
