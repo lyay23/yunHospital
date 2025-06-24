@@ -71,6 +71,10 @@
 			<el-button type="primary" size="small" v-if="isOver" :span="2" @click="finishConsultation">
 				诊毕
 			</el-button>
+			<!-- 新增按钮：生成病历分析模块 -->
+			<el-button type="success" size="small" @click="showAnalysisModule" style="margin-left: 10px;">
+				病历分析
+			</el-button>
 		</el-row>
 		<el-row>
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
@@ -99,8 +103,25 @@
 			</el-tabs>
 		</el-row>
 		
-		
-		
+		<!-- 新增：病历分析模块 -->
+		<el-row v-if="showAnalysis" style="margin-top: 20px;">
+			<el-col :span="24">
+				<el-card>
+					<template #header>
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<span>病历分析结果</span>
+							<el-button type="danger" size="small" @click="closeAnalysisModule">关闭</el-button>
+						</div>
+					</template>
+					<medical-analysis 
+						:patient-info="currentPatient"
+						:analysis-data="analysisData"
+						:loading="analysisLoading"
+						@refresh="loadAnalysisData">
+					</medical-analysis>
+				</el-card>
+			</el-col>
+		</el-row>
 		
 		<el-row>
 
@@ -147,6 +168,12 @@ const isDiagnosed = ref(false);
 const patientInfo=ref('请先选择一位患者')
 //是否显示诊毕
 const isOver=ref(true)
+
+// 新增：病历分析相关状态
+const showAnalysis = ref(false)
+const analysisLoading = ref(false)
+const analysisData = ref({})
+const currentPatient = ref({})
 
 onMounted(async () => {
   loadData(1)
@@ -205,6 +232,7 @@ const handleClick=()=>{
 
 const handleRowClick=(val, column, event)=>{
 	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
+	currentPatient.value = val
 	isOver.value=true
 	currentPatient.value = val;
 	isDiagnosed.value = false;	

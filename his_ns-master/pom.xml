@@ -39,7 +39,6 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- Spring Boot 3.x 不再默认包含，需要手动添加 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
