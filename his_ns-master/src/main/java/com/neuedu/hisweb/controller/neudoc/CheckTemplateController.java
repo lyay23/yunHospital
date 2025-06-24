@@ -58,4 +58,14 @@ public class CheckTemplateController {
             return new JsonResult<>("新增失败");
         }
     }
+
+    @PostMapping("/del")
+    public JsonResult<Object> delCheckTemplate(@RequestBody CheckTemplate template) {
+        template.setDelMark(0);
+        boolean result = iService.updateById(template);
+        if(result){
+            return new JsonResult<>(true);
+        }
+        return new JsonResult<>("删除失败");
+    }
 } 

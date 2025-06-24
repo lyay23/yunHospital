@@ -2,7 +2,7 @@
   <el-container>
     <el-main>
       <el-row>
-        <el-col :span="16">
+        <el-col :span="14">
           <div class="toolbar">
             <el-button type="primary" size="small" @click="handleAddItem">新增项目</el-button>
             <el-button type="danger" size="small" @click="handleDeleteItem">删除项目</el-button>
@@ -15,13 +15,13 @@
             <el-tag>本项目金额合计：{{ totalAmount }}元</el-tag>
           </div>
           <el-table :data="checkApplyList" style="width: 100%" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" />
-            <el-table-column prop="name" label="申请名称" width="180" />
-            <el-table-column prop="itemName" label="项目名称" />
-            <el-table-column prop="execDept" label="执行科室" />
-            <el-table-column prop="execState" label="执行状态" />
-            <el-table-column prop="price" label="单价" />
-            <el-table-column label="检查结果">
+            <el-table-column type="selection" width="30" align="center"/>
+            <el-table-column prop="name" label="申请名称" width="120" align="center"/>
+            <el-table-column prop="itemName" label="项目名称" width="180" align="center"/>
+            <el-table-column prop="execDept" label="执行科室" align="center"/>
+            <el-table-column prop="execState" label="执行状态" align="center"/>
+            <el-table-column prop="price" label="单价" align="center"/>
+            <el-table-column label="检查结果" align="center">
               <template #default="scope">
                 <el-link type="primary" v-if="scope.row.state === 5" @click="viewResult(scope.row)">查看结果</el-link>
               </template>
@@ -37,7 +37,7 @@
                 style="margin-top: 10px;"
             />
         </el-col>
-        <el-col :span="8">
+        <el-col :span="10">
           <div class="template-section">
             <el-card class="box-card">
               <template #header>
@@ -46,12 +46,13 @@
                 </div>
               </template>
               <el-table :data="templateList" style="width: 100%">
-                <el-table-column prop="name" label="名称" />
-                <el-table-column label="操作">
+                <el-table-column prop="name" label="名称" align="center" />
+                <el-table-column label="操作" align="center" >
                   <template #default="scope">
                     <div style="display: flex; flex-direction: row; align-items: center;">
                         <el-button type="text" size="small" @click="useTemplate(scope.row)">使用</el-button>
                         <el-button type="text" size="small" @click="viewTemplate(scope.row)" style="margin-left: 8px;">详细</el-button>
+                        <el-button v-if="parseInt(scope.row.scope) === 3" type="text" size="small" @click="handleDeleteTemplate(scope.row)" style="margin-left: 8px; color: #F56C6C;">删除</el-button>
                     </div>
                   </template>
                 </el-table-column>
@@ -439,6 +440,9 @@ async function handleDeleteItem() {
 function handleRefresh() {
     if (currentRegistId.value) {
         loadCheckApply(currentRegistId.value);
+        ElMessage.success('刷新成功');
+    } else {
+        ElMessage.warning('请先选择一位患者');
     }
 }
 
@@ -455,84 +459,70 @@ function viewResult(row) {
 }
 
 async function loadCommonTemplates() {
-    const doctorId = userStore.getUserInfo.value.id;
-    // recordType=1 for checkup. Assuming scope=3 is personal.
-    const url = `/checktemplate/page?recordType=1&scope=3&doctorId=${doctorId}`; 
+    const url = `/checktemplate/page?recordType=1&doctorId=${userStore.getUserInfo.value.id}`;
     const result = await fetchData(url);
-    if(result.result) {
+    if (result.result) {
         templateList.value = result.data.records;
-    } else {
-        templateList.value = [];
     }
 }
 
 async function useTemplate(template) {
-    if (!props.patient) {
-        ElMessage.error('请先选择患者');
+    if (!currentRegistId.value) {
+        ElMessage.error('请先选择一位患者');
         return;
     }
-     if (!currentMedicalId.value){
-         const medRes = await fetchData(`/neudoc/getMedicalRecord?registId=${props.patient.id}`);
-        if(medRes.result && medRes.data){
-            currentMedicalId.value = medRes.data.id;
-        } else {
-             ElMessage.error('获取病历信息失败,请先创建病历首页!');
-            return;
-        }
+    const res = await fetchData(`/checkrelation/items?templateId=${template.id}`);
+    if(!res.result || res.data.length === 0){
+        ElMessage.error('模板内容为空');
+        return;
     }
 
-    const itemsResult = await fetchData(`/checkrelation/items?templateId=${template.id}`);
-    if (!itemsResult.result || itemsResult.data.length === 0) {
-        ElMessage.error('无法获取模板项目或模板为空');
-        return;
-    }
-    
-    const itemsToAdd = itemsResult.data.map(item => ({
+    const itemsToAdd = res.data.map(item => ({
         medicalId: currentMedicalId.value,
         registId: currentRegistId.value,
         itemId: item.id,
-        name: template.name, 
+        name: template.name, // 申请名称使用模板名称
         itemName: item.itemName,
-        objective: '', 
+        price: item.price,
+        objective: '',
         position: '',
         isUrgent: 0,
-        num: 1, 
+        num: 1,
+        state: 1, // 暂存
+        recordType: 1, // 检查
         doctorId: userStore.getUserInfo.value.id,
-        recordType: 1
     }));
 
-    const addResp = await postReq("/checkapply/add", itemsToAdd);
-
-    if (addResp.data.result) {
-        ElMessage.success(`已使用模板 "${template.name}"`);
+    const addResult = await postReq('/checkapply/add', itemsToAdd);
+    if (addResult.data.result) {
+        ElMessage.success(`已应用模板【${template.name}】`);
         loadCheckApply(currentRegistId.value);
     } else {
-        ElMessage.error(addResp.data.errMsg || '应用模板失败');
+        ElMessage.error(addResult.data.errMsg || '应用模板失败');
     }
 }
 
 async function viewTemplate(template) {
     currentTemplateName.value = template.name;
     const result = await fetchData(`/checkrelation/items?templateId=${template.id}`);
-    if(result.result) {
+    if(result.result){
         templateDetailItems.value = result.data;
         templateDetailDialogVisible.value = true;
     } else {
-        ElMessage.error('获取模板详情失败');
+        ElMessage.error("获取模板详情失败");
     }
 }
 
-function handleSaveAsTemplate(){
+function handleSaveAsTemplate() {
     if (selectedItems.value.length === 0) {
-        ElMessage.warning('请至少选择一个项目来创建模板');
+        ElMessage.warning('请选择要存为模板的项目');
         return;
     }
-
+    
     ElMessageBox.prompt('请输入模板名称', '存为组套', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /.+/,
-        inputErrorMessage: '模板名称不能为空',
+        inputValidator: (val) => val ? true : '模板名称不能为空',
     }).then(async ({ value }) => {
         const itemIds = selectedItems.value.map(item => item.itemId);
         const templateData = {
@@ -540,21 +530,43 @@ function handleSaveAsTemplate(){
             scope: '3', // 3-个人
             recordType: 1, // 1-检查
             itemIds: itemIds,
-            doctorId: userStore.getUserInfo.value.id
+            doctorId: userStore.getUserInfo.value.id,
+            deptId: userStore.getUserInfo.value.deptID,
         };
-
-        const resp = await postReq('/checktemplate/add', templateData);
-        if (resp.data.result) {
-            ElMessage.success(`模板 "${value}" 保存成功`);
-            loadCommonTemplates(); 
+        const result = await postReq('/checktemplate/add', templateData);
+        if (result.data.result) {
+            ElMessage.success('模板保存成功');
+            loadCommonTemplates(); // 刷新常用模板列表
         } else {
-            ElMessage.error(resp.data.errMsg || '保存模板失败');
+            ElMessage.error(result.data.errMsg || '模板保存失败');
         }
     }).catch(() => {
-        ElMessage.info('已取消操作');
+        ElMessage.info('操作已取消');
     });
 }
 
+async function handleDeleteTemplate(template) {
+    try {
+        await ElMessageBox.confirm(`确定要删除模板【${template.name}】吗？`, '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+        });
+        const result = await postReq('/checktemplate/del', template);
+        if (result.data.result) {
+            ElMessage.success('删除成功');
+            loadCommonTemplates();
+        } else {
+            ElMessage.error(result.data.errMsg || '删除失败');
+        }
+    } catch (error) {
+        if (error !== 'cancel') {
+            ElMessage.error('操作失败');
+        } else {
+            ElMessage.info('已取消删除');
+        }
+    }
+}
 
 defineExpose({
     clearList

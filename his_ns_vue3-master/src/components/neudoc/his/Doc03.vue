@@ -2,7 +2,7 @@
   <el-container>
     <el-main>
       <el-row>
-        <el-col :span="16">
+        <el-col :span="14">
           <div class="toolbar">
             <el-button type="primary" size="small" @click="handleAddItem">新增项目</el-button>
             <el-button type="danger" size="small" @click="handleDeleteItem">删除项目</el-button>
@@ -14,30 +14,30 @@
           <div class="total-amount">
             <el-tag>本项目金额合计：{{ totalAmount }}元</el-tag>
           </div>
-          <el-table :data="labApplyList" style="width: 100%" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" />
-            <el-table-column prop="name" label="申请名称" width="180" />
-            <el-table-column prop="itemName" label="项目名称" />
-            <el-table-column prop="execDept" label="执行科室" />
-            <el-table-column prop="execState" label="执行状态" />
-            <el-table-column prop="price" label="单价" />
-            <el-table-column label="检验结果">
+          <el-table :data="testApplyList" style="width: 100%" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="30" />
+            <el-table-column prop="name" label="申请名称" width="120" align="center"/>
+            <el-table-column prop="itemName" label="项目名称" width="180" align="center" />
+            <el-table-column prop="execDept" label="执行科室"  align="center"/>
+            <el-table-column prop="execState" label="执行状态" align="center" />
+            <el-table-column prop="price" label="单价" align="center"/>
+            <el-table-column label="检验结果" align="center">
               <template #default="scope">
                 <el-link type="primary" v-if="scope.row.state === 5" @click="viewResult(scope.row)">查看结果</el-link>
               </template>
             </el-table-column>
           </el-table>
           <el-pagination
-                v-if="labApplyList.length > 0"
+                v-if="testApplyList.length > 0"
                 background
                 layout="prev, pager, next"
-                :total="labApplyPage.total"
-                :page-size="labApplyPage.size"
-                @current-change="handleLabApplyPageChange"
+                :total="testApplyPage.total"
+                :page-size="testApplyPage.size"
+                @current-change="handleTestApplyPageChange"
                 style="margin-top: 10px;"
             />
         </el-col>
-        <el-col :span="8">
+        <el-col :span="10">
           <div class="template-section">
             <el-card class="box-card">
               <template #header>
@@ -46,12 +46,13 @@
                 </div>
               </template>
               <el-table :data="templateList" style="width: 100%">
-                <el-table-column prop="name" label="名称" />
-                <el-table-column label="操作">
+                <el-table-column prop="name" label="名称" align="center" />
+                <el-table-column label="操作" align="center">
                   <template #default="scope">
                     <div style="display: flex; flex-direction: row; align-items: center;">
                         <el-button type="text" size="small" @click="useTemplate(scope.row)">使用</el-button>
                         <el-button type="text" size="small" @click="viewTemplate(scope.row)" style="margin-left: 8px;">详细</el-button>
+                        <el-button v-if="parseInt(scope.row.scope) === 3" type="text" size="small" @click="handleDeleteTemplate(scope.row)" style="margin-left: 8px; color: #F56C6C;">删除</el-button>
                     </div>
                   </template>
                 </el-table-column>
@@ -160,8 +161,8 @@ const props = defineProps({
 });
 
 const userStore = useUserStore();
-const labApplyList = ref([]);
-const labApplyPage = ref({ total: 0, size: 10, current: 1 });
+const testApplyList = ref([]);
+const testApplyPage = ref({ total: 0, size: 10, current: 1 });
 const currentRegistId = ref(null);
 const currentMedicalId = ref(null);
 const selectedItems = ref([]);
@@ -195,7 +196,7 @@ const newItemForm = ref({
 
 watch(() => props.patient, (newPatient) => {
     if (newPatient) {
-        loadLabApply(newPatient.id);
+        loadTestApply(newPatient.id);
         loadCommonTemplates();
     } else {
         clearList();
@@ -204,10 +205,10 @@ watch(() => props.patient, (newPatient) => {
 }, { immediate: true });
 
 const totalAmount = computed(() => {
-  return labApplyList.value.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2);
+  return testApplyList.value.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2);
 });
 
-async function loadLabApply(registerId, pn = 1) {
+async function loadTestApply(registerId, pn = 1) {
     if (registerId) {
         currentRegistId.value = registerId;
         const medRes = await fetchData(`/neudoc/getMedicalRecord?registId=${registerId}`);
@@ -219,27 +220,27 @@ async function loadLabApply(registerId, pn = 1) {
     }
     
     if (!currentRegistId.value) return;
-
-    const url = `/labapply/page?registId=${currentRegistId.value}&recordType=2&pn=${pn}&count=${labApplyPage.value.size}`;
+    // 使用 /checkapply/page 接口, 但 recordType 为 2
+    const url = `/checkapply/page?registId=${currentRegistId.value}&recordType=2&pn=${pn}&count=${testApplyPage.value.size}`;
     const result = await fetchData(url);
     if(result.result) {
-        labApplyList.value = result.data.records.map(item => ({...item, execState: formatState(item.state)}));
-        labApplyPage.value.total = result.data.total;
-        labApplyPage.value.current = result.data.current;
+        testApplyList.value = result.data.records.map(item => ({...item, execState: formatState(item.state)}));
+        testApplyPage.value.total = result.data.total;
+        testApplyPage.value.current = result.data.current;
     } else {
-        labApplyList.value = [];
-        labApplyPage.value.total = 0;
+        testApplyList.value = [];
+        testApplyPage.value.total = 0;
     }
 }
 
-function handleLabApplyPageChange(pn) {
-    loadLabApply(null, pn);
+function handleTestApplyPageChange(pn) {
+    loadTestApply(null, pn);
 }
 
 function clearList() {
-    labApplyList.value = [];
+    testApplyList.value = [];
     selectedItems.value = [];
-    labApplyPage.value = { total: 0, size: 10, current: 1 };
+    testApplyPage.value = { total: 0, size: 10, current: 1 };
     currentRegistId.value = null;
     currentMedicalId.value = null;
 }
@@ -248,31 +249,38 @@ function handleAddItem() {
   addItemDialogVisible.value = true;
   activeTab.value = 'template';
   resetDialogState();
-  if(templates.value.records.length === 0) loadTemplates(1);
+  loadTemplates(1);
 }
 
-function handleTabClick(tab) {
-    resetDialogState();
-    if(tab.paneName === 'template' && templates.value.records.length === 0) {
-        loadTemplates(1);
-    } else if (tab.paneName === 'item' && fmeditems.value.records.length === 0) {
-        loadFmeditems(1);
-    }
-}
-
-function resetDialogState(){
-    newItemForm.value = { name: '', applicationName: '', objective: '', position: '', isUrgent: false, price: 0 };
-    selectedFmeditem.value = null;
+function resetDialogState() {
     selectedTemplate.value = null;
+    selectedFmeditem.value = null;
     templateKeyword.value = '';
     fmeditemKeyword.value = '';
+    newItemForm.value = {
+      name: '',
+      applicationName: '',
+      objective: '',
+      position: '',
+      isUrgent: false,
+      price: 0,
+    };
 }
 
+async function handleTabClick(tab) {
+  resetDialogState();
+  if (tab.paneName === 'template') {
+    await loadTemplates(1);
+  } else if (tab.paneName === 'item') {
+    await loadFmeditems(1);
+  }
+}
 
-async function loadTemplates(pn = 1) {
-    const url = `/labtemplate/page?recordType=2&scope=1&pn=${pn}&count=10&keyword=${templateKeyword.value}`;
+async function loadTemplates(pn) {
+    // 使用 /checktemplate/page 接口, recordType 为 2
+    const url = `/checktemplate/page?scope=1&recordType=2&pn=${pn}&count=${templates.value.size}&keyword=${templateKeyword.value}`;
     const result = await fetchData(url);
-    if(result.result) {
+    if (result.result) {
         templates.value = result.data;
     }
 }
@@ -285,10 +293,20 @@ function searchTemplates() {
     loadTemplates(1);
 }
 
-async function loadFmeditems(pn = 1) {
-    const url = `/fmeditem/page?pn=${pn}&count=10&keyword=${fmeditemKeyword.value}`;
+function handleTemplateSelect(row) {
+    selectedTemplate.value = row;
+    selectedFmeditem.value = null;
+    // 假设模板中包含项目列表
+    newItemForm.value.name = row.name;
+    newItemForm.value.applicationName = row.name;
+    newItemForm.value.price = row.price; 
+}
+
+async function loadFmeditems(pn) {
+    // 注意：expclassId=72 假设是检验费用
+    const url = `/fmeditem/page?expclassId=72&pn=${pn}&count=${fmeditems.value.size}&keyword=${fmeditemKeyword.value}`;
     const result = await fetchData(url);
-    if(result.result) {
+    if (result.result) {
         fmeditems.value = result.data;
     }
 }
@@ -301,153 +319,128 @@ function searchFmeditems() {
     loadFmeditems(1);
 }
 
-async function handleTemplateSelect(template) {
-    selectedTemplate.value = template;
-    selectedFmeditem.value = null; 
-    newItemForm.value.name = template.name;
-    newItemForm.value.applicationName = template.name;
-}
-
-function handleFmeditemSelect(item) {
-    selectedFmeditem.value = item;
-    selectedTemplate.value = null; 
-    newItemForm.value.name = item.itemName;
-    newItemForm.value.price = item.price;
+function handleFmeditemSelect(row) {
+    selectedFmeditem.value = row;
+    selectedTemplate.value = null;
+    newItemForm.value.name = row.itemName;
+    newItemForm.value.applicationName = row.itemName;
+    newItemForm.value.price = row.price;
 }
 
 async function confirmAddItem() {
-    if (!props.patient) {
-        ElMessage.error('请先选择患者');
+    if (!currentMedicalId.value) {
+        ElMessage.error('无有效的病历信息，无法添加项目。');
         return;
     }
-    if (!currentMedicalId.value){
-         const medRes = await fetchData(`/neudoc/getMedicalRecord?registId=${props.patient.id}`);
-        if(medRes.result && medRes.data){
-            currentMedicalId.value = medRes.data.id;
-        } else {
-             ElMessage.error('获取病历信息失败,请先创建病历首页!');
-            return;
-        }
-    }
 
-    let itemsToAdd = [];
+    const itemData = {
+        medicalId: currentMedicalId.value,
+        registId: currentRegistId.value,
+        state: 1, // 1 for '暂存'
+        recordType: 2, // 2 for '检验'
+        isUrgent: newItemForm.value.isUrgent ? 1 : 0,
+        objective: newItemForm.value.objective,
+        position: newItemForm.value.position,
+        name: newItemForm.value.applicationName,
+        num: 1, // 默认数量为1
+        doctorId: userStore.getUserInfo.value.id
+    };
 
+    let itemsToSubmit = [];
     if (selectedTemplate.value) {
-        const url = `/labrelation/items?templateId=${selectedTemplate.value.id}`;
-        const result = await fetchData(url);
-        if(result.result && result.data.length > 0) {
-            itemsToAdd = result.data.map(item => ({
-                medicalId: currentMedicalId.value,
-                registId: currentRegistId.value,
-                itemId: item.id,
-                name: newItemForm.value.applicationName,
-                itemName: item.itemName,
-                objective: newItemForm.value.objective,
-                position: newItemForm.value.position,
-                isUrgent: newItemForm.value.isUrgent ? 1 : 0,
-                num: 1, 
-                doctorId: userStore.getUserInfo.value.id,
-                recordType: 2 // 2 for lab
-            }));
-        }
+        //  后台需要根据模板id，查询模板明细，然后批量插入
+        itemsToSubmit.push({
+            ...itemData,
+            itemId: selectedTemplate.value.id, 
+            itemName: selectedTemplate.value.name,
+            price: selectedTemplate.value.price,
+            isTemplate:true //标识是模板
+        });
     } else if (selectedFmeditem.value) {
-        itemsToAdd.push({
-            medicalId: currentMedicalId.value,
-            registId: currentRegistId.value,
+        itemsToSubmit.push({
+            ...itemData,
             itemId: selectedFmeditem.value.id,
-            name: newItemForm.value.applicationName,
             itemName: selectedFmeditem.value.itemName,
-            objective: newItemForm.value.objective,
-            position: newItemForm.value.position,
-            isUrgent: newItemForm.value.isUrgent ? 1 : 0,
-            num: 1,
-            doctorId: userStore.getUserInfo.value.id,
-            recordType: 2 // 2 for lab
+            price: selectedFmeditem.value.price,
         });
     }
-
-    if (itemsToAdd.length === 0) {
-        ElMessage.error('没有要新增的项目');
-        return;
-    }
-
-    const resp = await postReq("/labapply/add", itemsToAdd);
-
-    if (resp.data.result) {
+    
+    // 使用 /checkapply/add 接口, 后端需要一个list
+    const result = await postReq('/checkapply/add', itemsToSubmit);
+    if (result.data.result) {
         ElMessage.success('新增成功');
         addItemDialogVisible.value = false;
-        loadLabApply(currentRegistId.value);
+        loadTestApply(currentRegistId.value);
     } else {
-        ElMessage.error(resp.data.errMsg || '新增失败');
+        ElMessage.error(result.data.errMsg || '新增失败');
     }
 }
-
 
 function handleSelectionChange(val) {
-  selectedItems.value = val;
-}
-
-async function handleStateChange(state, successMsg, errorMsg, warningMsg){
-    if (selectedItems.value.length === 0) {
-        ElMessage.warning(warningMsg || '请至少选择一个项目');
-        return;
-    }
-    const ids = selectedItems.value.map(item => item.id);
-    const resp = await postReq('/labapply/updateState', { ids, state: state });
-    if (resp.data.result) {
-        ElMessage.success(successMsg);
-        loadLabApply(currentRegistId.value);
-    } else {
-        ElMessage.error(resp.data.errMsg || errorMsg);
-    }
-}
-
-function handleCommitItem() {
-    handleStateChange(2, '开立成功', '开立失败');
-}
-
-function handleCancelItem() {
-    handleStateChange(0, '作废成功', '作废失败');
+    selectedItems.value = val;
 }
 
 async function handleDeleteItem() {
     if (selectedItems.value.length === 0) {
-        ElMessage.warning('请至少选择一个项目');
+        ElMessage.warning('请选择要删除的项目');
         return;
     }
-    const uncommittedItems = selectedItems.value.filter(item => item.state === 1);
-    if (uncommittedItems.length !== selectedItems.value.length) {
-        ElMessage.error('只能删除暂存状态的项目');
+    await ElMessageBox.confirm('确定删除所选项目吗？', '提示', { type: 'warning' });
+    const ids = selectedItems.value.map(item => item.id);
+    // 使用 /checkapply/del 接口
+    const result = await postReq('/checkapply/del', ids);
+    if (result.data.result) {
+        ElMessage.success('删除成功');
+        loadTestApply(currentRegistId.value);
+    } else {
+        ElMessage.error(result.data.errMsg || '删除失败');
+    }
+}
+
+async function handleCommitItem() {
+    if (selectedItems.value.length === 0) {
+        ElMessage.warning('请选择要开立的项目');
+        return;
+    }
+    await ElMessageBox.confirm('确定开立所选项目吗？', '提示', { type: 'warning' });
+    const ids = selectedItems.value.map(item => item.id);
+    // 使用 /checkapply/updateState 接口
+    const result = await postReq('/checkapply/updateState', { ids, state: 2 });
+    if (result.data.result) {
+        ElMessage.success('开立成功');
+        loadTestApply(currentRegistId.value);
+    } else {
+        ElMessage.error(result.data.errMsg || '开立失败');
+    }
+}
+
+async function handleCancelItem() {
+    if (selectedItems.value.length === 0) {
+        ElMessage.warning('请选择要作废的项目');
+        return;
+    }
+    await ElMessageBox.confirm('确定作废所选项目吗？', '提示', { type: 'warning' });
+    const ids = selectedItems.value.map(item => item.id);
+    // 使用 /checkapply/updateState 接口
+    const result = await postReq('/checkapply/updateState', { ids, state: 6 });
+    if (result.data.result) {
+        ElMessage.success('作废成功');
+        loadTestApply(currentRegistId.value);
+    } else {
+        ElMessage.error(result.data.errMsg || '作废失败');
+    }
+}
+
+function handleSaveAsTemplate() {
+    if (selectedItems.value.length === 0) {
+        ElMessage.warning('请选择要存为模板的项目');
         return;
     }
     
-    ElMessageBox.confirm('确定要删除选中的项目吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-    }).then(async () => {
-        const ids = uncommittedItems.map(item => item.id);
-        const resp = await postReq('/labapply/del', ids);
-        if (resp.data.result) {
-            ElMessage.success('删除成功');
-            loadLabApply(currentRegistId.value);
-        } else {
-            ElMessage.error(resp.data.errMsg || '删除失败');
-        }
-    }).catch(() => {});
-}
-
-async function handleSaveAsTemplate(){
-    if (selectedItems.value.length === 0) {
-        ElMessage.warning('请至少选择一个项目来创建模板');
-        return;
-    }
-
     ElMessageBox.prompt('请输入模板名称', '存为组套', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /.+/,
-        inputErrorMessage: '模板名称不能为空',
+        inputValidator: (val) => val ? true : '模板名称不能为空',
     }).then(async ({ value }) => {
         const itemIds = selectedItems.value.map(item => item.itemId);
         const templateData = {
@@ -455,112 +448,132 @@ async function handleSaveAsTemplate(){
             scope: '3', // 3-个人
             recordType: 2, // 2-检验
             itemIds: itemIds,
-            doctorId: userStore.getUserInfo.value.id
+            doctorId: userStore.getUserInfo.value.id,
+            deptId: userStore.getUserInfo.value.deptID,
         };
-
-        const resp = await postReq('/labtemplate/add', templateData);
-        if (resp.data.result) {
-            ElMessage.success(`模板 "${value}" 保存成功`);
-            loadCommonTemplates(); 
+        const result = await postReq('/checktemplate/add', templateData);
+        if (result.data.result) {
+            ElMessage.success('模板保存成功');
+            loadCommonTemplates(); // 刷新常用模板列表
         } else {
-            ElMessage.error(resp.data.errMsg || '保存模板失败');
+            ElMessage.error(result.data.errMsg || '模板保存失败');
         }
     }).catch(() => {
-        ElMessage.info('已取消操作');
+        ElMessage.info('操作已取消');
     });
 }
 
 function handleRefresh() {
     if (currentRegistId.value) {
-        loadLabApply(currentRegistId.value);
+        loadTestApply(currentRegistId.value);
+        ElMessage.success('刷新成功');
+    } else {
+        ElMessage.warning('请先选择一位患者');
     }
 }
 
-const formatState = (state) => {
-    const stateMap = {
-        1: '暂存', 2: '已开立', 3: '已交费', 4: '已登记',
-        5: '执行完', 6: '已退费', 0: '已作废'
-    };
-    return stateMap[state] || '未知';
-}
-
 async function loadCommonTemplates() {
-    const doctorId = userStore.getUserInfo.value.id;
-    const url = `/labtemplate/page?recordType=2&doctorId=${doctorId}`; 
+    // 使用 /checktemplate/page 接口, recordType 为 2, 并传入医生ID
+    const url = `/checktemplate/page?recordType=2&doctorId=${userStore.getUserInfo.value.id}`;
     const result = await fetchData(url);
-    if(result.result) {
+    if (result.result) {
         templateList.value = result.data.records;
-    } else {
-        templateList.value = [];
     }
 }
 
 async function useTemplate(template) {
-    if (!props.patient) {
-        ElMessage.error('请先选择患者');
+    if (!currentRegistId.value) {
+        ElMessage.error('请先选择一位患者');
         return;
     }
-     if (!currentMedicalId.value){
-         const medRes = await fetchData(`/neudoc/getMedicalRecord?registId=${props.patient.id}`);
-        if(medRes.result && medRes.data){
-            currentMedicalId.value = medRes.data.id;
-        } else {
-             ElMessage.error('获取病历信息失败,请先创建病历首页!');
-            return;
-        }
+    const res = await fetchData(`/checkrelation/items?templateId=${template.id}`);
+    if(!res.result || res.data.length === 0){
+        ElMessage.error('模板内容为空');
+        return;
     }
 
-    const itemsResult = await fetchData(`/labrelation/items?templateId=${template.id}`);
-    if (!itemsResult.result || itemsResult.data.length === 0) {
-        ElMessage.error('无法获取模板项目或模板为空');
-        return;
-    }
-    
-    const itemsToAdd = itemsResult.data.map(item => ({
+    const itemsToAdd = res.data.map(item => ({
         medicalId: currentMedicalId.value,
         registId: currentRegistId.value,
         itemId: item.id,
-        name: template.name, 
+        name: template.name, // 申请名称使用模板名称
         itemName: item.itemName,
-        objective: '', 
+        price: item.price,
+        objective: '',
         position: '',
         isUrgent: 0,
-        num: 1, 
+        num: 1,
+        state: 1, // 暂存
+        recordType: 2, // 检验
         doctorId: userStore.getUserInfo.value.id,
-        recordType: 2
     }));
 
-    const addResp = await postReq("/labapply/add", itemsToAdd);
-
-    if (addResp.data.result) {
-        ElMessage.success(`已使用模板 "${template.name}"`);
-        loadLabApply(currentRegistId.value);
+    const addResult = await postReq('/checkapply/add', itemsToAdd);
+    if (addResult.data.result) {
+        ElMessage.success(`已应用模板【${template.name}】`);
+        loadTestApply(currentRegistId.value);
     } else {
-        ElMessage.error(addResp.data.errMsg || '应用模板失败');
+        ElMessage.error(addResult.data.errMsg || '应用模板失败');
     }
 }
 
 async function viewTemplate(template) {
     currentTemplateName.value = template.name;
-    const result = await fetchData(`/labrelation/items?templateId=${template.id}`);
-    if(result.result) {
+    const result = await fetchData(`/checkrelation/items?templateId=${template.id}`);
+    if(result.result){
         templateDetailItems.value = result.data;
         templateDetailDialogVisible.value = true;
     } else {
-        ElMessage.error('获取模板详情失败');
+        ElMessage.error("获取模板详情失败");
     }
 }
 
-function viewResult(row) { 
-    // TODO
+async function handleDeleteTemplate(template) {
+    try {
+        await ElMessageBox.confirm(`确定要删除模板【${template.name}】吗？`, '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+        });
+        const result = await postReq('/checktemplate/del', template);
+        if (result.data.result) {
+            ElMessage.success('删除成功');
+            loadCommonTemplates();
+        } else {
+            ElMessage.error(result.data.errMsg || '删除失败');
+        }
+    } catch (error) {
+        if (error !== 'cancel') {
+            ElMessage.error('操作失败');
+        } else {
+            ElMessage.info('已取消删除');
+        }
+    }
 }
 
+function viewResult(item) {
+    // Logic to view check result
+    console.log('Viewing result for:', item);
+}
+
+function formatState(state) {
+    switch(state) {
+        case 1: return '暂存';
+        case 2: return '已开立';
+        case 3: return '已交费';
+        case 4: return '已登记';
+        case 5: return '已出结果';
+        case 6: return '已作废';
+        default: return '未知';
+    }
+}
 
 defineExpose({
     clearList
 });
 
 </script>
+
 <style scoped>
 .toolbar {
   margin-bottom: 10px;
@@ -569,7 +582,7 @@ defineExpose({
   margin-bottom: 10px;
 }
 .template-section {
-  margin-left: 20px;
+  padding-left: 10px;
 }
 .clearfix:before,
 .clearfix:after {

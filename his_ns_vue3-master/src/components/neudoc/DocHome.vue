@@ -81,8 +81,8 @@
 			    <el-tab-pane label="检查申请">
 					<checkapply ref="checkApplyComp" :patient="currentPatient"></checkapply>
 				</el-tab-pane>
-			    <el-tab-pane label="检验申请*">
-					检验申请
+			    <el-tab-pane label="检验申请">
+					<testapply ref="testApplyComp" :patient="currentPatient"></testapply>
 				</el-tab-pane>
 				<el-tab-pane label="门诊确诊*">
 					检验申请
@@ -114,6 +114,7 @@
 <script setup>
 import medicalrecord from '../neudoc/his/Doc01.vue'
 import checkapply from '../neudoc/his/Doc02.vue'
+import testapply from '../neudoc/his/Doc03.vue'
 
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
@@ -135,6 +136,7 @@ const data = ref({})
 const data2 = ref({})
 const medicalRecordComp = ref(null)
 const checkApplyComp = ref(null)
+const testApplyComp = ref(null)
 //搜索框
 const kw=ref('')
 //是否显示患者列表
