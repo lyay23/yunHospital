@@ -38,7 +38,8 @@ public class CheckApply implements Serializable {
 
     private Integer num;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("CreationTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private LocalDateTime creationTime;
 
     private Integer doctorId;

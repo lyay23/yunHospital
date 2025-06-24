@@ -25,17 +25,20 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
     @Transactional
     public boolean addItems(List<CheckApply> items) {
         for (CheckApply item : items) {
-            item.setState(1); // 1-暂存
-            item.setCreationTime(LocalDateTime.now());
-            //如果前端没有传入
-            if(item.getCheckOperId()==null){
-                item.setCheckOperId(item.getDoctorId());
-            }
-             if(item.getResultOperId()==null){
-                item.setResultOperId(item.getDoctorId());
+            if(item.getId() == null) { //it's a new item
+                item.setName(item.getItemName());
+                item.setState(1); // 1-暂存
+                item.setCreationTime(LocalDateTime.now());
+                //如果前端没有传入
+                if (item.getCheckOperId() == null) {
+                    item.setCheckOperId(item.getDoctorId());
+                }
+                if (item.getResultOperId() == null) {
+                    item.setResultOperId(item.getDoctorId());
+                }
             }
         }
-        return saveBatch(items);
+        return saveOrUpdateBatch(items);
     }
 
     @Override

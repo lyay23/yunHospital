@@ -34,12 +34,14 @@ public class CheckTemplateController {
             wrapper.eq("RecordType", recordType);
         }
 
+        wrapper.eq("DelMark", 1);
+
         // 加载全院模板(scope=1)和个人模板(scope=3)
         if (doctorId != null) {
-            wrapper.and(wq -> wq.in("Scope", "1", "2", "3")
+            wrapper.and(wq -> wq.in("Scope", "1", "2")
                     .or(iq -> iq.eq("Scope", "3").eq("UserID", doctorId)));
         } else if (scope != null && !scope.isEmpty()) {
-            wrapper.in("Scope", "1", "2", "3");
+            wrapper.in("Scope", scope);
         }
         
         wrapper.orderByDesc("CreationTime");

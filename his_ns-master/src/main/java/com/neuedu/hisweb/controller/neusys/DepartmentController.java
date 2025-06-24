@@ -9,6 +9,8 @@ import com.neuedu.hisweb.service.IDepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -34,6 +36,10 @@ public class DepartmentController {
         return new JsonResult<Page>(page);
     }
 
+    @GetMapping("/tech")
+    public JsonResult<List<Department>> getTechDept(){
+        return new JsonResult<>(iDepartmentService.lambdaQuery().ge(Department::getId,22).list());
+    }
 
     @PostMapping("/add")
     public JsonResult<Department>addDepartment(@RequestBody Department department){

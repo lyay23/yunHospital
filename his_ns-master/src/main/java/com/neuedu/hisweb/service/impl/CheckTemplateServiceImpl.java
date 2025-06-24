@@ -26,7 +26,6 @@ public class CheckTemplateServiceImpl extends ServiceImpl<CheckTemplateMapper, C
     public boolean saveTemplate(CheckTemplateItemVo templateVo) {
         // 1. 保存CheckTemplate主表
         templateVo.setCreationTime(LocalDateTime.now());
-        templateVo.setUserId(templateVo.getDoctorId());
         boolean result = save(templateVo);
         if (!result) {
             return false;

@@ -173,7 +173,6 @@ const isOver=ref(true)
 const showAnalysis = ref(false)
 const analysisLoading = ref(false)
 const analysisData = ref({})
-const currentPatient = ref({})
 
 onMounted(async () => {
   loadData(1)
