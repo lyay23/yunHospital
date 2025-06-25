@@ -80,22 +80,22 @@
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
 			     @tab-click="handleClick">
 			    <el-tab-pane label="病历首页" name="1">
-					<medicalrecord ref="medicalRecordComp" :is-diagnosed="isDiagnosed" :patient="currentPatient" v-if="activeName === '1'"></medicalrecord>
+					<Medicalrecord ref="medicalRecordComp" :is-diagnosed="isDiagnosed" :patient="currentPatient" v-if="activeName === '1'"></Medicalrecord>
 				</el-tab-pane>
 			    <el-tab-pane label="检查申请" name="2">
-					<checkapply ref="checkApplyComp" :patient="currentPatient" v-if="activeName === '2'"></checkapply>
+					<Checkapply ref="checkApplyComp" :patient="currentPatient" v-if="activeName === '2'"></Checkapply>
 				</el-tab-pane>
 			    <el-tab-pane label="检验申请" name="3">
-					<testapply ref="testApplyComp" :patient="currentPatient" v-if="activeName === '3'"></testapply>
+					<Testapply ref="testApplyComp" :patient="currentPatient" v-if="activeName === '3'"></Testapply>
 				</el-tab-pane>
 				<el-tab-pane label="门诊确诊" name="4">
 					<Doc04 :patient="currentPatient" v-if="activeName === '4'" />
 				</el-tab-pane>
 				<el-tab-pane label="处置申请" name="5">
-					<disposalapply :patient="currentPatient" v-if="activeName === '5'" />
+					<Disposalapply :patient="currentPatient" v-if="activeName === '5'" />
 				</el-tab-pane>
 				<el-tab-pane label="处方申请" name="6">
-					处方申请
+					<Prescriptionapply :patient="currentPatient" v-if="activeName === '6'"/>
 				</el-tab-pane>
 				<el-tab-pane label="费用查询*" name="7">
 					费用查询
@@ -133,11 +133,12 @@
 </template>
 
 <script setup>
-import medicalrecord from '../neudoc/his/Doc01.vue'
-import checkapply from '../neudoc/his/Doc02.vue'
-import testapply from '../neudoc/his/Doc03.vue'
+import Medicalrecord from '../neudoc/his/Doc01.vue'
+import Checkapply from '../neudoc/his/Doc02.vue'
+import Testapply from '../neudoc/his/Doc03.vue'
 import Doc04 from './his/Doc04.vue'
-import disposalapply from './his/Doc05.vue'
+import Disposalapply from './his/Doc05.vue'
+import Prescriptionapply from './his/Doc06.vue'
 
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
