@@ -45,7 +45,7 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
 
     @Override
     @Transactional
-    public boolean saveMedicalRecord(MedicalRecordVo vo) {
+    public MedicalRecordVo saveMedicalRecord(MedicalRecordVo vo) {
         MedicalRecord medicalRecord = new MedicalRecord();
         BeanUtils.copyProperties(vo, medicalRecord);
 
@@ -83,12 +83,12 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
                 MedicalDisease medicalDisease = new MedicalDisease();
                 BeanUtils.copyProperties(diseaseVo, medicalDisease);
                 medicalDisease.setId(null);
-                medicalDisease.setMedicalId(medicalRecord.getId());
-                medicalDisease.setRegistId(vo.getRegistId());
+                medicalDisease.setMedicalID(medicalRecord.getId());
+                medicalDisease.setRegistID(vo.getRegistId());
                 medicalDiseaseMapper.insert(medicalDisease);
             }
         }
 
-        return true;
+        return vo;
     }
 }

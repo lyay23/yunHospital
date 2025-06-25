@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -27,14 +28,14 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
         for (CheckApply item : items) {
             if(item.getId() == null) { //it's a new item
                 item.setName(item.getItemName());
-                item.setState(1); // 1-暂存
-                item.setCreationTime(LocalDateTime.now());
-                //如果前端没有传入
+            item.setState(1); // 1-暂存
+            item.setCreationTime(LocalDateTime.now());
+            //如果前端没有传入
                 if (item.getCheckOperId() == null) {
-                    item.setCheckOperId(item.getDoctorId());
-                }
+                item.setCheckOperId(item.getDoctorId());
+            }
                 if (item.getResultOperId() == null) {
-                    item.setResultOperId(item.getDoctorId());
+                item.setResultOperId(item.getDoctorId());
                 }
             }
         }
@@ -54,5 +55,28 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
         checkApply.setState(state);
         
         return update(checkApply, wrapper);
+    }
+
+    @Override
+    @Transactional
+    public boolean saveOrUpdateBatch(Collection<CheckApply> entityList) {
+        for (CheckApply checkApply : entityList) {
+            // Ensure the name is set from itemName
+            if (checkApply.getName() == null && checkApply.getItemName() != null) {
+                checkApply.setName(checkApply.getItemName());
+            }
+            // Set creation time for new entities
+            if (checkApply.getId() == null) {
+                checkApply.setCreationTime(LocalDateTime.now());
+                // If it's a new item, also set operator IDs from doctor ID, if they are not provided
+                if (checkApply.getCheckOperId() == null) {
+                    checkApply.setCheckOperId(checkApply.getDoctorId());
+                }
+                if (checkApply.getResultOperId() == null) {
+                    checkApply.setResultOperId(checkApply.getDoctorId());
+                }
+            }
+        }
+        return super.saveOrUpdateBatch(entityList);
     }
 } 

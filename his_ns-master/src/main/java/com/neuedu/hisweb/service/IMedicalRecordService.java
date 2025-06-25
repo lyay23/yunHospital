@@ -22,5 +22,5 @@ public interface IMedicalRecordService extends IService<MedicalRecord> {
 
      MedicalRecordVo getMedicalRecordByRegistId(Integer registId);
 
-    boolean saveMedicalRecord(MedicalRecordVo medicalRecord);
+    MedicalRecordVo saveMedicalRecord(MedicalRecordVo medicalRecord);
 }

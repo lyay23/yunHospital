@@ -22,7 +22,7 @@
             <result property="medicalID" column="MedicalID"/>
             <result property="diseaseID" column="DiseaseID"/>
             <result property="diagnoseType" column="DiagnoseType"/>
-            <result property="getSiskDate" column="GetSiskDate"/>
+            <result property="siskDate" column="GetSiskDate"/>
             <result property="diagnoseCate" column="DiagnoseCate"/>
             <association property="disease" javaType="com.neuedu.hisweb.entity.Disease">
                 <id property="id" column="d_id"/>

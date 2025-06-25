@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-//let base = '/his';
-let base='http://localhost:8080'
+let base = '/api';
+//let base='http://localhost:8080'
 export const postReq = (url, params) => {
   return axios({
     method: 'post',
@@ -105,30 +105,9 @@ export const putRequest = (url, params) => {
     method: 'put',
     url: `${base}${url}`,
     data: params,
-    transformRequest: [function (data) {
-      if (!data) return '';
-      
-      const ret = [];
-      for (let key in data) {
-        if (data.hasOwnProperty(key)) {
-          const value = data[key];
-          // 处理值为 null 或 undefined 的情况
-          const encodedValue = value === null || value === undefined ? '' : encodeURIComponent(value);
-          ret.push(`${encodeURIComponent(key)}=${encodedValue}`);
-        }
-      }
-      
-      // 使用 join 避免末尾多余的 &
-      return ret.join('&');
-    }],
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/json',
     }
-  })
-  .catch(error => {
-    console.error('PUT 请求失败:', error);
-    // 可以在这里进行统一的错误处理
-    throw error; // 继续抛出错误，让调用者可以捕获
   });
 };
 
@@ -138,6 +117,12 @@ export const deleteRequest = (url) => {
     url: `${base}${url}`
   });
 }
+
+// 兼容旧版API的别名
+export const get = getReq;
+export const post = postJsonRequest;
+export const put = putRequest;
+export const del = deleteRequest;
 
 export const showConstants = (row, column, cellValue, index) => {
   let showMsg = '';

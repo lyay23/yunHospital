@@ -28,7 +28,7 @@ import java.time.Duration;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @RestController
-@RequestMapping("/api/ai")
+@RequestMapping("/ai")
 public class AIChatController {
 
     private static final Logger logger = LoggerFactory.getLogger(AIChatController.class);

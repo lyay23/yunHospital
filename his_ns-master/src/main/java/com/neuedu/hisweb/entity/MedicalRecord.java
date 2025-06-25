@@ -35,7 +35,7 @@ public class MedicalRecord implements Serializable {
     /**
      * 病历号
      */
-    @TableField(value = "CaseNumber", insertStrategy = FieldStrategy.ALWAYS)
+    @TableField("CaseNumber")
     private String caseNumber;
 
     /**

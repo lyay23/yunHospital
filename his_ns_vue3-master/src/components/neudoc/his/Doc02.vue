@@ -149,7 +149,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Refresh, Search } from '@element-plus/icons-vue';
-import { fetchData, postReq } from '../../../utils/api';
+import { fetchData, postReq, get } from '../../../utils/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useUserStore } from '../../../store/user.js';
 
@@ -211,10 +211,15 @@ const totalAmount = computed(() => {
 async function loadCheckApply(registerId, pn = 1) {
     if (registerId) {
         currentRegistId.value = registerId;
-        const medRes = await fetchData(`/neudoc/getMedicalRecord?registId=${registerId}`);
-        if(medRes.result && medRes.data){
-            currentMedicalId.value = medRes.data.id;
+        try {
+            const medRes = await get('/neudoc/medicalrecord/getByRegistId', { registId: registerId });
+            if(medRes.data.result && medRes.data.data && medRes.data.data.id){
+                currentMedicalId.value = medRes.data.data.id;
         } else {
+                currentMedicalId.value = null;
+            }
+        } catch (error) {
+            console.error("获取病历ID失败", error);
             currentMedicalId.value = null;
         }
     }
@@ -321,11 +326,16 @@ async function confirmAddItem() {
         return;
     }
     if (!currentMedicalId.value){
-         const medRes = await fetchData(`/neudoc/getMedicalRecord?registId=${props.patient.id}`);
-        if(medRes.result && medRes.data){
-            currentMedicalId.value = medRes.data.id;
+        try {
+            const medRes = await get('/neudoc/medicalrecord/getByRegistId', { registId: props.patient.id });
+            if(medRes.data.result && medRes.data.data && medRes.data.data.id){
+                currentMedicalId.value = medRes.data.data.id;
         } else {
              ElMessage.error('获取病历信息失败,请先创建病历首页!');
+                return;
+            }
+        } catch (error) {
+            ElMessage.error('获取病历信息时发生网络错误');
             return;
         }
     }

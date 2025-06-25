@@ -79,25 +79,25 @@
 		<el-row>
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
 			     @tab-click="handleClick">
-			    <el-tab-pane label="病历首页">
-					<medicalrecord ref="medicalRecordComp" :is-diagnosed="isDiagnosed" :patient="currentPatient"></medicalrecord>
+			    <el-tab-pane label="病历首页" name="1">
+					<medicalrecord ref="medicalRecordComp" :is-diagnosed="isDiagnosed" :patient="currentPatient" v-if="activeName === '1'"></medicalrecord>
 				</el-tab-pane>
-			    <el-tab-pane label="检查申请">
-					<checkapply ref="checkApplyComp" :patient="currentPatient"></checkapply>
+			    <el-tab-pane label="检查申请" name="2">
+					<checkapply ref="checkApplyComp" :patient="currentPatient" v-if="activeName === '2'"></checkapply>
 				</el-tab-pane>
-			    <el-tab-pane label="检验申请">
-					<testapply ref="testApplyComp" :patient="currentPatient"></testapply>
+			    <el-tab-pane label="检验申请" name="3">
+					<testapply ref="testApplyComp" :patient="currentPatient" v-if="activeName === '3'"></testapply>
 				</el-tab-pane>
-				<el-tab-pane label="门诊确诊*">
-					检验申请
+				<el-tab-pane label="门诊确诊" name="4">
+					<Doc04 :patient="currentPatient" v-if="activeName === '4'" />
 				</el-tab-pane>
-				<el-tab-pane label="处置申请*">
+				<el-tab-pane label="处置申请*" name="5">
 					处置申请
 				</el-tab-pane>
-				<el-tab-pane label="处方申请">
+				<el-tab-pane label="处方申请" name="6">
 					处方申请
 				</el-tab-pane>
-				<el-tab-pane label="费用查询*">
+				<el-tab-pane label="费用查询*" name="7">
 					费用查询
 				</el-tab-pane>
 			</el-tabs>
@@ -136,6 +136,7 @@
 import medicalrecord from '../neudoc/his/Doc01.vue'
 import checkapply from '../neudoc/his/Doc02.vue'
 import testapply from '../neudoc/his/Doc03.vue'
+import Doc04 from './his/Doc04.vue'
 
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
@@ -223,7 +224,7 @@ async function loadData2(pn){
 	}	
 }
 
-const activeName = ref('first')
+const activeName = ref('1')
 //门诊tab 切换 
 const handleClick=()=>{
 	

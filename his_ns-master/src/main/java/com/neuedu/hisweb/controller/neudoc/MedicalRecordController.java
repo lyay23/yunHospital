@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2023-11-21
  */
 @RestController
-@RequestMapping("/neudoc")
+@RequestMapping("/neudoc/medicalrecord")
 public class MedicalRecordController {
 
     @Autowired
@@ -30,19 +30,29 @@ public class MedicalRecordController {
     /**
      * 医生根据挂号ID，得到患者的病历信息
      */
-    @GetMapping("/getMedicalRecord")
+    @GetMapping("/getByRegistId")
     public JsonResult<MedicalRecordVo> getMedicalRecordByRegistId(@RequestParam("registId") Integer registId) {
         MedicalRecordVo medicalRecord = iMedicalRecordService.getMedicalRecordByRegistId(registId);
         return JsonResult.success(medicalRecord);
     }
 
     @PostMapping("/save")
-    public JsonResult saveMedicalRecord(@RequestBody MedicalRecordVo medicalRecord) {
+    public JsonResult<MedicalRecordVo> saveMedicalRecord(@RequestBody MedicalRecordVo medicalRecord) {
         try {
-            boolean success = iMedicalRecordService.saveMedicalRecord(medicalRecord);
-            return success ? JsonResult.success(null) : JsonResult.error("保存失败");
+            MedicalRecordVo result = iMedicalRecordService.saveMedicalRecord(medicalRecord);
+            return JsonResult.success(result);
         } catch (Exception e) {
             return JsonResult.error("保存异常: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/update")
+    public JsonResult<Boolean> updateMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
+        try {
+            boolean success = iMedicalRecordService.updateById(medicalRecord);
+            return JsonResult.success(success);
+        } catch (Exception e) {
+            return JsonResult.error("更新异常: " + e.getMessage());
         }
     }
 

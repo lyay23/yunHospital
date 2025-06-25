@@ -42,6 +42,16 @@ public class CheckApplyController {
         }
     }
 
+    @PostMapping("/saveOrUpdateBatch")
+    public JsonResult<Object> saveOrUpdateBatch(@RequestBody List<CheckApply> items) {
+        boolean result = iService.saveOrUpdateBatch(items);
+        if (result) {
+            return new JsonResult<>(items);
+        } else {
+            return new JsonResult<>("操作失败");
+        }
+    }
+
     @PostMapping("/updateState")
     public JsonResult<Object> updateState(@RequestBody Map<String, Object> params) {
         List<Integer> ids = (List<Integer>) params.get("ids");

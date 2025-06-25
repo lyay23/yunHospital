@@ -141,7 +141,7 @@
         <template #footer>
             <el-button @click="detailsDialogVisible = false">关 闭</el-button>
         </template>
-    </el-dialog>
+  </el-dialog>
   </div>
 </template>
 
@@ -186,76 +186,96 @@ const totalAmount = computed(() => {
 });
 
 // Watch for patient changes
-watch(() => props.patient, (newPatient) => {
-  if (newPatient && newPatient.id) {
-    loadCheckApplies(newPatient.id);
-    loadTemplates();
-    } else {
+watch(() => props.patient, async (newPatient, oldPatient) => {
+  if (newPatient && newPatient.id && (!oldPatient || newPatient.id !== oldPatient.id)) {
+    // 1. 获取病历ID
+    try {
+      const medRes = await getReq('/neudoc/medicalrecord/getByRegistId', { registId: newPatient.id });
+      if (medRes.data && medRes.data.data && medRes.data.data.id) {
+        medicalRecordId.value = medRes.data.data.id;
+      } else {
+        // 如果没有病历，创建一个，并获取新ID
+        const newMedRed = { registId: newPatient.id, caseNumber: newPatient.caseNumber };
+        const createRes = await postReq('/neudoc/medicalrecord/save', newMedRed);
+        if (createRes.data && createRes.data.data && createRes.data.data.id) {
+            medicalRecordId.value = createRes.data.data.id;
+        } else {
+            ElMessage.error("创建新病历失败，无法继续操作");
+            return;
+        }
+      }
+      
+      // 成功获取或创建病历ID后，加载检验申请
+      loadCheckApplies(newPatient.id);
+      loadTemplates(); // Also load templates for the doctor
+
+    } catch (error) {
+      console.error("获取或创建病历失败", error);
+      ElMessage.error("准备患者病历信息时出错，请重试");
+        }
+  } else if (!newPatient) {
+    // 清理数据
     checkApplyData.value = [];
     requirement.value = '';
-    }
-}, { immediate: true });
-
+    medicalRecordId.value = null;
+    templateData.value = []; // Also clear templates
+  }
+}, { immediate: true, deep: true });
 
 async function loadCheckApplies(registId) {
     const url = `/checkapply/page?registId=${registId}&recordType=2&count=100`;
     try {
         const result = await getReq(url);
-        if (result.data.result) {
-            checkApplyData.value = result.data.data.records.map(item => ({
-                ...item,
-            }));
-            
-            if (checkApplyData.value.length > 0) {
-                 if(checkApplyData.value[0].objective)
-                    requirement.value = checkApplyData.value[0].objective;
-                 if(checkApplyData.value[0].medicalId)
-                    medicalRecordId.value = checkApplyData.value[0].medicalId;
-            } else {
-                requirement.value = '';
-                medicalRecordId.value = null; // Reset if no items
-            }
+        checkApplyData.value = result.data.data.records.map(item => ({
+            ...item,
+        }));
+        
+        if (checkApplyData.value.length > 0) {
+             if(checkApplyData.value[0].objective)
+                requirement.value = checkApplyData.value[0].objective;
+             if(checkApplyData.value[0].medicalId)
+                medicalRecordId.value = checkApplyData.value[0].medicalId;
         } else {
-            checkApplyData.value = [];
             requirement.value = '';
-            medicalRecordId.value = null;
         }
     } catch (error) {
         console.error("加载检验申请失败:", error);
         checkApplyData.value = [];
         requirement.value = '';
-        medicalRecordId.value = null;
-    }
+        medicalRecordId.value = null; // Reset if no items
+  }
 }
 
 async function loadTemplates() {
     const url = `/checktemplate/page?recordType=2&doctorId=${userStore.userInfo.id}&count=100`;
      try {
         const result = await getReq(url);
-        if (result.data.result) {
-            templateData.value = result.data.data.records;
-        }
+        templateData.value = result.data.data.records;
     } catch (error) {
         console.error("加载检验模板失败:", error);
-    }
+}
 }
 
 async function loadDepts() {
     // 调用分页接口，但一次性加载所有检验科室
     const url = `/department/tech`;
-    const result = await getReq(url);
-    if (result.data.result) {
+    try {
+        const result = await getReq(url);
         deptData.value = result.data.data;
+    } catch (error) {
+        console.error("加载执行科室失败:", error);
     }
 }
 
 async function searchFmeditem(pn = 1) {
     const url = `/fmeditem/page?expClassId=73&pn=${pn}&count=${fmeditemPage.value.size}&keyword=${fmeditemKw.value}`;
-    const result = await getReq(url);
-    if (result.data.result) {
-      fmeditemData.value = result.data.data.records;
-      fmeditemPage.value.total = result.data.data.total;
-      fmeditemPage.value.current = result.data.data.current;
+    try {
+        const result = await getReq(url);
+        fmeditemData.value = result.data.data.records;
+        fmeditemPage.value.total = result.data.data.total;
+        fmeditemPage.value.current = result.data.data.current;
+    } catch (error) {
+        console.error("加载检验项目失败:", error);
     }
 }
 
@@ -333,12 +353,12 @@ async function removeCheckApply() {
       if (!result.data.result) {
         ElMessage.error(result.data.errMsg || '删除失败');
         return; // Stop if DB deletion fails
-      }
+    }
     } catch (error) {
       ElMessage.error('网络错误，删除失败');
       return;
     }
-  }
+}
 
   // If DB deletion was successful (or not needed), update the UI
   checkApplyData.value = checkApplyData.value.filter(item => 
@@ -359,61 +379,45 @@ async function saveCheckApply() {
         return;
     }
   
-  // If medicalRecordId is not available, fetch it first for new items
-  if (!medicalRecordId.value && checkApplyData.value.some(item => !item.id)) {
+  // If medicalRecordId is not available, fetch it first
+  if (!medicalRecordId.value) {
       try {
-          const medRes = await getReq(`/neudoc/getMedicalRecord?registId=${props.patient.id}`);
-          if (medRes.data.result && medRes.data.data) {
+          const medRes = await getReq('/neudoc/medicalrecord/getByRegistId', { registId: props.patient.id });
+          if (medRes.data && medRes.data.data && medRes.data.data.id) {
               medicalRecordId.value = medRes.data.data.id;
-    } else {
-              ElMessage.error('无法获取病历信息，新增项目失败');
+          } else {
+              // 此处不应再创建，因为 watcher 里已经处理过了
+              ElMessage.error('无法获取病历信息，暂存失败');
               return;
           }
       } catch (error) {
-          ElMessage.error('获取病历信息失败');
+          ElMessage.error('获取病历信息时发生网络错误');
           return;
-      }
+    }
   }
 
-  // Separate new items from existing items
-  const newItems = checkApplyData.value.filter(item => !item.id);
-  const existingItems = checkApplyData.value.filter(item => item.id);
-
-  const basePayload = {
-    medicalId: medicalRecordId.value,
-    registId: props.patient.id,
-    objective: requirement.value,
-    recordType: 2,
-    doctorId: userStore.userInfo.id,
-  };
+  // Use saveOrUpdateBatch to simplify logic
+  const payload = checkApplyData.value.map(item => ({
+      ...item,
+      medicalId: medicalRecordId.value,
+      registId: props.patient.id,
+      objective: requirement.value,
+      recordType: 2, // 检验
+      state: 1, // 暂存
+      id: item.id || null,
+      doctorId: userStore.userInfo.id,
+  }));
 
   try {
-    const promises = [];
-
-    // Promise for adding new items
-    if (newItems.length > 0) {
-      const addPayload = newItems.map(item => ({
-        ...item,
-        ...basePayload,
-        state: 1, //暂存
-      }));
-      promises.push(postReq('/checkapply/add', addPayload));
-    }
-
-    // Promise for updating existing items (to update objective)
-    if (existingItems.length > 0) {
-      const updatePayload = existingItems.map(item => ({
-        ...item,
-        objective: requirement.value,
-      }));
-       promises.push(postReq('/checkapply/add', updatePayload));
-    }
-    
-    await Promise.all(promises);
-    
+    const result = await postReq('/checkapply/saveOrUpdateBatch', payload);
     ElMessage.success(`暂存成功`);
-    loadCheckApplies(props.patient.id);
-
+    // The controller now returns the updated items. We can update the local state.
+    if (result.data && result.data.result) {
+        checkApplyData.value = result.data.data;
+    } else {
+        // Fallback to reloading if the response is not as expected
+        loadCheckApplies(props.patient.id);
+    }
   } catch (error) {
      ElMessage.error('网络错误，操作失败');
   }
@@ -421,7 +425,7 @@ async function saveCheckApply() {
 
 async function openCheckApply() {
   if (selectedCheckApplies.value.length === 0) {
-    ElMessage.warning('请选择要开立的项目');
+        ElMessage.warning('请选择要开立的项目');
         return;
     }
     
@@ -446,20 +450,20 @@ async function openCheckApply() {
   try {
     const result = await postReq('/checkapply/updateState', payload);
     if (result.data.result) {
-      ElMessage.success('开立成功');
+        ElMessage.success('开立成功');
       loadCheckApplies(props.patient.id);
       selectedCheckApplies.value = [];
     } else {
-      ElMessage.error(result.data.errMsg || '开立失败');
+        ElMessage.error(result.data.errMsg || '开立失败');
     }
   } catch (error) {
     ElMessage.error('网络错误，开立失败');
-  }
+    }
 }
 
 async function cancelCheckApply() {
    if (selectedCheckApplies.value.length === 0) {
-    ElMessage.warning('请选择要作废的项目');
+        ElMessage.warning('请选择要作废的项目');
         return;
     }
 
@@ -483,15 +487,15 @@ async function cancelCheckApply() {
   try {
     const result = await postReq('/checkapply/updateState', payload);
     if (result.data.result) {
-      ElMessage.success('作废成功');
+        ElMessage.success('作废成功');
       loadCheckApplies(props.patient.id);
       selectedCheckApplies.value = [];
     } else {
-      ElMessage.error(result.data.errMsg || '作废失败');
-        }
+        ElMessage.error(result.data.errMsg || '作废失败');
+    }
     } catch (error) {
     ElMessage.error('网络错误，作废失败');
-  }
+    }
 }
 
 async function useTemplate(template) {
@@ -509,19 +513,19 @@ async function useTemplate(template) {
                     if (!checkApplyData.value.some(existing => existing.itemId === item.id)) {
                         checkApplyData.value.push({
                             registId: props.patient.id,
-                            itemId: item.id,
-                            itemName: item.itemName,
-                            price: item.price,
+        itemId: item.id,
+        itemName: item.itemName,
+        price: item.price,
                             deptId: defaultDeptId, 
                             deptName: defaultDeptName,
-                            isUrgent: 0, 
+        isUrgent: 0,
                             state: 1, // 默认为暂存
                         });
                     }
                 });
                 ElMessage.success(`套组"${template.name}"已添加`);
             }
-        } else {
+    } else {
             ElMessage.error('获取套组项目失败');
         }
     } catch (error) {
@@ -542,7 +546,7 @@ async function showTemplateDetails(template) {
   } catch (error) {
     console.error('获取套组详情失败:', error);
     ElMessage.error('网络错误，获取套组详情失败');
-  }
+    }
 }
 
 async function deleteTemplate(template) {
@@ -550,26 +554,26 @@ async function deleteTemplate(template) {
     `确定要删除套组 " ${template.name} " 吗？`,
     '确认删除',
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
     }
   ).then(async () => {
     try {
-      const result = await postReq('/checktemplate/del', template);
-      if (result.data.result) {
-        ElMessage.success('删除成功');
+        const result = await postReq('/checktemplate/del', template);
+        if (result.data.result) {
+            ElMessage.success('删除成功');
         loadTemplates(); 
-      } else {
-        ElMessage.error(result.data.errMsg || '删除失败');
-      }
+        } else {
+            ElMessage.error(result.data.errMsg || '删除失败');
+        }
     } catch (error) {
       ElMessage.error('网络错误，删除失败');
     }
   }).catch(() => {
     // User cancelled
   });
-}
+        }
 
 async function saveAsTemplate() {
     if (checkApplyData.value.length === 0) {
@@ -599,7 +603,7 @@ async function saveAsTemplate() {
                 loadTemplates(); // Refresh the template list
             } else {
                 ElMessage.error(result.data.errMsg || '保存失败');
-            }
+    }
         } catch (error) {
             ElMessage.error('网络错误，保存失败');
         }

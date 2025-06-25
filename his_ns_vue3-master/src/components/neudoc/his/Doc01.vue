@@ -188,7 +188,7 @@
 
 <script setup>
 import { ref,onMounted, defineExpose, watch, computed, defineProps } from 'vue'
-import { getReq,postReq } from '../../../utils/api'
+import { get, postReq } from '@/utils/api'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import axios from 'axios'
 import { nextTick } from 'vue';
@@ -201,7 +201,7 @@ const props = defineProps({
 	patient: {
 		type: Object,
 		default: null
-	}
+    }
 });
 
 const westernDiseases = ref([]);
@@ -258,7 +258,7 @@ async function loadDiseases(dicaType) {
 		if (searchKeyword.value) {
 			url += `&keyword=${searchKeyword.value}`;
 		}
-		const resp = await getReq(url);
+		const resp = await get(url);
 		if (resp.data.result) {
 			diseases.value = resp.data.data.records;
 			total.value = resp.data.data.total;
@@ -305,8 +305,8 @@ function handleSearch() {
 }
 
 function openAssessmentDialog() {
-	if (!props.patient || !props.patient.id) {
-		ElMessage.warning('请先选择一位患者');
+	if (!props.patient) {
+		ElMessage.error('请先选择一位患者');
 		return;
 	}
 	assessmentDialogVisible.value = true;
@@ -374,45 +374,48 @@ function confirmDiseaseSelection() {
 }
 
 //获取病人病历首页信息信息
-async function loadMedicalRecord(rid){
-	// First, clear the state of the previous patient.
-	isSaved.value = false; // Reset the save state for the new patient
-	medicalRecord.value = { registId: rid };
-	westernDiseases.value = [];
-	chineseDiseases.value = [];
+const loadMedicalRecord = async (rid) => {
+    if (!rid) {
+        console.error("加载病历的rid无效");
+        return;
+    }
+    try {
+        const response = await get('/neudoc/medicalrecord/getByRegistId', { registId: rid });
+        if (response.data && response.data.result) {
+            if (response.data.data) {
+                // 使用 Object.assign 更新，而不是替换整个对象
+                Object.assign(medicalRecord.value, response.data.data);
 
-	currentRid.value = rid;
-	loading.value=true;
-
-	getReq('/neudoc/getMedicalRecord', { registId: rid }).then(response=>{
-		if(response.data.result && response.data.data){
-			medicalRecord.value = response.data.data;
-			// The arrays are already empty, just populate them
 			if (medicalRecord.value.medicalDiseases) {
-				medicalRecord.value.medicalDiseases.forEach(d => {
-					if (d.diagnoseType === 1) { // 1 for 西医
-						westernDiseases.value.push(d);
-					} else if (d.diagnoseType === 2) { // 2 for 中医
-						chineseDiseases.value.push(d);
-					}
-				});
-			}
-		}
-		// If there is no record, medicalRecord.value remains { registId: rid }
-		// and the diagnosis lists remain empty, which is the correct state.
-	}).catch(err=>{
+                    const west = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 1);
+                    const east = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 2);
+                    westernDiseases.value = west.map(d => ({...d, disease: { diseaseCode: d.diseaseCode, diseaseName: d.diseaseName }}));
+                    chineseDiseases.value = east.map(d => ({...d, disease: { diseaseCode: d.diseaseCode, diseaseName: d.diseaseName }}));
+                }
+            } else {
+                // 如果没有病历记录，为新诊创建一个
+                const newRecord = { registId: props.patient.id, caseNumber: props.patient.caseNumber };
+                clearForm(); // 先清空旧数据
+                Object.assign(medicalRecord.value, newRecord); // 再合并新数据
+            }
+        } else {
+            ElMessage.error(response.data.errMsg || '加载病历信息失败');
+            clearForm();
+        }
+    } catch (error) {
+        console.error('加载病历失败:', error);
 		ElMessage.error('加载病历失败');
-	})
-	
 }
+};
 
-function save(callback){
-	if (!medicalRecord.value || !medicalRecord.value.registId) {
+const save = (callback) => {
+	if (!props.patient) {
 	    ElMessage.error('请先选择一位患者');
 	    return;
 	}
+	isSaved.value=false
 	medicalRecord.value.medicalDiseases = [...westernDiseases.value, ...chineseDiseases.value];
-	postReq('/neudoc/save',medicalRecord.value).then(resp=>{
+	postReq('/neudoc/medicalrecord/save',medicalRecord.value).then(resp=>{
 		if(resp.data.result){
 			if (callback && typeof callback === 'function') {
 				callback();
@@ -426,23 +429,15 @@ function save(callback){
 	    ElMessage.error('网络错误，操作失败')
 	})
 }
-function submit(){
-	ElMessageBox.confirm(
-	    '确认是否提交?提交后无法修改',
-	    '提醒',
-	    {
-	      confirmButtonText: '确认',
-	      cancelButtonText: '取消',
-	      type: 'warning',
-	    }
-	)
-	.then(() => {
-		medicalRecord.value.caseState=2; //2-已提交
-		save(() => {
-			ElMessage.success('提交成功');
-			isSaved.value = true;
-		});
+const submit=()=>{
+	if (!props.patient) {
+        ElMessage.error('请先选择一位患者');
+        return;
+    }
+	save(()=>{
+		isSaved.value=true
 	})
+	
 }
 
 function clearAll(){
@@ -470,10 +465,11 @@ function refresh() {
 }
 
 function clearForm() {
-    medicalRecord.value = {};
-    currentRid.value = null;
-	westernDiseases.value = [];
-	chineseDiseases.value = [];
+	medicalRecord.value = {}
+	westernDiseases.value = []
+	chineseDiseases.value = []
+	isSaved.value = false
+	aiContent.value = ''
 }
 
 const diagnosisSummary = computed(() => {
@@ -488,19 +484,15 @@ const diagnosisSummary = computed(() => {
     return summary || '无';
 });
 
-watch(
-    () => props.patient,
-    (newPatient, oldPatient) => {
-        if (newPatient && newPatient.id) {
-            if (!oldPatient || newPatient.id !== oldPatient.id) {
-                loadMedicalRecord(newPatient.id);
-            }
-        } else {
-            clearForm(); // 如果没有选择患者，则清空表单
+watch(() => props.patient, (newPatient, oldPatient) => {
+    if (newPatient && newPatient.id) {
+        if (!oldPatient || newPatient.id !== oldPatient.id) {
+            loadMedicalRecord(newPatient.id);
         }
-    },
-    { immediate: true, deep: true } // immediate: true 保证组件加载时即使patient没变也会执行一次
-);
+    } else {
+        clearForm();
+    }
+}, { deep: true, immediate: true });
 
 watch([westernDiseases, chineseDiseases], () => {
     isWestActive.value = chineseDiseases.value.length === 0;
@@ -523,42 +515,42 @@ function resetAIResult() {
 }
 
 async function analyzeByAI() {
-	if (!props.patient || !props.patient.id) {
-		ElMessage.warning('请先选择一位患者');
-		return;
-	}
-	resetAIResult();
-	aiLoading.value = true;
-	const message = encodeURIComponent(JSON.stringify(medicalRecord.value));
-	eventSource = new EventSource(`/api/ai/stream?message=${message}`);
-	eventSource.onmessage = function(event) {
-		let raw = event.data.trim();
-		if (raw.startsWith('data:')) {
+	if (!props.patient) {
+    ElMessage.error('请先选择一位患者');
+    return;
+  }
+  resetAIResult();
+  aiLoading.value = true;
+  const message = encodeURIComponent(JSON.stringify(medicalRecord.value));
+  eventSource = new EventSource(`/api/ai/stream?message=${message}`);
+  eventSource.onmessage = function(event) {
+    let raw = event.data.trim();
+    if (raw.startsWith('data:')) {
 			raw = raw.substring(5).trim();
 		}
 		if(raw === "" || raw.startsWith(':')){
 			return;
-		}
+    }
 
-		try {
-			const data = JSON.parse(raw);
+    try {
+      const data = JSON.parse(raw);
 			//  解析阿里云百炼服务返回的JSON结构
 			if (data.output && data.output.choices && data.output.choices.length > 0) {
 				const message = data.output.choices[0].message;
 				if (message && message.content) {
 					// 百炼API每次返回的是完整的句子，而不是增量，所以直接赋值
 					contentBuffer = message.content;
-					streamTypewriter(contentBuffer);
-				}
-			}
-		} catch (e) {
+        streamTypewriter(contentBuffer);
+      }
+      }
+    } catch (e) {
 			console.warn('无法解析SSE中的JSON片段:', event.data, e);
-		}
-	};
-	eventSource.onerror = function() {
-		aiLoading.value = false;
-		if (eventSource) eventSource.close();
-	};
+    }
+  };
+  eventSource.onerror = function() {
+    aiLoading.value = false;
+    if (eventSource) eventSource.close();
+  };
 }
 
 // 打字机流式输出
