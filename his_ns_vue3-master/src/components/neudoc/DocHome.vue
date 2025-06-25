@@ -91,8 +91,8 @@
 				<el-tab-pane label="门诊确诊" name="4">
 					<Doc04 :patient="currentPatient" v-if="activeName === '4'" />
 				</el-tab-pane>
-				<el-tab-pane label="处置申请*" name="5">
-					处置申请
+				<el-tab-pane label="处置申请" name="5">
+					<disposalapply :patient="currentPatient" v-if="activeName === '5'" />
 				</el-tab-pane>
 				<el-tab-pane label="处方申请" name="6">
 					处方申请
@@ -137,6 +137,7 @@ import medicalrecord from '../neudoc/his/Doc01.vue'
 import checkapply from '../neudoc/his/Doc02.vue'
 import testapply from '../neudoc/his/Doc03.vue'
 import Doc04 from './his/Doc04.vue'
+import disposalapply from './his/Doc05.vue'
 
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
