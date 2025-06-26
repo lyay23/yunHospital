@@ -73,7 +73,7 @@
 			    <el-table-column prop="realname" label="姓名"  width="65" align="center"  />
 			    <el-table-column prop="gender" label="性别" width="55"  align="center">
 					<template #default="scope">
-					    {{scope.row.gender==1?"男":"女"}}
+					    {{scope.row.gender==71?"男":"女"}}
 					</template>
 				</el-table-column>
 			    <el-table-column prop="idnumber" label="身份证"  align="center" />
@@ -116,7 +116,7 @@
 <script setup>
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
-import { ElMessageBox,ElTable } from 'element-plus'
+import { ElMessageBox,ElTable, ElMessage } from 'element-plus'
 import { formatDate,getAge,getTimeRange } from '../../utils/utils.js'
 import router from '../../router';
 //导入用户仓库
@@ -280,20 +280,18 @@ function save(){
 		"scheduling":doc.value[0]
 	}
 
-	postReq("/register/add",param).then(resp=>{
-		if(resp.data.result){
+	postReq("/register/add",param).then(resp => {
+		loading.value = false;
+		if (resp.data.result) {
+			ElMessage.success('挂号成功')
+			// 清空选择，为下次挂号做准备
 			multipleTableRef.value.clearSelection()
 			multipleTableRef2.value.clearSelection()
-      loadSchedulingData(1);
-			ElMessageBox.alert('挂号成功', '提示',{})
-
-			
-		}else{
-			if(result.errMsg=='未登录')
-				router.push('/login')
-				
-			ElMessageBox.alert(resp.data.errMsg, '提示',{})
-		}	
+			// 重新加载排班数据，刷新余号
+			loadSchedulingData(1)
+		} else {
+			ElMessage.error(resp.data.errMsg)
+		}
 	})
 }
 

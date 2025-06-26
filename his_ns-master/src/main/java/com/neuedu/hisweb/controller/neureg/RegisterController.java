@@ -66,9 +66,7 @@ public class RegisterController {
     }
 
     @PostMapping("/finish")
-    public JsonResult<JsonResult> finish(@RequestParam(value = "id") Integer id){
-        Register register=new Register();
-        register.setId(id);
+    public JsonResult<JsonResult> finish(@RequestBody Register register){
         register.setVisitState(3);
         boolean rs= iService.updateById(register);
         if(rs){

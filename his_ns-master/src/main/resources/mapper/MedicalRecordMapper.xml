@@ -1,46 +1,49 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.neuedu.hisweb.mapper.MedicalRecordMapper">
-    <resultMap id="MedicalRecordVoResultMap" type="com.neuedu.hisweb.entity.vo.MedicalRecordVo">
-        <id property="id" column="id"/>
-        <result property="caseNumber" column="CaseNumber"/>
-        <result property="registId" column="RegistID"/>
-        <result property="readme" column="Readme"/>
-        <result property="present" column="Present"/>
-        <result property="presentTreat" column="PresentTreat"/>
-        <result property="history" column="History"/>
-        <result property="allergy" column="Allergy"/>
-        <result property="physique" column="Physique"/>
-        <result property="proposal" column="Proposal"/>
-        <result property="careful" column="Careful"/>
-        <result property="checkResult" column="CheckResult"/>
-        <result property="diagnosis" column="Diagnosis"/>
-        <result property="handling" column="Handling"/>
-        <result property="caseState" column="CaseState"/>
-        <collection property="medicalDiseases" ofType="com.neuedu.hisweb.entity.vo.MedicalDiseaseVo">
-            <id property="id" column="md_id"/>
-            <result property="medicalID" column="MedicalID"/>
-            <result property="diseaseID" column="DiseaseID"/>
-            <result property="diagnoseType" column="DiagnoseType"/>
-            <result property="siskDate" column="GetSiskDate"/>
-            <result property="diagnoseCate" column="DiagnoseCate"/>
-            <association property="disease" javaType="com.neuedu.hisweb.entity.Disease">
-                <id property="id" column="d_id"/>
-                <result property="diseaseCode" column="DiseaseCode"/>
-                <result property="diseaseName" column="DiseaseName"/>
-                <result property="diseaseICD" column="DiseaseICD"/>
-                <result property="diseCategoryID" column="DiseCategoryID"/>
-            </association>
-        </collection>
-    </resultMap>
 
-    <select id="getMedicalRecordByRegistId" resultMap="MedicalRecordVoResultMap">
-        select mr.*,
-               md.ID as md_id,md.MedicalID,md.DiseaseID,md.DiagnoseType,md.GetSiskDate,md.DiagnoseCate,
-               d.ID as d_id,d.DiseaseCode,d.DiseaseName,d.DiseaseICD,d.DiseCategoryID
-        from medicalrecord mr
-        left join medicaldisease md on mr.ID = md.MedicalID
-        left join disease d on md.DiseaseID = d.ID
-        where mr.RegistID = #{registId}
+    <!-- 新的、安全的查询：明确列出所有字段，并使用驼峰式别名 -->
+    <select id="getMedicalRecordByRegistId" resultType="com.neuedu.hisweb.entity.vo.MedicalRecordVo">
+        select
+            ID as id,
+            CaseNumber as caseNumber,
+            RegistID as registId,
+            Readme as readme,
+            Present as present,
+            PresentTreat as presentTreat,
+            History as history,
+            Allergy as allergy,
+            Physique as physique,
+            Proposal as proposal,
+            Careful as careful,
+            CheckResult as checkResult,
+            Diagnosis as diagnosis,
+            Handling as handling,
+            CaseState as caseState
+        from medicalrecord
+        where RegistID = #{registId} limit 1
     </select>
+
+    <!-- 新的查询：根据病历ID获取所有诊断信息 -->
+    <select id="getMedicalDiseasesByMedicalId" resultType="com.neuedu.hisweb.entity.vo.MedicalDiseaseVo">
+        select
+            md.ID as id,
+            md.MedicalID,
+            md.DiseaseID,
+            md.DiagnoseType,
+            md.GetSiskDate,
+            md.DiagnoseCate,
+            d.ID as "disease.id",
+            d.DiseaseCode as "disease.diseaseCode",
+            d.DiseaseName as "disease.diseaseName",
+            d.DiseaseICD as "disease.diseaseICD",
+            d.DiseCategoryID as "disease.diseCategoryID"
+        from
+            medicaldisease md
+        left join
+            disease d on md.DiseaseID = d.ID
+        where
+            md.MedicalID = #{medicalId}
+    </select>
+
 </mapper> 

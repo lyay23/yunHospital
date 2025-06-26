@@ -17,6 +17,12 @@ ollama:
   timeout: 60000
 
 
+aliyun:
+  oss:
+    endpoint: https://oss-cn-hangzhou.aliyuncs.com
+    bucketName: sky-take-out039
+    region: cn-hangzhou
+
 # 百炼云部署配置
 # 百炼云部署配置
 bailian:

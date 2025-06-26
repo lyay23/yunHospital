@@ -30,34 +30,36 @@
 				</el-row>
 
 				<el-form-item label="主诉">
-					<el-input v-model="medicalRecord.chiefComplaint" placeholder="患者陈述的主要症状、体征及其持续时间" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.readme" placeholder="患者陈述的主要症状、体征及其持续时间" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 				<el-form-item label="现病史">
-					<el-input v-model="medicalRecord.presentHistory" placeholder="围绕主诉，详细描述病情发生、发展、演变、诊疗的过程" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.present" placeholder="围绕主诉，详细描述病情发生、发展、演变、诊疗的过程" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 				<el-form-item label="现病治疗情况">
-					<el-input v-model="medicalRecord.presentTreatment" placeholder="患者在来本院就诊前，针对现病做过的治疗" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.presentTreat" placeholder="患者在来本院就诊前，针对现病做过的治疗" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 				<el-form-item label="既往史">
-					<el-input v-model="medicalRecord.pastHistory" placeholder="患者既往的健康状况和疾病历史" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.history" placeholder="患者既往的健康状况和疾病历史" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 				<el-form-item label="过敏史">
-					<el-input v-model="medicalRecord.allergicHistory" placeholder="患者的过敏史" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.allergy" placeholder="患者的过敏史" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 				<el-form-item label="体格检查">
-					<el-input v-model="medicalRecord.physicalExam" placeholder="医生的体格检查结果" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.physique" placeholder="医生的体格检查结果" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 
 				<el-form-item label="评估/诊断">
-					<el-input v-model="medicalRecord.diagnosis" placeholder="医生的评估/诊断" :disabled="isDiagnosed"></el-input>
+					<el-input type="textarea" :rows="3" :value="diagnosisSummary" readonly
+						:disabled="isFormDisabled"></el-input>
+					<el-button type="primary" @click="openAssessmentDialog" :disabled="isFormDisabled">评估/诊断</el-button>
 				</el-form-item>
 
 				<el-form-item label="检查建议">
-					<el-input v-model="medicalRecord.checkSuggestion" placeholder="医生的检查建议" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.proposal" placeholder="医生的检查建议" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 
 				<el-form-item label="注意事项">
-					<el-input v-model="medicalRecord.attentions" placeholder="医生的注意事项" :disabled="isDiagnosed"></el-input>
+					<el-input v-model="medicalRecord.careful" placeholder="医生的注意事项" :disabled="isDiagnosed"></el-input>
 				</el-form-item>
 
 				<el-form-item label="检查结果">
@@ -175,11 +177,17 @@
 </template>
 
 <script setup>
-import { ref,onMounted, defineExpose, watch, computed, defineProps } from 'vue'
-import { get, postReq } from '@/utils/api'
-import { ElMessageBox, ElMessage } from 'element-plus'
-import axios from 'axios'
-import { nextTick } from 'vue';
+import {
+	ref,
+	onMounted,
+	watch,
+	computed
+} from 'vue'
+import { get,postReq } from '../../../utils/api.js'
+import {
+	ElMessage,
+	ElMessageBox
+} from 'element-plus'
 
 const props = defineProps({
     patient: {
@@ -369,26 +377,21 @@ const loadMedicalRecord = async (rid) => {
     }
     try {
         const response = await get('/neudoc/medicalrecord/getByRegistId', { registId: rid });
-        if (response.data && response.data.result) {
-            if (response.data.data) {
-                // 使用 Object.assign 更新，而不是替换整个对象
-                Object.assign(medicalRecord.value, response.data.data);
+        if (response.data.data) {
+            Object.assign(medicalRecord.value, response.data.data);
 
-			if (medicalRecord.value.medicalDiseases) {
-                    const west = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 1);
-                    const east = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 2);
-                    westernDiseases.value = west.map(d => ({...d, disease: { diseaseCode: d.diseaseCode, diseaseName: d.diseaseName }}));
-                    chineseDiseases.value = east.map(d => ({...d, disease: { diseaseCode: d.diseaseCode, diseaseName: d.diseaseName }}));
-                }
-            } else {
-                // 如果没有病历记录，为新诊创建一个
-                const newRecord = { registId: props.patient.id, caseNumber: props.patient.caseNumber };
-                clearForm(); // 先清空旧数据
-                Object.assign(medicalRecord.value, newRecord); // 再合并新数据
+            if (medicalRecord.value.medicalDiseases) {
+                const west = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 1);
+                const east = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 2);
+                // 后端已经返回了正确的嵌套结构，直接赋值即可
+                westernDiseases.value = west;
+                chineseDiseases.value = east;
             }
         } else {
-            ElMessage.error(response.data.errMsg || '加载病历信息失败');
-            clearForm();
+            // 如果没有病历记录，为新诊创建一个
+            const newRecord = { registId: props.patient.id, caseNumber: props.patient.caseNumber };
+            clearForm(); // 先清空旧数据
+            Object.assign(medicalRecord.value, newRecord); // 再合并新数据
         }
     } catch (error) {
         console.error('加载病历失败:', error);
@@ -397,25 +400,32 @@ const loadMedicalRecord = async (rid) => {
 };
 
 const save = (callback) => {
-	if (!props.patient) {
-	    ElMessage.error('请先选择一位患者');
-	    return;
-	}
-	isSaved.value=false
-	medicalRecord.value.medicalDiseases = [...westernDiseases.value, ...chineseDiseases.value];
-	postReq('/neudoc/medicalrecord/save',medicalRecord.value).then(resp=>{
-		if(resp.data.result){
-			if (callback && typeof callback === 'function') {
-				callback();
-			} else {
-				ElMessage.success('暂存成功')
-			}
-		}else{
-			ElMessage.error(resp.data.errMsg || '操作失败')
+	return new Promise((resolve, reject) => {
+		if (!props.patient) {
+			ElMessage.error('请先选择一位患者');
+			return reject(new Error('No patient selected'));
 		}
-	}).catch(err => {
-	    ElMessage.error('网络错误，操作失败')
-	})
+		isSaved.value = false;
+		medicalRecord.value.medicalDiseases = [...westernDiseases.value, ...chineseDiseases.value];
+		postReq('/neudoc/medicalrecord/save', medicalRecord.value).then(resp => {
+			if (resp.data.result) {
+				if (callback && typeof callback === 'function') {
+					callback();
+				} else {
+					ElMessage.success('暂存成功');
+				}
+				// 使用 Object.assign 更新，而不是替换整个对象
+				Object.assign(medicalRecord.value, resp.data.data);
+				resolve(true); // Promise 成功
+			} else {
+				ElMessage.error(resp.data.errMsg || '操作失败');
+				reject(new Error(resp.data.errMsg || '操作失败')); // Promise 失败
+			}
+		}).catch(err => {
+			ElMessage.error('网络错误，操作失败');
+			reject(err); // Promise 失败
+		});
+	});
 }
 const submit=()=>{
 	if (!props.patient) {
@@ -570,7 +580,8 @@ watch(aiContent, async () => {
 
 defineExpose({
     loadMedicalRecord,
-    clearForm
+    clearForm,
+    save
 })
 
 </script>

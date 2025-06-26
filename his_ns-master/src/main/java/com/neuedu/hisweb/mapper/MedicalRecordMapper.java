@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.MedicalRecord;
+import com.neuedu.hisweb.entity.vo.MedicalDiseaseVo;
 import com.neuedu.hisweb.entity.vo.MedicalRecordVo;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -47,4 +50,6 @@ public interface MedicalRecordMapper extends BaseMapper<MedicalRecord>   {
     MedicalRecordVo getByRid(Integer rid);
 
     MedicalRecordVo getMedicalRecordByRegistId(@Param("registId") Integer registId);
+
+    List<MedicalDiseaseVo> getMedicalDiseasesByMedicalId(Integer medicalId);
 }

@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from 'vue'
+import { ref,onMounted, onActivated } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import router from '../../router';
@@ -93,6 +93,10 @@ const currentPage = ref(1)
 
 onMounted(async () => {
   loadData(1)
+});
+
+onActivated(() => {
+	loadData(1);
 });
 
 //加载数据

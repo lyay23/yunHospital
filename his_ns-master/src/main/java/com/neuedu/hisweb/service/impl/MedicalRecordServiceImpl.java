@@ -25,70 +25,56 @@ import java.util.List;
  *  服务实现类
  * </p>
  *
- * @author lynn
- * @since 2023-11-21
+ * @author lituai
+ * @since 2023-11-20
  */
 @Service
 public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, MedicalRecord> implements IMedicalRecordService {
 
     @Autowired
-    private MedicalDiseaseMapper medicalDiseaseMapper;
+    private MedicalRecordMapper mapper;
     @Autowired
-    private RegisterMapper registerMapper;
-    @Autowired
-    private MedicalRecordMapper medicalRecordMapper;
+    private MedicalDiseaseMapper diseaseMapper;
 
     @Override
     public MedicalRecordVo getMedicalRecordByRegistId(Integer registId) {
-        return getBaseMapper().getMedicalRecordByRegistId(registId);
+        //第一步：查询病历基本信息
+        MedicalRecordVo medicalRecord = mapper.getMedicalRecordByRegistId(registId);
+        //第二步：如果病历存在，则查询其关联的诊断信息
+        if(medicalRecord!=null){
+            List<MedicalDiseaseVo> diseases = mapper.getMedicalDiseasesByMedicalId(medicalRecord.getId());
+            medicalRecord.setMedicalDiseases(diseases);
+        }
+        return medicalRecord;
     }
 
-    @Override
     @Transactional
-    public MedicalRecordVo saveMedicalRecord(MedicalRecordVo vo) {
+    @Override
+    public boolean saveMedicalRecord(MedicalRecordVo medicalRecordVo) {
+        //保存病历信息
         MedicalRecord medicalRecord = new MedicalRecord();
-        BeanUtils.copyProperties(vo, medicalRecord);
-
-        // 如果没有病历ID，说明是新建
-        if(medicalRecord.getId() == null){
-            // 通过挂号ID查询是否已经存在病历，防止重复创建
-            LambdaQueryWrapper<MedicalRecord> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(MedicalRecord::getRegistId, vo.getRegistId());
-            MedicalRecord existingRecord = getBaseMapper().selectOne(queryWrapper);
-            if (existingRecord != null) {
-                medicalRecord.setId(existingRecord.getId());
-                baseMapper.updateById(medicalRecord);
-            } else {
-                if(medicalRecord.getRegistId() != null) {
-                    //根据挂号ID查询挂号信息
-                    Register register = registerMapper.selectById(medicalRecord.getRegistId());
-                    if (register != null) {
-                        //设置正确的病历号
-                        medicalRecord.setCaseNumber(register.getCaseNumber());
-                    }
+        BeanUtils.copyProperties(medicalRecordVo,medicalRecord);
+        super.saveOrUpdate(medicalRecord);
+        //先删
+        LambdaQueryWrapper<MedicalDisease> wrapper=new LambdaQueryWrapper<>();
+        wrapper.eq(MedicalDisease::getMedicalID,medicalRecord.getId());
+        diseaseMapper.delete(wrapper);
+        //再加
+        List<MedicalDiseaseVo> list = medicalRecordVo.getMedicalDiseases();
+        if(list!=null && !list.isEmpty()) {
+            for (MedicalDiseaseVo diseaseVo : list) {
+                if (diseaseVo.getDisease() != null && diseaseVo.getDisease().getId() != null) {
+                    MedicalDisease medicalDisease = new MedicalDisease();
+                    medicalDisease.setMedicalID(medicalRecord.getId());
+                    medicalDisease.setRegistID(medicalRecord.getRegistId());
+                    medicalDisease.setDiseaseID(diseaseVo.getDisease().getId());
+                    medicalDisease.setDiagnoseType(diseaseVo.getDiagnoseType());
+                    medicalDisease.setDiagnoseCate(diseaseVo.getDiagnoseCate());
+                    diseaseMapper.insert(medicalDisease);
                 }
-                baseMapper.insert(medicalRecord);
-            }
-        } else {
-            baseMapper.updateById(medicalRecord);
-        }
-
-        // 先删除旧的诊断记录
-        medicalDiseaseMapper.delete(new QueryWrapper<MedicalDisease>().eq("MedicalID", medicalRecord.getId()));
-
-        // 再插入新的诊断记录
-        if (vo.getMedicalDiseases() != null && !vo.getMedicalDiseases().isEmpty()) {
-            for (MedicalDiseaseVo diseaseVo : vo.getMedicalDiseases()) {
-                if(diseaseVo.getDiseaseID() == null) continue; //跳过没有选择疾病的空行
-                MedicalDisease medicalDisease = new MedicalDisease();
-                BeanUtils.copyProperties(diseaseVo, medicalDisease);
-                medicalDisease.setId(null);
-                medicalDisease.setMedicalID(medicalRecord.getId());
-                medicalDisease.setRegistID(vo.getRegistId());
-                medicalDiseaseMapper.insert(medicalDisease);
             }
         }
 
-        return vo;
+        return true;
     }
 }

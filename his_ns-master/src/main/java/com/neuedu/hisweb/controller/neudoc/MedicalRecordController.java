@@ -31,17 +31,24 @@ public class MedicalRecordController {
      * 医生根据挂号ID，得到患者的病历信息
      */
     @GetMapping("/getByRegistId")
-    public JsonResult<MedicalRecordVo> getMedicalRecordByRegistId(@RequestParam("registId") Integer registId) {
-        MedicalRecordVo medicalRecord = iMedicalRecordService.getMedicalRecordByRegistId(registId);
-        return JsonResult.success(medicalRecord);
+    public JsonResult<MedicalRecordVo> getMedicalRecordByRegistId(Integer registId){
+        MedicalRecordVo vo= iMedicalRecordService.getMedicalRecordByRegistId(registId);
+        return JsonResult.success(vo);
     }
 
     @PostMapping("/save")
     public JsonResult<MedicalRecordVo> saveMedicalRecord(@RequestBody MedicalRecordVo medicalRecord) {
         try {
-            MedicalRecordVo result = iMedicalRecordService.saveMedicalRecord(medicalRecord);
-            return JsonResult.success(result);
+            // 调用保存服务，我们不使用其返回值，因为它可能不完整
+            iMedicalRecordService.saveMedicalRecord(medicalRecord);
+            
+            // 保存成功后，根据挂号ID重新获取完整的病历信息返回给前端
+            MedicalRecordVo updatedVo = iMedicalRecordService.getMedicalRecordByRegistId(medicalRecord.getRegistId());
+            return JsonResult.success(updatedVo);
+
         } catch (Exception e) {
+            // 记录详细错误，方便排查
+            // log.error("保存病历异常", e);
             return JsonResult.error("保存异常: " + e.getMessage());
         }
     }
@@ -53,21 +60,6 @@ public class MedicalRecordController {
             return JsonResult.success(success);
         } catch (Exception e) {
             return JsonResult.error("更新异常: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/finish")
-    public JsonResult<Object> finishConsultation(@RequestBody Register register) {
-        if (register == null || register.getId() == null) {
-            return new JsonResult<>("参数错误");
-        }
-        // Assuming state '3' means 'finished'
-        boolean success = iRegisterService.updateVisitState(register.getId(), 3);
-
-        if (success) {
-            return new JsonResult<>(true);
-        } else {
-            return new JsonResult<>("操作失败");
         }
     }
 

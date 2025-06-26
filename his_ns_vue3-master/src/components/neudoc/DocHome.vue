@@ -99,26 +99,6 @@
 			</el-tabs>
 		</el-row>
 		
-		<!-- 新增：病历分析模块 -->
-		<el-row v-if="showAnalysis" style="margin-top: 20px;">
-			<el-col :span="24">
-				<el-card>
-					<template #header>
-						<div style="display: flex; justify-content: space-between; align-items: center;">
-							<span>病历分析结果</span>
-							<el-button type="danger" size="small" @click="closeAnalysisModule">关闭</el-button>
-						</div>
-					</template>
-					<medical-analysis 
-						:patient-info="currentPatient"
-						:analysis-data="analysisData"
-						:loading="analysisLoading"
-						@refresh="loadAnalysisData">
-					</medical-analysis>
-				</el-card>
-			</el-col>
-		</el-row>
-		
 		<el-row>
 
 
@@ -169,11 +149,6 @@ const patientInfo=ref('请先选择一位患者')
 //是否显示诊毕
 const isOver=ref(true)
 
-// 新增：病历分析相关状态
-const showAnalysis = ref(false)
-const analysisLoading = ref(false)
-const analysisData = ref({})
-
 onMounted(async () => {
   loadData(1)
   loadData2(1)
@@ -183,7 +158,6 @@ onMounted(async () => {
 //加载当天未就诊患者数据
 async function loadData(pn){
 	loading.value=true
-	// var loginUser=JSON.parse(sessionStorage.getItem("user"))
 	var date=formatDate(new Date())
 	let url=`/register/page?count=100&pn=${pn}&state=1&regDate=${date}`
 	url+=`&deptId=${userStore.getUserInfo.value.deptID}`
@@ -205,7 +179,6 @@ async function loadData(pn){
 //加载当天已就诊患者数据
 async function loadData2(pn){
 	loading2.value=true
-	// var loginUser=JSON.parse(sessionStorage.getItem("user"))
 	var date=formatDate(new Date())
 	let url=`/register/page?count=100&pn=${pn}&state=3&regDate=${date}`
 	url+=`&deptId=${userStore.getUserInfo.value.deptID}`
@@ -233,8 +206,6 @@ const handleRowClick=(val, column, event)=>{
 	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
 	currentPatient.value = val
 	isOver.value=true
-	currentPatient.value = val;
-	isDiagnosed.value = false;	
 }
 
 const handleDiagnosedRowClick=(val, column, event)=>{
@@ -242,9 +213,6 @@ const handleDiagnosedRowClick=(val, column, event)=>{
 	isOver.value=false
 	currentPatient.value = val;
 	isDiagnosed.value = true;
-	if (medicalRecordComp.value) {
-		medicalRecordComp.value.clearForm();
-	}
 }
 
 function searchPatients() {
@@ -264,6 +232,9 @@ const finishConsultation = async () => {
     }
 
     try {
+		// 先保存病历，并等待结果
+		await medicalRecordComp.value.save()
+		// 确认诊毕
 		await ElMessageBox.confirm(
 			`确定要结束对【${currentPatient.value.realName}】的诊断吗？`,
 			'诊毕确认',
@@ -274,7 +245,8 @@ const finishConsultation = async () => {
 			}
 		);
 
-        const res = await postReq(`/register/finish?id=${currentPatient.value.id}`);
+        // 发送诊毕请求
+        const res = await postReq('/register/finish', { id: currentPatient.value.id });
         if (res.data.result) {
             ElMessage.success('诊毕成功');
             refreshPatientLists();
@@ -286,97 +258,20 @@ const finishConsultation = async () => {
             ElMessage.error(res.data.errMsg || '诊毕失败');
         }
     } catch (error) {
-		if (error !== 'cancel') {
-           ElMessage.error('操作失败或已取消');
-        }else{
+		// 打印真实错误到控制台，以便调试
+		console.error("诊毕过程中发生错误:", error);
+		
+		if (error && error.message && !error.message.includes('No patient selected') && error !== 'cancel') {
+           // ElMessage.error('操作失败或已取消'); // 暂时注释掉，让错误在控制台可见
+        } else if (error === 'cancel') {
 			ElMessage.info('操作已取消');
 		}
     }
 };
+
 </script>
-
-<style scoped>
-/* Reset browser defaults */
-html,
-body {
-	margin: 0;
-	padding: 0;
-	height: 100%;
-	width: 100%;
-	overflow: hidden;
-	/* Prevent body scrolling */
-}
-
-/* Use a more predictable box-sizing model */
-* {
-	box-sizing: border-box;
-}
-
-.home_container {
-	height: 100vh;
-	width: 100%;
-}
-
-/* Override Element Plus container behavior for our layout */
-.main-container,
-.content-container {
-	display: block;
-	height: 100%;
-	width: 100%;
-}
-
-.top-header {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 60px;
-	padding: 0 20px;
-	background-color: #20a0ff;
-	color: #fff;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	z-index: 100;
-}
-
-.sidebar {
-	position: fixed;
-	top: 60px;
-	left: 0;
-	bottom: 0;
-	width: 200px;
-	background-color: #fff;
-	border-right: 1px solid #e6e6e6;
-	overflow-y: hidden;
-	/* This will hide the scrollbar */
-	z-index: 99;
-}
-
-.el-menu-vertical {
-	height: 100%;
-	/* Make menu fill the sidebar */
-	border-right: none;
-}
-
-.main-content {
-	margin-top: 60px;
-	margin-left: 200px;
-	padding: 20px;
-	height: calc(100vh - 60px);
-	/* Full height minus header */
-	overflow-y: auto;
-	/* Allow main content to scroll */
-	width: calc(100% - 200px);
-}
-
-.home_title {
-	color: #fff;
-	font-size: 22px;
-	font-weight: bold;
-}
-
-.el-aside {
-  background-color: #f2f2f2; /* Lighter grey for a softer look */
+<style>
+.input-with-select .el-input-group__prepend {
+  background-color: var(--el-fill-color-blank);
 }
 </style>
