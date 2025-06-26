@@ -17,4 +17,6 @@ public interface ICheckApplyService extends IService<CheckApply> {
     boolean updateState(List<Integer> ids, Integer state);
 
     boolean saveOrUpdateBatch(Collection<CheckApply> entityList);
+
+    boolean delete(List<Integer> ids);
 } 

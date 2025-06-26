@@ -57,10 +57,18 @@ public class MedicalRecordController {
     }
 
     @PostMapping("/finish")
-    public JsonResult finish(@RequestBody Register register) {
-        register.setVisitState(3); //3-已诊
-        boolean success = iRegisterService.updateById(register);
-        return success ? JsonResult.success(null) : JsonResult.error("操作失败");
+    public JsonResult<Object> finishConsultation(@RequestBody Register register) {
+        if (register == null || register.getId() == null) {
+            return new JsonResult<>("参数错误");
+        }
+        // Assuming state '3' means 'finished'
+        boolean success = iRegisterService.updateVisitState(register.getId(), 3);
+
+        if (success) {
+            return new JsonResult<>(true);
+        } else {
+            return new JsonResult<>("操作失败");
+        }
     }
 
     /**

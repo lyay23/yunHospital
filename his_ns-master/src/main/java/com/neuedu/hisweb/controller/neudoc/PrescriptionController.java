@@ -62,6 +62,21 @@ public class PrescriptionController {
 
     @PostMapping("/del")
     public JsonResult<Object> deletePrescription(@RequestBody List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new JsonResult<>("删除失败：ID列表为空");
+        }
+        
+        QueryWrapper<Prescription> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("ID", ids)
+                    .and(wrapper -> wrapper.eq("PrescriptionState", 1)
+                                           .or()
+                                           .eq("PrescriptionState", 3));
+        
+        long count = iPrescriptionService.count(queryWrapper);
+        if (count != ids.size()) {
+            return new JsonResult<>("删除失败：包含无法删除的处方状态");
+        }
+
         boolean success = iPrescriptionService.removeByIds(ids);
         if (success) {
             return new JsonResult<>(true);

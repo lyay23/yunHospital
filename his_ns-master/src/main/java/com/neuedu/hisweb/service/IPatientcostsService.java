@@ -2,6 +2,9 @@ package com.neuedu.hisweb.service;
 
 import com.neuedu.hisweb.entity.Patientcosts;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.neuedu.hisweb.entity.vo.PatientCostVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2023-08-09
  */
 public interface IPatientcostsService extends IService<Patientcosts> {
-
+    List<PatientCostVo> selectPatientCost(String keyword, Integer itemType);
 }

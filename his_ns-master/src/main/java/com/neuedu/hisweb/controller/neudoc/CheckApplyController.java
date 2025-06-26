@@ -66,7 +66,7 @@ public class CheckApplyController {
 
     @PostMapping("/del")
     public JsonResult<Object> delCheckApply(@RequestBody List<Integer> ids) {
-        boolean result = iService.removeByIds(ids);
+        boolean result = iService.delete(ids);
         if (result) {
             return new JsonResult<>(true);
         } else {

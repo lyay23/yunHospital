@@ -259,8 +259,9 @@ async function deletePrescription() {
     ElMessage.warning("请选择要删除的处方");
     return;
   }
-  if (selectedPrescription.value.prescriptionState !== 1) {
-    ElMessage.error("只能删除暂存状态的处方！");
+  const state = selectedPrescription.value.prescriptionState;
+  if (state !== 1 && state !== 3) {
+    ElMessage.error("只能删除暂存或作废状态的处方！");
     return;
   }
   await ElMessageBox.confirm(`确认删除处方 "${selectedPrescription.value.prescriptionName}"?`, '警告', { type: 'warning' });

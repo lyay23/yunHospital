@@ -425,9 +425,9 @@ async function handleDeleteItem() {
         ElMessage.warning('请至少选择一个项目');
         return;
     }
-    const uncommittedItems = selectedItems.value.filter(item => item.state === 1);
+    const uncommittedItems = selectedItems.value.filter(item => item.state === 1 || item.state === 0);
     if (uncommittedItems.length !== selectedItems.value.length) {
-        ElMessage.error('只能删除暂存状态的项目');
+        ElMessage.error('只能删除暂存或作废状态的项目');
         return;
     }
     

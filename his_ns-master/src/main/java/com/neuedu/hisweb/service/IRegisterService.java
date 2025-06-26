@@ -20,4 +20,5 @@ public interface IRegisterService extends IService<Register> {
     boolean saveRegister(RegParam param);
     Page<RegisterVo> selectPage(Page<RegisterVo> page,Integer deptId,Integer docId,Integer state,String keyword,String regDate);
     boolean updateRegisterState(RegParam param);
+    boolean updateVisitState(Integer id, Integer state);
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.hisweb.mapper.PatientcostsMapper">
+
+    <resultMap id="PatientCostVo" type="com.neuedu.hisweb.entity.vo.PatientCostVo">
+        <id property="id" column="pc_id"/>
+        <result property="patientName" column="mc_realname"/>
+        <result property="caseNumber" column="reg_caseNumber"/>
+        <result property="registID" column="pc_registId"/>
+        <result property="invoiceID" column="pc_invoiceId"/>
+        <result property="itemID" column="pc_itemId"/>
+        <result property="itemType" column="pc_itemType"/>
+        <result property="name" column="pc_name"/>
+        <result property="price" column="pc_price"/>
+        <result property="amount" column="pc_amount"/>
+        <result property="deptID" column="pc_deptId"/>
+        <result property="createtime" column="pc_createtime"/>
+        <result property="createOperID" column="pc_createOperId"/>
+        <result property="payTime" column="pc_payTime"/>
+        <result property="registerID" column="pc_registerId"/>
+        <result property="feeType" column="pc_feeType"/>
+        <result property="backID" column="pc_backID"/>
+    </resultMap>
+
+    <select id="selectPatientCost" resultMap="PatientCostVo">
+        SELECT
+            pc.ID as pc_id,
+            pc.RegistID as pc_registId,
+            pc.InvoiceID as pc_invoiceId,
+            pc.ItemID as pc_itemId,
+            pc.ItemType as pc_itemType,
+            pc.Name as pc_name,
+            pc.Price as pc_price,
+            pc.Amount as pc_amount,
+            pc.DeptID as pc_deptId,
+            pc.CreateTime as pc_createtime,
+            pc.CreateOperID as pc_createOperId,
+            pc.PayTime as pc_payTime,
+            pc.RegisterID as pc_registerId,
+            pc.FeeType as pc_feeType,
+            pc.BackID as pc_backID,
+            mc.realname as mc_realname,
+            reg.CaseNumber as reg_caseNumber
+        FROM
+            patientcosts pc
+        LEFT JOIN
+            register reg ON pc.RegistID = reg.ID
+        LEFT JOIN
+            medicalcard mc ON reg.medicalCardId = mc.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (mc.realname LIKE CONCAT('%', #{keyword}, '%') OR reg.CaseNumber LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="itemType != null">
+                AND pc.ItemType = #{itemType}
+            </if>
+        </where>
+        ORDER BY
+            pc.CreateTime ASC
+    </select>
+</mapper> 

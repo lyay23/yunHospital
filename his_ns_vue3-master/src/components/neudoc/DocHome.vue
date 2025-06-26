@@ -80,7 +80,7 @@
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
 			     @tab-click="handleClick">
 			    <el-tab-pane label="病历首页" name="1">
-					<Medicalrecord ref="medicalRecordComp" :is-diagnosed="isDiagnosed" :patient="currentPatient" v-if="activeName === '1'"></Medicalrecord>
+					<Medicalrecord ref="medicalRecordComp" :patient="currentPatient" :is-diagnosed="isDiagnosed"></Medicalrecord>
 				</el-tab-pane>
 			    <el-tab-pane label="检查申请" name="2">
 					<Checkapply ref="checkApplyComp" :patient="currentPatient" v-if="activeName === '2'"></Checkapply>
@@ -98,7 +98,7 @@
 					<Prescriptionapply :patient="currentPatient" v-if="activeName === '6'"/>
 				</el-tab-pane>
 				<el-tab-pane label="费用查询*" name="7">
-					费用查询
+					<CostQuery :patient="currentPatient" v-if="activeName === '7'"/>
 				</el-tab-pane>
 			</el-tabs>
 		</el-row>
@@ -139,6 +139,7 @@ import Testapply from '../neudoc/his/Doc03.vue'
 import Doc04 from './his/Doc04.vue'
 import Disposalapply from './his/Doc05.vue'
 import Prescriptionapply from './his/Doc06.vue'
+import CostQuery from './his/doc07.vue'
 
 import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
@@ -245,6 +246,9 @@ const handleDiagnosedRowClick=(val, column, event)=>{
 	isOver.value=false
 	currentPatient.value = val;
 	isDiagnosed.value = true;
+	if (medicalRecordComp.value) {
+		medicalRecordComp.value.clearForm();
+	}
 }
 
 function searchPatients() {
@@ -274,20 +278,13 @@ async function finishConsultation() {
         }
     )
     .then(async () => {
-        const resp = await postReq("/neudoc/finish", currentPatient.value);
+        const resp = await postReq("/neudoc/medicalrecord/finish", currentPatient.value);
         if(resp.data.result){
             ElMessage.success('操作成功');
             loadData(1); 
             loadData2(1);
-            patientInfo.value = '请先选择一位患者';
             isOver.value = false;
-            currentPatient.value = null;
-            if (medicalRecordComp.value) {
-                medicalRecordComp.value.clearForm();
-            }
-            if (checkApplyComp.value) {
-                checkApplyComp.value.clearList();
-            }
+            isDiagnosed.value = true;
         } else {
             ElMessage.error(resp.data.errMsg || '操作失败');
         }

@@ -69,7 +69,6 @@
                 <el-space>
                   <el-button type="primary" :icon="Plus" @click="openAddDialog">新增项目</el-button>
                   <el-button type="danger" :icon="Delete" @click="removeApplyItem">删除项目</el-button>
-                  <el-button :icon="Document" @click="saveApplyItems">暂存</el-button>
                   <el-button type="success" :icon="SuccessFilled" @click="openApplyItems">开立</el-button>
                   <el-button :icon="DeleteFilled" @click="cancelApplyItems">作废</el-button>
                   <el-button :icon="Collection" @click="saveAsTemplate">存为套组</el-button>
@@ -79,7 +78,7 @@
             <el-table :data="applyData" style="width: 100%;" @selection-change="handleApplySelectionChange">
                 <el-table-column type="selection"></el-table-column>
                 <el-table-column property="itemName" label="项目名称" ></el-table-column>
-                <el-table-column property="deptName" label="执行科室" width="100"></el-table-column>
+                <el-table-column property="execDept" label="执行科室" width="100"></el-table-column>
                 <el-table-column label="加急" width="60" align="center">
                    <template #default="scope">
                       <el-tag :type="scope.row.isUrgent === 1 ? 'danger' : 'info'" size="small">{{ scope.row.isUrgent === 1 ? '是' : '否' }}</el-tag>
@@ -307,32 +306,40 @@ function handleApplySelectionChange(selection) {
   selectedApplyItems.value = selection;
 }
 
-function addApplyItem() {
+async function addApplyItem() {
   if (selectedFmeditems.value.length === 0) {
     ElMessage.warning('请至少选择一个处置项目');
-        return;
-    }
+    return;
+  }
   if (!selectedDeptId.value) {
     ElMessage.warning('请选择执行科室');
-        return;
-    }
+    return;
+  }
 
-  const selectedDept = deptData.value.find(d => d.id === selectedDeptId.value);
+  const itemsToAdd = selectedFmeditems.value.map(item => ({
+    medicalId: medicalRecordId.value,
+    registId: props.patient.id,
+    itemId: item.id,
+    name: item.itemName,
+    itemName: item.itemName,
+    objective: requirement.value,
+    isUrgent: isUrgent.value ? 1 : 0,
+    num: 1,
+    state: 1, // 1-暂存
+    recordType: RECORD_TYPE, 
+    doctorId: userStore.userInfo.id,
+    deptId: selectedDeptId.value,
+    price: item.price
+  }));
 
-  selectedFmeditems.value.forEach(item => {
-    applyData.value.push({
-      registId: props.patient.id,
-      itemId: item.id,
-      itemName: item.itemName,
-      price: item.price,
-      deptId: selectedDeptId.value,
-      deptName: selectedDept.deptName,
-      isUrgent: isUrgent.value ? 1 : 0,
-        state: 1, // 1 for '暂存'
-    });
-  });
-
-  dialogVisible.value = false;
+  const res = await postReq('/checkapply/add', itemsToAdd);
+  if (res.data.result) {
+    ElMessage.success('项目已保存');
+    dialogVisible.value = false;
+    loadApplyItems(props.patient.id);
+  } else {
+    ElMessage.error(res.data.errMsg || '保存失败');
+  }
 }
 
 async function removeApplyItem() {
@@ -362,58 +369,6 @@ async function removeApplyItem() {
   );
   ElMessage.success('删除成功');
   selectedApplyItems.value = [];
-}
-
-async function saveApplyItems() {
-  if (!props.patient) {
-    ElMessage.warning('请先选择一位患者');
-    return;
-  }
-  
-  if (applyData.value.length === 0) {
-    ElMessage.warning('没有可暂存的项目');
-        return;
-    }
-  
-  // If medicalRecordId is not available, fetch it first
-  if (!medicalRecordId.value) {
-      try {
-          const medRes = await getReq('/neudoc/medicalrecord/getByRegistId', { registId: props.patient.id });
-          if (medRes.data && medRes.data.data && medRes.data.data.id) {
-              medicalRecordId.value = medRes.data.data.id;
-          } else {
-              ElMessage.error('无法获取病历信息，暂存失败');
-              return;
-          }
-      } catch (error) {
-          ElMessage.error('获取病历信息时发生网络错误');
-          return;
-    }
-  }
-
-  // Use saveOrUpdateBatch to simplify logic
-  const payload = applyData.value.map(item => ({
-      ...item,
-      medicalId: medicalRecordId.value,
-      registId: props.patient.id,
-      objective: requirement.value,
-      recordType: RECORD_TYPE, 
-      state: 1, // 暂存
-      id: item.id || null,
-      doctorId: userStore.userInfo.id,
-  }));
-
-  try {
-    const result = await postReq('/checkapply/saveOrUpdateBatch', payload);
-    ElMessage.success(`暂存成功`);
-    if (result.data && result.data.result) {
-        applyData.value = result.data.data;
-    } else {
-        loadApplyItems(props.patient.id);
-    }
-  } catch (error) {
-     ElMessage.error('网络错误，操作失败');
-  }
 }
 
 async function openApplyItems() {

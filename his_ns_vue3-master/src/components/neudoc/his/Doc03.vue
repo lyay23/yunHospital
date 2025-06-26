@@ -69,7 +69,6 @@
                 <el-space>
                   <el-button type="primary" :icon="Plus" @click="openAddDialog">新增项目</el-button>
                   <el-button type="danger" :icon="Delete" @click="removeCheckApply">删除项目</el-button>
-                  <el-button :icon="Document" @click="saveCheckApply">暂存</el-button>
                   <el-button type="success" :icon="SuccessFilled" @click="openCheckApply">开立</el-button>
                   <el-button :icon="DeleteFilled" @click="cancelCheckApply">作废</el-button>
                   <el-button :icon="Collection" @click="saveAsTemplate">存为套组</el-button>
@@ -79,7 +78,7 @@
             <el-table :data="checkApplyData" style="width: 100%;" @selection-change="handleCheckApplySelectionChange">
                 <el-table-column type="selection"></el-table-column>
                 <el-table-column property="itemName" label="项目名称" ></el-table-column>
-                <el-table-column property="deptName" label="执行科室" width="100"></el-table-column>
+                <el-table-column property="execDept" label="执行科室" width="100"></el-table-column>
                 <el-table-column label="加急" width="60" align="center">
                    <template #default="scope">
                       <el-tag :type="scope.row.isUrgent === 1 ? 'danger' : 'info'" size="small">{{ scope.row.isUrgent === 1 ? '是' : '否' }}</el-tag>
@@ -305,7 +304,7 @@ function handleCheckApplySelectionChange(selection) {
   selectedCheckApplies.value = selection;
 }
 
-function addCheckApply() {
+async function addCheckApply() {
   if (selectedFmeditems.value.length === 0) {
     ElMessage.warning('请至少选择一个检验项目');
         return;
@@ -315,22 +314,30 @@ function addCheckApply() {
         return;
     }
 
-  const selectedDept = deptData.value.find(d => d.id === selectedDeptId.value);
-
-  selectedFmeditems.value.forEach(item => {
-    checkApplyData.value.push({
+  const itemsToAdd = selectedFmeditems.value.map(item => ({
+    medicalId: medicalRecordId.value,
       registId: props.patient.id,
       itemId: item.id,
+    name: item.itemName,
       itemName: item.itemName,
-      price: item.price,
+    objective: requirement.value,
+    isUrgent: isUrgent.value ? 1 : 0,
+    num: 1,
+    state: 1, // 1-暂存
+    recordType: 2, // 2-检验
+    doctorId: userStore.userInfo.id,
       deptId: selectedDeptId.value,
-      deptName: selectedDept.deptName,
-      isUrgent: isUrgent.value ? 1 : 0,
-        state: 1, // 1 for '暂存'
-    });
-  });
+    price: item.price
+  }));
 
+  const res = await postReq('/checkapply/add', itemsToAdd);
+  if (res.data.result) {
+    ElMessage.success('项目已保存');
   dialogVisible.value = false;
+    loadCheckApplies(props.patient.id);
+  } else {
+    ElMessage.error(res.data.errMsg || '保存失败');
+  }
 }
 
 async function removeCheckApply() {
@@ -366,61 +373,6 @@ async function removeCheckApply() {
   );
   ElMessage.success('删除成功');
   selectedCheckApplies.value = [];
-}
-
-async function saveCheckApply() {
-  if (!props.patient) {
-    ElMessage.warning('请先选择一位患者');
-    return;
-  }
-  
-  if (checkApplyData.value.length === 0) {
-    ElMessage.warning('没有可暂存的项目');
-        return;
-    }
-  
-  // If medicalRecordId is not available, fetch it first
-  if (!medicalRecordId.value) {
-      try {
-          const medRes = await getReq('/neudoc/medicalrecord/getByRegistId', { registId: props.patient.id });
-          if (medRes.data && medRes.data.data && medRes.data.data.id) {
-              medicalRecordId.value = medRes.data.data.id;
-          } else {
-              // 此处不应再创建，因为 watcher 里已经处理过了
-              ElMessage.error('无法获取病历信息，暂存失败');
-              return;
-          }
-      } catch (error) {
-          ElMessage.error('获取病历信息时发生网络错误');
-          return;
-    }
-  }
-
-  // Use saveOrUpdateBatch to simplify logic
-  const payload = checkApplyData.value.map(item => ({
-      ...item,
-      medicalId: medicalRecordId.value,
-      registId: props.patient.id,
-      objective: requirement.value,
-      recordType: 2, // 检验
-      state: 1, // 暂存
-      id: item.id || null,
-      doctorId: userStore.userInfo.id,
-  }));
-
-  try {
-    const result = await postReq('/checkapply/saveOrUpdateBatch', payload);
-    ElMessage.success(`暂存成功`);
-    // The controller now returns the updated items. We can update the local state.
-    if (result.data && result.data.result) {
-        checkApplyData.value = result.data.data;
-    } else {
-        // Fallback to reloading if the response is not as expected
-        loadCheckApplies(props.patient.id);
-    }
-  } catch (error) {
-     ElMessage.error('网络错误，操作失败');
-  }
 }
 
 async function openCheckApply() {

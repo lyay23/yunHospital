@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -47,6 +48,7 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
      * @param param
      * @return
      */
+    @Override
     public boolean saveRegister(RegParam param) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
         String date_str=df.format(new Date()).toString();
@@ -161,5 +163,11 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         return true;
     }
 
-
+    @Override
+    public boolean updateVisitState(Integer id, Integer state) {
+        Register register = new Register();
+        register.setId(id);
+        register.setVisitState(state);
+        return this.updateById(register);
+    }
 }
