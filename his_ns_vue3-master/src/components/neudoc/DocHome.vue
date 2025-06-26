@@ -71,10 +71,6 @@
 			<el-button type="primary" size="small" v-if="isOver" :span="2" @click="finishConsultation">
 				诊毕
 			</el-button>
-			<!-- 新增按钮：生成病历分析模块 -->
-			<el-button type="success" size="small" @click="showAnalysisModule" style="margin-left: 10px;">
-				病历分析
-			</el-button>
 		</el-row>
 		<el-row>
 			<el-tabs v-model="activeName" type="card" class="demo-tabs"
@@ -83,19 +79,19 @@
 					<Medicalrecord ref="medicalRecordComp" :patient="currentPatient" :is-diagnosed="isDiagnosed"></Medicalrecord>
 				</el-tab-pane>
 			    <el-tab-pane label="检查申请" name="2">
-					<Checkapply ref="checkApplyComp" :patient="currentPatient" v-if="activeName === '2'"></Checkapply>
+					<Checkapply ref="checkApplyComp" :patient="currentPatient" :is-diagnosed="isDiagnosed" v-if="activeName === '2'"></Checkapply>
 				</el-tab-pane>
 			    <el-tab-pane label="检验申请" name="3">
-					<Testapply ref="testApplyComp" :patient="currentPatient" v-if="activeName === '3'"></Testapply>
+					<Testapply ref="testApplyComp" :patient="currentPatient" :is-diagnosed="isDiagnosed" v-if="activeName === '3'"></Testapply>
 				</el-tab-pane>
 				<el-tab-pane label="门诊确诊" name="4">
-					<Doc04 :patient="currentPatient" v-if="activeName === '4'" />
+					<Doc04 :patient="currentPatient" :is-diagnosed="isDiagnosed" v-if="activeName === '4'" />
 				</el-tab-pane>
 				<el-tab-pane label="处置申请" name="5">
-					<Disposalapply :patient="currentPatient" v-if="activeName === '5'" />
+					<Disposalapply :patient="currentPatient" :is-diagnosed="isDiagnosed" v-if="activeName === '5'" />
 				</el-tab-pane>
 				<el-tab-pane label="处方申请" name="6">
-					<Prescriptionapply :patient="currentPatient" v-if="activeName === '6'"/>
+					<Prescriptionapply :patient="currentPatient" :is-diagnosed="isDiagnosed" v-if="activeName === '6'"/>
 				</el-tab-pane>
 				<el-tab-pane label="费用查询*" name="7">
 					<CostQuery :patient="currentPatient" v-if="activeName === '7'"/>
@@ -252,47 +248,51 @@ const handleDiagnosedRowClick=(val, column, event)=>{
 }
 
 function searchPatients() {
-    loadData(1);
-    loadData2(1);
+	loadData(1)
+	loadData2(1)
 }
 
 function refreshPatientLists() {
-    kw.value = '';
     loadData(1);
     loadData2(1);
 }
 
-async function finishConsultation() {
+const finishConsultation = async () => {
     if (!currentPatient.value) {
         ElMessage.warning('请先选择一位患者');
         return;
     }
 
-    ElMessageBox.confirm(
-        '确认要结束本次诊断吗?',
-        '提醒',
-        {
-          confirmButtonText: '确认',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }
-    )
-    .then(async () => {
-        const resp = await postReq("/neudoc/medicalrecord/finish", currentPatient.value);
-        if(resp.data.result){
-            ElMessage.success('操作成功');
-            loadData(1); 
-            loadData2(1);
-            isOver.value = false;
-            isDiagnosed.value = true;
+    try {
+		await ElMessageBox.confirm(
+			`确定要结束对【${currentPatient.value.realName}】的诊断吗？`,
+			'诊毕确认',
+			{
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning',
+			}
+		);
+
+        const res = await postReq(`/register/finish?id=${currentPatient.value.id}`);
+        if (res.data.result) {
+            ElMessage.success('诊毕成功');
+            refreshPatientLists();
+			currentPatient.value = null;
+			patientInfo.value = '请先选择一位患者';
+			isOver.value=false
+			activeName.value='1'
         } else {
-            ElMessage.error(resp.data.errMsg || '操作失败');
+            ElMessage.error(res.data.errMsg || '诊毕失败');
         }
-    })
-    .catch(() => {
-        // catch cancel action
-    });
-}
+    } catch (error) {
+		if (error !== 'cancel') {
+           ElMessage.error('操作失败或已取消');
+        }else{
+			ElMessage.info('操作已取消');
+		}
+    }
+};
 </script>
 
 <style scoped>
@@ -374,5 +374,9 @@ body {
 	color: #fff;
 	font-size: 22px;
 	font-weight: bold;
+}
+
+.el-aside {
+  background-color: #f2f2f2; /* Lighter grey for a softer look */
 }
 </style>

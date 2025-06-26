@@ -29,47 +29,48 @@
 					</el-col>
 				</el-row>
 
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">主诉：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.chiefComplaint" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">现病史：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.historyOfPresentIllness" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">现病治疗情况：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.historyOfTreatment" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">既往史：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.pastHistory" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">过敏史：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.allergies" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">体格检查：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.healthCheckup" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">评估/诊断：</el-col>
-					<el-col :span="10" :offset="1">
-						<el-input v-model="form.diagnosis" type="textarea" :rows="2" :disabled="props.isDiagnosed"></el-input>
-					</el-col>
-					<el-col :span="2" style="text-align: center;">
-						<el-button type="primary" @click="showDiseaseDialog" :disabled="props.isDiagnosed">评估/诊断</el-button>
-					</el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">检查建议：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.checkSuggestion" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
-				<el-row style="margin-top:20px">
-					<el-col :span="2" style="text-align: right;">注意事项：</el-col>
-					<el-col :span="20" :offset="1"><el-input v-model="form.attention" type="textarea" :rows="3" :disabled="props.isDiagnosed"></el-input></el-col>
-				</el-row>
+				<el-form-item label="主诉">
+					<el-input v-model="medicalRecord.chiefComplaint" placeholder="患者陈述的主要症状、体征及其持续时间" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+				<el-form-item label="现病史">
+					<el-input v-model="medicalRecord.presentHistory" placeholder="围绕主诉，详细描述病情发生、发展、演变、诊疗的过程" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+				<el-form-item label="现病治疗情况">
+					<el-input v-model="medicalRecord.presentTreatment" placeholder="患者在来本院就诊前，针对现病做过的治疗" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+				<el-form-item label="既往史">
+					<el-input v-model="medicalRecord.pastHistory" placeholder="患者既往的健康状况和疾病历史" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+				<el-form-item label="过敏史">
+					<el-input v-model="medicalRecord.allergicHistory" placeholder="患者的过敏史" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+				<el-form-item label="体格检查">
+					<el-input v-model="medicalRecord.physicalExam" placeholder="医生的体格检查结果" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+
+				<el-form-item label="评估/诊断">
+					<el-input v-model="medicalRecord.diagnosis" placeholder="医生的评估/诊断" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+
+				<el-form-item label="检查建议">
+					<el-input v-model="medicalRecord.checkSuggestion" placeholder="医生的检查建议" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+
+				<el-form-item label="注意事项">
+					<el-input v-model="medicalRecord.attentions" placeholder="医生的注意事项" :disabled="isDiagnosed"></el-input>
+				</el-form-item>
+
+				<el-form-item label="检查结果">
+					<el-input type=
+					"textarea" :rows="2" v-model="medicalRecord.checkResult" 
+						:disabled="isFormDisabled"></el-input>
+				</el-form-item>
+
+				<el-form-item label="处理意见">
+					<el-input type=
+					"textarea" :rows="2" v-model="medicalRecord.handling" 
+						:disabled="isFormDisabled"></el-input>
+				</el-form-item>
 				
 			</el-form>
 
@@ -181,14 +182,14 @@ import axios from 'axios'
 import { nextTick } from 'vue';
 
 const props = defineProps({
-	patient: {
-		type: Object,
-		default: null
-	},
-	isDiagnosed: {
-		type: Boolean,
-		default: false
-	}
+    patient: {
+        type: Object,
+        default: null
+    },
+    isDiagnosed: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const westernDiseases = ref([]);
@@ -233,8 +234,6 @@ const aiContentRef = ref(null);
 const isFormDisabled = computed(() => {
   return isSaved.value || props.isDiagnosed;
 });
-
-const form = ref({});
 
 onMounted(async () => {
 	// No initial data loading needed here
@@ -568,28 +567,6 @@ watch(aiContent, async () => {
     aiContentRef.value.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 });
-
-function showDiseaseDialog() {
-	if (!props.patient) {
-		ElMessage.error('请先选择一位患者');
-		return;
-	}
-	assessmentDialogVisible.value = true;
-}
-
-function confirmSelection() {
-	if (!selectedDiseases.value.length) {
-		ElMessage.error('请选择一个诊断');
-		return;
-	}
-	const selectedDisease = selectedDiseases.value[0];
-	form.value.diagnosis = selectedDisease.disease.diseaseName;
-	assessmentDialogVisible.value = false;
-}
-
-function cancelSelection() {
-	assessmentDialogVisible.value = false;
-}
 
 defineExpose({
     loadMedicalRecord,

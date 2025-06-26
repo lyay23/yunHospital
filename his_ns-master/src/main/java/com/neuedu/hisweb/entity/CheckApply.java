@@ -28,6 +28,9 @@ public class CheckApply implements Serializable {
     @TableField(exist = false)
     private String itemName;
 
+    @TableField(exist = false)
+    private Integer deptId;
+
     private String name;
 
     private String objective;

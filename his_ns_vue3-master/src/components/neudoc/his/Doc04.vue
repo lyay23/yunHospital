@@ -3,7 +3,7 @@
     <template #header>
       <div class="card-header">
         <span>门诊确诊</span>
-        <el-button type="primary" :disabled="!patient || !patient.id" @click="saveAll" :icon="DocumentChecked">确诊保存</el-button>
+        <el-button type="primary" :disabled="!patient || !patient.id || isDiagnosed" @click="saveAll" :icon="DocumentChecked">确诊保存</el-button>
       </div>
     </template>
     <div v-if="!patient || !patient.id">
@@ -31,10 +31,10 @@
         </el-row>
         <el-divider content-position="left">病历信息</el-divider>
         <el-form-item label="初步诊断">
-          <el-input v-model="medicalRecord.diagnosis" type="textarea" :rows="3" placeholder="医生根据患者情况，得出的初步诊断结果" />
+          <el-input v-model="medicalRecord.diagnosis" type="textarea" :rows="3" placeholder="医生根据患者情况，得出的初步诊断结果" :disabled="isDiagnosed" />
         </el-form-item>
         <el-form-item label="处理意见">
-          <el-input v-model="medicalRecord.handling" type="textarea" :rows="3" placeholder="医生对病情的处理意见" />
+          <el-input v-model="medicalRecord.handling" type="textarea" :rows="3" placeholder="医生对病情的处理意见" :disabled="isDiagnosed" />
         </el-form-item>
       </el-form>
 
@@ -42,13 +42,13 @@
       
       <!-- 操作按钮 -->
       <div class="action-bar" style="margin-bottom: 10px;">
-        <el-button type="primary" @click="openAddDialog" :icon="Plus">添加诊断</el-button>
-        <el-button type="danger" @click="handleDeleteBatch" :icon="Delete">删除诊断</el-button>
+        <el-button type="primary" @click="openAddDialog" :icon="Plus" :disabled="isDiagnosed">添加诊断</el-button>
+        <el-button type="danger" @click="handleDeleteBatch" :icon="Delete" :disabled="isDiagnosed">删除诊断</el-button>
       </div>
 
       <!-- 最终诊断列表 -->
-      <el-table :data="finalDiagnoses" @selection-change="handleSelectionChange" border>
-        <el-table-column type="selection" width="55" align="center" />
+      <el-table :data="finalDiagnoses" @selection-change="handleSelectionChange" border :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
+        <el-table-column type="selection" width="55" align="center" :selectable="() => !isDiagnosed" />
         <el-table-column prop="disease.diseaseCode" label="疾病编码" width="120" />
         <el-table-column prop="disease.diseaseName" label="疾病名称" />
         <el-table-column label="发病日期" width="220">
@@ -59,12 +59,13 @@
               placeholder="选择发病日期"
               value-format="YYYY-MM-DD HH:mm:ss"
               style="width: 100%"
+              :disabled="isDiagnosed"
             />
           </template>
         </el-table-column>
         <el-table-column label="诊断状态" width="120">
           <template #default="scope">
-            <el-select v-model="scope.row.diagnoseCate" placeholder="请选择">
+            <el-select v-model="scope.row.diagnoseCate" placeholder="请选择" :disabled="isDiagnosed">
               <el-option label="疑诊" :value="1"></el-option>
               <el-option label="确诊" :value="2"></el-option>
             </el-select>
@@ -103,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, watch, onMounted, defineProps } from 'vue';
 import { get, post, put, del } from '@/utils/api';
 import { ElMessage, ElMessageBox, ElTable } from 'element-plus';
 import { DocumentChecked, Plus, Delete, Search } from '@element-plus/icons-vue';
@@ -115,6 +116,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isDiagnosed: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const medicalRecord = ref({});
@@ -285,7 +290,18 @@ const saveAll = async () => {
     const res = await post('/neudoc/medicalrecord/save', payload);
 
     if (res.data && res.data.result) {
-      ElMessage.success('确诊信息保存成功');
+      // 确诊信息保存成功后，调用诊毕接口
+      try {
+        const finishRes = await post(`/register/finish?id=${props.patient.id}`);
+        if (finishRes.data && finishRes.data.result) {
+            ElMessage.success('患者已诊毕，病历已锁定');
+        } else {
+            ElMessage.error(finishRes.data.errMsg || '标记诊毕失败');
+        }
+      } catch (finishError) {
+        ElMessage.error('调用诊毕接口时发生网络或服务器错误');
+      }
+
       // 保存后重新加载数据，以获取新ID等信息
       await loadData();
     } else {

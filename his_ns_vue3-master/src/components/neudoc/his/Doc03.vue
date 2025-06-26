@@ -67,18 +67,18 @@
                     <el-tag type="warning">{{ totalAmount }}元</el-tag>
                 </el-space>
                 <el-space>
-                  <el-button type="primary" :icon="Plus" @click="openAddDialog">新增项目</el-button>
-                  <el-button type="danger" :icon="Delete" @click="removeCheckApply">删除项目</el-button>
-                  <el-button type="success" :icon="SuccessFilled" @click="openCheckApply">开立</el-button>
-                  <el-button :icon="DeleteFilled" @click="cancelCheckApply">作废</el-button>
-                  <el-button :icon="Collection" @click="saveAsTemplate">存为套组</el-button>
+                  <el-button type="primary" :icon="Plus" @click="openAddDialog" :disabled="isDiagnosed">新增项目</el-button>
+                  <el-button type="danger" :icon="Delete" @click="removeCheckApply" :disabled="isDiagnosed">删除项目</el-button>
+                  <el-button type="success" :icon="SuccessFilled" @click="openCheckApply" :disabled="isDiagnosed">开立</el-button>
+                  <el-button :icon="DeleteFilled" @click="cancelCheckApply" :disabled="isDiagnosed">作废</el-button>
+                  <el-button :icon="Collection" @click="saveAsTemplate" :disabled="isDiagnosed">存为套组</el-button>
                 </el-space>
               </div>
             </template>
-            <el-table :data="checkApplyData" style="width: 100%;" @selection-change="handleCheckApplySelectionChange">
-                <el-table-column type="selection"></el-table-column>
+            <el-table :data="checkApplyData" style="width: 100%;" @selection-change="handleCheckApplySelectionChange" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
+                <el-table-column type="selection" :selectable="() => !isDiagnosed"></el-table-column>
                 <el-table-column property="itemName" label="项目名称" ></el-table-column>
-                <el-table-column property="execDept" label="执行科室" width="100"></el-table-column>
+                <el-table-column property="deptName" label="执行科室" width="100"></el-table-column>
                 <el-table-column label="加急" width="60" align="center">
                    <template #default="scope">
                       <el-tag :type="scope.row.isUrgent === 1 ? 'danger' : 'info'" size="small">{{ scope.row.isUrgent === 1 ? '是' : '否' }}</el-tag>
@@ -100,7 +100,7 @@
             <template #header>
               <span>目的要求</span>
             </template>
-            <el-input type="textarea" v-model="requirement" :rows="4" placeholder="【检验目的：】【患者主诉：】【现病史：】" resize="none"></el-input>
+            <el-input type="textarea" v-model="requirement" :rows="4" placeholder="【检验目的：】【患者主诉：】【现病史：】" resize="none" :disabled="isDiagnosed"></el-input>
           </el-card>
         </el-space>
       </el-col>
@@ -116,9 +116,9 @@
               <el-table-column fixed="right" label="操作" width="180" align="center">
                 <template #default="scope">
                   <el-space>
-                    <el-button @click.prevent="useTemplate(scope.row)" type="primary" text size="small">使用</el-button>
+                    <el-button @click.prevent="useTemplate(scope.row)" type="primary" text size="small" :disabled="isDiagnosed">使用</el-button>
                     <el-button @click.prevent="showTemplateDetails(scope.row)" type="info" text size="small">详细</el-button>
-                    <el-button @click.prevent="deleteTemplate(scope.row)" type="danger" text size="small">删除</el-button>
+                    <el-button @click.prevent="deleteTemplate(scope.row)" type="danger" text size="small" :disabled="isDiagnosed">删除</el-button>
                   </el-space>
                 </template>
               </el-table-column>
@@ -157,6 +157,10 @@ const props = defineProps({
     patient: {
         type: Object,
         default: null
+    },
+    isDiagnosed: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -218,6 +222,7 @@ watch(() => props.patient, async (newPatient, oldPatient) => {
     requirement.value = '';
     medicalRecordId.value = null;
     templateData.value = []; // Also clear templates
+    selectedCheckApplies.value = [];
   }
 }, { immediate: true, deep: true });
 
@@ -314,30 +319,35 @@ async function addCheckApply() {
         return;
     }
 
-  const itemsToAdd = selectedFmeditems.value.map(item => ({
-    medicalId: medicalRecordId.value,
+  const selectedDept = deptData.value.find(d => d.id === selectedDeptId.value);
+
+  const newItems = selectedFmeditems.value.map(item => ({
       registId: props.patient.id,
       itemId: item.id,
-    name: item.itemName,
       itemName: item.itemName,
-    objective: requirement.value,
-    isUrgent: isUrgent.value ? 1 : 0,
-    num: 1,
-    state: 1, // 1-暂存
-    recordType: 2, // 2-检验
-    doctorId: userStore.userInfo.id,
+      price: item.price,
       deptId: selectedDeptId.value,
-    price: item.price
-  }));
+      deptName: selectedDept.deptName,
+      isUrgent: isUrgent.value ? 1 : 0,
+      state: 1, 
+      medicalId: medicalRecordId.value,
+      objective: requirement.value,
+      recordType: 2, 
+      doctorId: userStore.userInfo.id,
+    }));
 
-  const res = await postReq('/checkapply/add', itemsToAdd);
-  if (res.data.result) {
-    ElMessage.success('项目已保存');
-  dialogVisible.value = false;
-    loadCheckApplies(props.patient.id);
-  } else {
-    ElMessage.error(res.data.errMsg || '保存失败');
-  }
+    try {
+        const result = await postReq('/checkapply/saveOrUpdateBatch', newItems);
+        if (result.data.result) {
+            ElMessage.success('项目已添加并暂存');
+            dialogVisible.value = false;
+            await loadCheckApplies(props.patient.id); // Reload data
+        } else {
+            ElMessage.error(result.data.errMsg || '添加失败');
+        }
+      } catch (error) {
+        ElMessage.error('网络错误，添加失败');
+      }
 }
 
 async function removeCheckApply() {
@@ -353,7 +363,6 @@ async function removeCheckApply() {
   
   const clientOnlyItems = selectedCheckApplies.value.filter(item => !item.id);
 
-  // Handle DB deletion
   if (idsToDelete.length > 0) {
     try {
       const result = await postReq('/checkapply/del', idsToDelete);
@@ -367,12 +376,36 @@ async function removeCheckApply() {
     }
 }
 
-  // If DB deletion was successful (or not needed), update the UI
+  
   checkApplyData.value = checkApplyData.value.filter(item => 
     !selectedCheckApplies.value.some(selected => selected === item)
   );
   ElMessage.success('删除成功');
   selectedCheckApplies.value = [];
+}
+
+async function saveChanges() {
+    if (!props.patient || checkApplyData.value.length === 0) {
+        return; // Nothing to save
+    }
+    
+    const payload = checkApplyData.value.map(item => ({
+        ...item,
+        medicalId: medicalRecordId.value,
+        registId: props.patient.id,
+        objective: requirement.value, // The main thing to update
+        recordType: 2,
+        doctorId: userStore.userInfo.id,
+    }));
+
+    try {
+        await postReq('/checkapply/saveOrUpdateBatch', payload);
+    } catch (error) {
+        console.error("Failed to save changes", error);
+        ElMessage.error('自动保存目的要求失败');
+        // We can throw error to stop proceeding actions like 'open'
+        throw new Error("SaveChangesFailed");
+    }
 }
 
 async function openCheckApply() {
@@ -381,15 +414,24 @@ async function openCheckApply() {
         return;
     }
     
+  try {
+    await saveChanges();
+  } catch (error) {
+    return; // Stop if saving changes fails
+  }
+    
   // 筛选出已暂存（有ID）的项目
   const idsToOpen = selectedCheckApplies.value
-    .filter(item => item.id) 
+    .filter(item => item.id && item.state === 1) 
     .map(item => item.id);
     
   if (selectedCheckApplies.value.some(item => !item.id)) {
      ElMessage.warning('有新项目尚未暂存，请先点击"暂存"按钮。');
   }
-
+   if (idsToOpen.length != selectedCheckApplies.value.length) {
+        ElMessage.warning('请仅选择暂存状态的项目进行开立。');
+        return;
+    }
   if (idsToOpen.length === 0) {
       return;
   }
@@ -403,7 +445,7 @@ async function openCheckApply() {
     const result = await postReq('/checkapply/updateState', payload);
     if (result.data.result) {
         ElMessage.success('开立成功');
-      loadCheckApplies(props.patient.id);
+      await loadCheckApplies(props.patient.id);
       selectedCheckApplies.value = [];
     } else {
         ElMessage.error(result.data.errMsg || '开立失败');
@@ -440,7 +482,7 @@ async function cancelCheckApply() {
     const result = await postReq('/checkapply/updateState', payload);
     if (result.data.result) {
         ElMessage.success('作废成功');
-      loadCheckApplies(props.patient.id);
+      await loadCheckApplies(props.patient.id);
       selectedCheckApplies.value = [];
     } else {
         ElMessage.error(result.data.errMsg || '作废失败');
@@ -451,38 +493,38 @@ async function cancelCheckApply() {
 }
 
 async function useTemplate(template) {
+     if (!props.patient) {
+        ElMessage.warning('请先选择一位患者');
+        return;
+    }
     try {
-        const result = await getReq(`/checkrelation/items?templateId=${template.id}`);
-        if (result.data.result && result.data.data) {
-            const items = result.data.data;
-            if (items.length > 0) {
-                 // 默认取第一个项目的执行科室，或提供选择
-                const defaultDeptId = items[0].deptId; 
-                const defaultDeptName = items[0].deptName;
+        const result = await getReq(`/checktemplate/getById?id=${template.id}`);
+        const templateItems = result.data.data.items;
 
-                items.forEach(item => {
-                    // 检查是否已存在相同的itemId
-                    if (!checkApplyData.value.some(existing => existing.itemId === item.id)) {
-                        checkApplyData.value.push({
-                            registId: props.patient.id,
-        itemId: item.id,
-        itemName: item.itemName,
-        price: item.price,
-                            deptId: defaultDeptId, 
-                            deptName: defaultDeptName,
-        isUrgent: 0,
-                            state: 1, // 默认为暂存
-                        });
-                    }
-                });
-                ElMessage.success(`套组"${template.name}"已添加`);
-            }
-    } else {
-            ElMessage.error('获取套组项目失败');
-        }
+        const deptMap = new Map(deptData.value.map(d => [d.id, d.deptName]));
+
+        const newItems = templateItems.map(item => ({
+            registId: props.patient.id,
+            itemId: item.id,
+            itemName: item.itemName,
+            price: item.price,
+            deptId: item.deptId,
+            deptName: deptMap.get(item.deptId) || '未知科室',
+            isUrgent: 0, 
+            state: 1, 
+            medicalId: medicalRecordId.value,
+            objective: requirement.value,
+            recordType: 2,
+            doctorId: userStore.userInfo.id,
+        }));
+        
+        await postReq('/checkapply/saveOrUpdateBatch', newItems);
+        ElMessage.success(`已应用套组: ${template.name}`);
+        await loadCheckApplies(props.patient.id);
+
     } catch (error) {
-        console.error('使用模板失败:', error);
-        ElMessage.error('网络错误，使用模板失败');
+        ElMessage.error('应用套组失败');
+        console.error(error);
     }
 }
 
@@ -533,38 +575,39 @@ async function saveAsTemplate() {
         return;
     }
 
+    await saveChanges();
+
     ElMessageBox.prompt('请输入套组名称', '存为套组', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /.+/,
-        inputErrorMessage: '套组名称不能为空',
+        inputPattern: /\S+/,
+        inputErrorMessage: '名称不能为空'
     }).then(async ({ value }) => {
         const itemIds = checkApplyData.value.map(item => item.itemId);
         const payload = {
             name: value,
-            scope: '3', // 3-个人
-            recordType: '2', // 2-检验
-            userId: userStore.userInfo.id,
-            itemIds: itemIds,
+            doctorId: userStore.userInfo.id,
+            scope: 'personal',
+            recordType: 2, // 检验
+            itemIds: itemIds
         };
-
         try {
             const result = await postReq('/checktemplate/add', payload);
             if (result.data.result) {
                 ElMessage.success('套组保存成功');
-                loadTemplates(); // Refresh the template list
+                loadTemplates(); // Refresh template list
             } else {
                 ElMessage.error(result.data.errMsg || '保存失败');
-    }
+            }
         } catch (error) {
             ElMessage.error('网络错误，保存失败');
         }
     }).catch(() => {
-        // User cancelled
+        // Cancelled
     });
 }
 </script>
 
 <style scoped>
-/* Add any specific styles if needed */
+
 </style>

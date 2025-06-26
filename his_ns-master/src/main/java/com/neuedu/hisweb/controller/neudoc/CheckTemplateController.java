@@ -51,6 +51,16 @@ public class CheckTemplateController {
         return new JsonResult<>(page);
     }
 
+    @GetMapping("/getById")
+    public JsonResult<CheckTemplateItemVo> getById(@RequestParam("id") Integer id) {
+        CheckTemplateItemVo template = iService.getTemplateWithItems(id);
+        if (template != null) {
+            return new JsonResult<>(template);
+        } else {
+            return new JsonResult<>("未找到模板");
+        }
+    }
+
     @PostMapping("/add")
     public JsonResult<Object> addCheckTemplate(@RequestBody CheckTemplateItemVo templateVo) {
         boolean result = iService.saveTemplate(templateVo);

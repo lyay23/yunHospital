@@ -67,16 +67,16 @@
                     <el-tag type="warning">{{ totalAmount }}元</el-tag>
                 </el-space>
                 <el-space>
-                  <el-button type="primary" :icon="Plus" @click="openAddDialog">新增项目</el-button>
-                  <el-button type="danger" :icon="Delete" @click="removeApplyItem">删除项目</el-button>
-                  <el-button type="success" :icon="SuccessFilled" @click="openApplyItems">开立</el-button>
-                  <el-button :icon="DeleteFilled" @click="cancelApplyItems">作废</el-button>
-                  <el-button :icon="Collection" @click="saveAsTemplate">存为套组</el-button>
+                  <el-button type="primary" :icon="Plus" @click="openAddDialog" :disabled="isDiagnosed">新增项目</el-button>
+                  <el-button type="danger" :icon="Delete" @click="removeApplyItem" :disabled="isDiagnosed">删除项目</el-button>
+                  <el-button type="success" :icon="SuccessFilled" @click="openApplyItems" :disabled="isDiagnosed">开立</el-button>
+                  <el-button :icon="DeleteFilled" @click="cancelApplyItems" :disabled="isDiagnosed">作废</el-button>
+                  <el-button :icon="Collection" @click="saveAsTemplate" :disabled="isDiagnosed">存为套组</el-button>
                 </el-space>
               </div>
             </template>
-            <el-table :data="applyData" style="width: 100%;" @selection-change="handleApplySelectionChange">
-                <el-table-column type="selection"></el-table-column>
+            <el-table :data="applyData" style="width: 100%;" @selection-change="handleApplySelectionChange" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
+                <el-table-column type="selection" :selectable="() => !isDiagnosed"></el-table-column>
                 <el-table-column property="itemName" label="项目名称" ></el-table-column>
                 <el-table-column property="execDept" label="执行科室" width="100"></el-table-column>
                 <el-table-column label="加急" width="60" align="center">
@@ -91,7 +91,7 @@
                 </el-table-column>
                 <el-table-column property="price" label="单价" width="80"></el-table-column>
                  <template #empty>
-                    <el-empty description="暂无处置项目" />
+                    <el-empty :description="isDiagnosed ? '患者已诊毕' : '暂无处置项目'" />
                 </template>
             </el-table>
           </el-card>
@@ -100,7 +100,7 @@
             <template #header>
               <span>目的要求</span>
             </template>
-            <el-input type="textarea" v-model="requirement" :rows="4" placeholder="【处置目的：】【患者主诉：】【现病史：】" resize="none"></el-input>
+            <el-input type="textarea" v-model="requirement" :rows="4" placeholder="【处置目的：】【患者主诉：】【现病史：】" resize="none" :disabled="isDiagnosed"></el-input>
           </el-card>
         </el-space>
       </el-col>
@@ -116,14 +116,14 @@
               <el-table-column fixed="right" label="操作" width="180" align="center">
                 <template #default="scope">
                   <el-space>
-                    <el-button @click.prevent="useTemplate(scope.row)" type="primary" text size="small">使用</el-button>
+                    <el-button @click.prevent="useTemplate(scope.row)" type="primary" text size="small" :disabled="isDiagnosed">使用</el-button>
                     <el-button @click.prevent="showTemplateDetails(scope.row)" type="info" text size="small">详细</el-button>
-                    <el-button @click.prevent="deleteTemplate(scope.row)" type="danger" text size="small">删除</el-button>
+                    <el-button @click.prevent="deleteTemplate(scope.row)" type="danger" text size="small" :disabled="isDiagnosed">删除</el-button>
                   </el-space>
                 </template>
               </el-table-column>
               <template #empty>
-                  <el-empty description="暂无处置套组" />
+                  <el-empty :description="isDiagnosed ? '患者已诊毕' : '暂无处置套组'" />
               </template>
     </el-table>
         </el-card>
@@ -159,6 +159,10 @@ const props = defineProps({
     patient: {
         type: Object,
         default: null
+    },
+    isDiagnosed: {
+        type: Boolean,
+        default: false
     }
 });
 

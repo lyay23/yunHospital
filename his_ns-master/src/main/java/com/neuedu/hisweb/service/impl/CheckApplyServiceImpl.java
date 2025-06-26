@@ -174,6 +174,12 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
             if (checkApply.getName() == null && checkApply.getItemName() != null) {
                 checkApply.setName(checkApply.getItemName());
             }
+
+            // Repurpose the 'position' field to store the department ID
+            if (checkApply.getDeptId() != null) {
+                checkApply.setPosition(String.valueOf(checkApply.getDeptId()));
+            }
+            
             // Set creation time for new entities
             if (checkApply.getId() == null) {
                 checkApply.setCreationTime(LocalDateTime.now());

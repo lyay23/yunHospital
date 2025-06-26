@@ -7,6 +7,6 @@ import java.math.BigDecimal;
  
 @Data
 public class CheckApplyVo extends CheckApply {
-    private String execDept;
+    private String deptName;
     private BigDecimal price;
 } 

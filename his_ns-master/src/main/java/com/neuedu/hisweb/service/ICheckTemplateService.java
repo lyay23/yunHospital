@@ -6,4 +6,6 @@ import com.neuedu.hisweb.entity.vo.CheckTemplateItemVo;
 
 public interface ICheckTemplateService extends IService<CheckTemplate> {
     boolean saveTemplate(CheckTemplateItemVo templateVo);
+
+    CheckTemplateItemVo getTemplateWithItems(Integer id);
 } 

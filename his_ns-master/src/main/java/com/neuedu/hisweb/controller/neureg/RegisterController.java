@@ -65,5 +65,18 @@ public class RegisterController {
         else return new JsonResult<>("退号失败");
     }
 
+    @PostMapping("/finish")
+    public JsonResult<JsonResult> finish(@RequestParam(value = "id") Integer id){
+        Register register=new Register();
+        register.setId(id);
+        register.setVisitState(3);
+        boolean rs= iService.updateById(register);
+        if(rs){
+            JsonResult<JsonResult> jsonResult= new JsonResult<>();
+            jsonResult.setResult(true);
+            return jsonResult;
+        }
+        else return new JsonResult<>("诊毕失败");
+    }
 }
 

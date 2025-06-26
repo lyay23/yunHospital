@@ -4,18 +4,18 @@
       <el-row>
         <el-col :span="14">
           <div class="toolbar">
-            <el-button type="primary" size="small" @click="handleAddItem">新增项目</el-button>
-            <el-button type="danger" size="small" @click="handleDeleteItem">删除项目</el-button>
-            <el-button type="success" size="small" @click="handleCommitItem">开立项目</el-button>
-            <el-button type="warning" size="small" @click="handleCancelItem">作废项目</el-button>
-            <el-button size="small" @click="handleSaveAsTemplate">存为组套</el-button>
+            <el-button type="primary" size="small" @click="handleAddItem" :disabled="isDiagnosed">新增项目</el-button>
+            <el-button type="danger" size="small" @click="handleDeleteItem" :disabled="isDiagnosed">删除项目</el-button>
+            <el-button type="success" size="small" @click="handleCommitItem" :disabled="isDiagnosed">开立项目</el-button>
+            <el-button type="warning" size="small" @click="handleCancelItem" :disabled="isDiagnosed">作废项目</el-button>
+            <el-button size="small" @click="handleSaveAsTemplate" :disabled="isDiagnosed">存为组套</el-button>
             <el-button :icon="Refresh" size="small" @click="handleRefresh">刷新</el-button>
           </div>
           <div class="total-amount">
             <el-tag>本项目金额合计：{{ totalAmount }}元</el-tag>
           </div>
-          <el-table :data="checkApplyList" style="width: 100%" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="30" align="center"/>
+          <el-table :data="checkApplyList" style="width: 100%" @selection-change="handleSelectionChange" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
+            <el-table-column type="selection" width="30" align="center" :selectable="() => !isDiagnosed"/>
             <el-table-column prop="name" label="申请名称" width="120" align="center"/>
             <el-table-column prop="itemName" label="项目名称" width="180" align="center"/>
             <el-table-column prop="execDept" label="执行科室" align="center"/>
@@ -50,9 +50,9 @@
                 <el-table-column label="操作" align="center" >
                   <template #default="scope">
                     <div style="display: flex; flex-direction: row; align-items: center;">
-                        <el-button type="text" size="small" @click="useTemplate(scope.row)">使用</el-button>
+                        <el-button type="text" size="small" @click="useTemplate(scope.row)" :disabled="isDiagnosed">使用</el-button>
                         <el-button type="text" size="small" @click="viewTemplate(scope.row)" style="margin-left: 8px;">详细</el-button>
-                        <el-button v-if="parseInt(scope.row.scope) === 3" type="text" size="small" @click="handleDeleteTemplate(scope.row)" style="margin-left: 8px; color: #F56C6C;">删除</el-button>
+                        <el-button v-if="parseInt(scope.row.scope) === 3" type="text" size="small" @click="handleDeleteTemplate(scope.row)" style="margin-left: 8px; color: #F56C6C;" :disabled="isDiagnosed">删除</el-button>
                     </div>
                   </template>
                 </el-table-column>
@@ -71,7 +71,7 @@
       <el-tab-pane label="选择模板" name="template">
         <el-row>
           <el-col :span="12">
-            <el-input v-model="templateKeyword" placeholder="按模板名称搜索" class="input-with-select">
+            <el-input v-model="templateKeyword" placeholder="按模板名称搜索" class="input-with-select" :disabled="isDiagnosed">
               <template #append><el-button :icon="Search" @click="searchTemplates" /></template>
             </el-input>
           </el-col>
@@ -86,7 +86,7 @@
       <el-tab-pane label="选择项目" name="item">
         <el-row>
           <el-col :span="12">
-            <el-input v-model="fmeditemKeyword" placeholder="按项目助记码搜索" class="input-with-select">
+            <el-input v-model="fmeditemKeyword" placeholder="按项目助记码搜索" class="input-with-select" :disabled="isDiagnosed">
               <template #append><el-button :icon="Search" @click="searchFmeditems" /></template>
             </el-input>
           </el-col>
@@ -106,19 +106,19 @@
       <h3>项目详情</h3>
       <el-form :model="newItemForm" label-width="120px">
         <el-form-item label="申请名称">
-          <el-input v-model="newItemForm.applicationName" />
+          <el-input v-model="newItemForm.applicationName" :disabled="isDiagnosed" />
         </el-form-item>
         <el-form-item label="项目名称">
           <el-input v-model="newItemForm.name" disabled />
         </el-form-item>
         <el-form-item label="目的要求">
-          <el-input v-model="newItemForm.objective" type="textarea" />
+          <el-input v-model="newItemForm.objective" type="textarea" :disabled="isDiagnosed" />
         </el-form-item>
         <el-form-item label="检查部位">
-          <el-input v-model="newItemForm.position" />
+          <el-input v-model="newItemForm.position" :disabled="isDiagnosed" />
         </el-form-item>
         <el-form-item label="是否加急">
-          <el-switch v-model="newItemForm.isUrgent" />
+          <el-switch v-model="newItemForm.isUrgent" :disabled="isDiagnosed" />
         </el-form-item>
       </el-form>
     </div>
@@ -126,7 +126,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="addItemDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmAddItem" :disabled="!selectedTemplate && !selectedFmeditem">确认新增</el-button>
+        <el-button type="primary" @click="confirmAddItem" :disabled="!selectedTemplate && !selectedFmeditem || isDiagnosed">确认新增</el-button>
       </span>
     </template>
   </el-dialog>
@@ -147,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, defineProps } from 'vue';
 import { Refresh, Search } from '@element-plus/icons-vue';
 import { fetchData, postReq, get } from '../../../utils/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -157,6 +157,10 @@ const props = defineProps({
     patient: {
         type: Object,
         default: null
+    },
+    isDiagnosed: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -245,7 +249,8 @@ function handleCheckApplyPageChange(pn) {
 function clearList() {
     checkApplyList.value = [];
     selectedItems.value = [];
-    checkApplyPage.value = { total: 0, size: 10, current: 1 };
+    checkApplyPage.value.total = 0;
+    checkApplyPage.value.current = 1;
     currentRegistId.value = null;
     currentMedicalId.value = null;
 }

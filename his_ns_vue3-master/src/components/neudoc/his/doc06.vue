@@ -11,11 +11,11 @@
           </el-col>
             <el-col :span="12" style="text-align: right;">
               <el-button-group>
-                <el-button type="primary" :icon="CirclePlus" @click="openAddPrescriptionDialog">增方</el-button>
-                <el-button type="danger" :icon="Delete" @click="deletePrescription">删方</el-button>
-                <el-button type="success" :icon="SuccessFilled" @click="issuePrescription">开立</el-button>
-                <el-button type="warning" :icon="DeleteFilled" @click="cancelPrescription">作废</el-button>
-                <el-button :icon="Refresh" @click="refreshAll">刷新</el-button>
+                <el-button type="primary" :icon="CirclePlus" @click="openAddPrescriptionDialog" :disabled="isDiagnosed">增方</el-button>
+                <el-button type="danger" :icon="Delete" @click="deletePrescription" :disabled="isDiagnosed">删方</el-button>
+                <el-button type="success" :icon="SuccessFilled" @click="issuePrescription" :disabled="isDiagnosed">开立</el-button>
+                <el-button type="warning" :icon="DeleteFilled" @click="cancelPrescription" :disabled="isDiagnosed">作废</el-button>
+                <el-button :icon="Refresh" @click="refreshAll" :disabled="isDiagnosed">刷新</el-button>
               </el-button-group>
           </el-col>
         </el-row>
@@ -29,7 +29,7 @@
       <el-col :span="6">
         <el-card shadow="never" style="height: 100%; display: flex; flex-direction: column;">
           <template #header><span>处方列表</span></template>
-          <el-table :data="prescriptions" highlight-current-row @row-click="handlePrescriptionSelect" height="100%" style="flex: 1;">
+          <el-table :data="prescriptions" highlight-current-row @row-click="handlePrescriptionSelect" height="100%" style="flex: 1;" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
             <el-table-column prop="prescriptionName" label="名称" />
             <el-table-column prop="prescriptionState" label="状态" width="70">
               <template #default="scope">{{ formatState(scope.row.prescriptionState) }}</template>
@@ -46,13 +46,13 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>{{ selectedPrescription ? selectedPrescription.prescriptionName : '处方明细' }}</span>
               <el-button-group>
-                <el-button type="primary" :icon="CirclePlus" size="small" @click="openAddDrugDialog" :disabled="!selectedPrescription">增药</el-button>
-                <el-button type="danger" :icon="Delete" size="small" @click="deleteDrugs" :disabled="selectedDetails.length === 0">删药</el-button>
+                <el-button type="primary" :icon="CirclePlus" size="small" @click="openAddDrugDialog" :disabled="!selectedPrescription || isDiagnosed">增药</el-button>
+                <el-button type="danger" :icon="Delete" size="small" @click="deleteDrugs" :disabled="selectedDetails.length === 0 || isDiagnosed">删药</el-button>
               </el-button-group>
             </div>
           </template>
-          <el-table :data="prescriptionDetails" @selection-change="handleDetailSelectionChange" height="100%" style="flex: 1;">
-            <el-table-column type="selection" width="55" />
+          <el-table :data="prescriptionDetails" @selection-change="handleDetailSelectionChange" height="100%" style="flex: 1;" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
+            <el-table-column type="selection" width="55" :selectable="() => !isDiagnosed"/>
             <el-table-column prop="drugsName" label="药品名称" />
             <el-table-column prop="drugsFormat" label="规格" width="120" />
             <el-table-column prop="drugsPrice" label="单价" width="80" />
@@ -74,7 +74,7 @@
             <el-container>
               <el-aside width="400px" style="padding-right: 10px;">
                 <el-input v-model="templateKw" placeholder="搜索模板" @input="loadTemplates" clearable/>
-                <el-table :data="templates" highlight-current-row @row-click="handleTemplateSelect" size="small" style="margin-top: 10px;">
+                <el-table :data="templates" highlight-current-row @row-click="handleTemplateSelect" size="small" style="margin-top: 10px;" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
                   <el-table-column prop="name" label="模板名称" />
                   <el-table-column prop="scope" label="范围" width="80">
                     <template #default="scope">{{ formatScope(scope.row.scope) }}</template>
@@ -86,7 +86,7 @@
                   <template #header>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span>模板明细</span>
-                      <el-button type="primary" @click="useTemplate" :disabled="!selectedTemplate || !selectedPrescription">使用该模板</el-button>
+                      <el-button type="primary" @click="useTemplate" :disabled="!selectedTemplate || !selectedPrescription || isDiagnosed">使用该模板</el-button>
 		    	</div>
                 </template>
                   <el-table :data="templateDetails" size="small">
@@ -147,6 +147,10 @@ const props = defineProps({
   patient: {
     type: Object,
     default: null
+  },
+  isDiagnosed: {
+    type: Boolean,
+    default: false
   }
 });
 
