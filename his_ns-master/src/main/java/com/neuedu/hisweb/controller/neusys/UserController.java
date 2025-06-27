@@ -7,6 +7,7 @@ import com.neuedu.hisweb.entity.User;
 import com.neuedu.hisweb.entity.vo.UserVo;
 import com.neuedu.hisweb.service.IUserService;
 import com.neuedu.hisweb.utils.JwtUtils;
+import com.neuedu.hisweb.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,13 +51,13 @@ public class UserController {
 
         if (user == null) {
             // 登录失败
-            jsonResult = new JsonResult<User>("用户名或密码不正确！");
+            jsonResult = new JsonResult<>("用户名或密码不正确！");
         } else {
-            // 登录成功，将用户信息存入会话
+            // 登录成功
+            UserUtils.setLoginUser(user);
             request.getSession().setAttribute("user", user);
-            // 生成JWT令牌（通过注入的jwtUtils实例调用sign方法）
             String token = jwtUtils.createToken(user);
-            // 返回用户信息和令牌
+            // 将token和用户信息封装到JsonResult中返回
             jsonResult = new JsonResult<>(user, token);
         }
         return jsonResult;

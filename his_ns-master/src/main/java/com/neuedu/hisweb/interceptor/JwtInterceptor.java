@@ -46,6 +46,10 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         // 通过注入的实例调用getUserByToken方法
         Object userObj = jwtUtils.getUserByToken(token);
+        if (userObj == null) {
+            // token无效或已过期
+            return false;
+        }
         if (userObj instanceof Customer){
             UserUtils.setLoginCustomer((Customer) userObj);
         }
@@ -63,5 +67,6 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         UserUtils.removeUser();
+        UserUtils.removeCustomer();
     }
 }

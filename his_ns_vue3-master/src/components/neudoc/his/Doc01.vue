@@ -377,21 +377,21 @@ const loadMedicalRecord = async (rid) => {
     }
     try {
         const response = await get('/neudoc/medicalrecord/getByRegistId', { registId: rid });
-        if (response.data.data) {
-            Object.assign(medicalRecord.value, response.data.data);
+            if (response.data.data) {
+                Object.assign(medicalRecord.value, response.data.data);
 
-            if (medicalRecord.value.medicalDiseases) {
-                const west = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 1);
-                const east = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 2);
+			if (medicalRecord.value.medicalDiseases) {
+                    const west = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 1);
+                    const east = medicalRecord.value.medicalDiseases.filter(d => d.diagnoseType === 2);
                 // 后端已经返回了正确的嵌套结构，直接赋值即可
                 westernDiseases.value = west;
                 chineseDiseases.value = east;
-            }
-        } else {
-            // 如果没有病历记录，为新诊创建一个
-            const newRecord = { registId: props.patient.id, caseNumber: props.patient.caseNumber };
-            clearForm(); // 先清空旧数据
-            Object.assign(medicalRecord.value, newRecord); // 再合并新数据
+                }
+            } else {
+                // 如果没有病历记录，为新诊创建一个
+                const newRecord = { registId: props.patient.id, caseNumber: props.patient.caseNumber };
+                clearForm(); // 先清空旧数据
+                Object.assign(medicalRecord.value, newRecord); // 再合并新数据
         }
     } catch (error) {
         console.error('加载病历失败:', error);
@@ -401,16 +401,16 @@ const loadMedicalRecord = async (rid) => {
 
 const save = (callback) => {
 	return new Promise((resolve, reject) => {
-		if (!props.patient) {
-			ElMessage.error('请先选择一位患者');
+	if (!props.patient) {
+	    ElMessage.error('请先选择一位患者');
 			return reject(new Error('No patient selected'));
-		}
+	}
 		isSaved.value = false;
-		medicalRecord.value.medicalDiseases = [...westernDiseases.value, ...chineseDiseases.value];
+	medicalRecord.value.medicalDiseases = [...westernDiseases.value, ...chineseDiseases.value];
 		postReq('/neudoc/medicalrecord/save', medicalRecord.value).then(resp => {
 			if (resp.data.result) {
-				if (callback && typeof callback === 'function') {
-					callback();
+			if (callback && typeof callback === 'function') {
+				callback();
 				} else {
 					ElMessage.success('暂存成功');
 				}
@@ -420,8 +420,8 @@ const save = (callback) => {
 			} else {
 				ElMessage.error(resp.data.errMsg || '操作失败');
 				reject(new Error(resp.data.errMsg || '操作失败')); // Promise 失败
-			}
-		}).catch(err => {
+		}
+	}).catch(err => {
 			ElMessage.error('网络错误，操作失败');
 			reject(err); // Promise 失败
 		});

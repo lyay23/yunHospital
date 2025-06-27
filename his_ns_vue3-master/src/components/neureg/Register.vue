@@ -291,7 +291,7 @@ function save(){
 			loadSchedulingData(1)
 		} else {
 			ElMessage.error(resp.data.errMsg)
-		}
+		}	
 	})
 }
 

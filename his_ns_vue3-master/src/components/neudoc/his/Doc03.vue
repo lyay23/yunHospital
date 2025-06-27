@@ -329,7 +329,7 @@ async function addCheckApply() {
       deptId: selectedDeptId.value,
       deptName: selectedDept.deptName,
       isUrgent: isUrgent.value ? 1 : 0,
-      state: 1, 
+        state: 1, 
       medicalId: medicalRecordId.value,
       objective: requirement.value,
       recordType: 2, 
@@ -340,7 +340,7 @@ async function addCheckApply() {
         const result = await postReq('/checkapply/saveOrUpdateBatch', newItems);
         if (result.data.result) {
             ElMessage.success('项目已添加并暂存');
-            dialogVisible.value = false;
+  dialogVisible.value = false;
             await loadCheckApplies(props.patient.id); // Reload data
         } else {
             ElMessage.error(result.data.errMsg || '添加失败');
@@ -388,24 +388,24 @@ async function saveChanges() {
     if (!props.patient || checkApplyData.value.length === 0) {
         return; // Nothing to save
     }
-    
-    const payload = checkApplyData.value.map(item => ({
-        ...item,
-        medicalId: medicalRecordId.value,
-        registId: props.patient.id,
+
+  const payload = checkApplyData.value.map(item => ({
+      ...item,
+      medicalId: medicalRecordId.value,
+      registId: props.patient.id,
         objective: requirement.value, // The main thing to update
         recordType: 2,
-        doctorId: userStore.userInfo.id,
-    }));
+      doctorId: userStore.userInfo.id,
+  }));
 
-    try {
+  try {
         await postReq('/checkapply/saveOrUpdateBatch', payload);
     } catch (error) {
         console.error("Failed to save changes", error);
         ElMessage.error('自动保存目的要求失败');
         // We can throw error to stop proceeding actions like 'open'
         throw new Error("SaveChangesFailed");
-    }
+  }
 }
 
 async function openCheckApply() {
@@ -418,7 +418,7 @@ async function openCheckApply() {
     await saveChanges();
   } catch (error) {
     return; // Stop if saving changes fails
-  }
+    }
     
   // 筛选出已暂存（有ID）的项目
   const idsToOpen = selectedCheckApplies.value
@@ -504,13 +504,13 @@ async function useTemplate(template) {
         const deptMap = new Map(deptData.value.map(d => [d.id, d.deptName]));
 
         const newItems = templateItems.map(item => ({
-            registId: props.patient.id,
-            itemId: item.id,
-            itemName: item.itemName,
-            price: item.price,
+                            registId: props.patient.id,
+        itemId: item.id,
+        itemName: item.itemName,
+        price: item.price,
             deptId: item.deptId,
             deptName: deptMap.get(item.deptId) || '未知科室',
-            isUrgent: 0, 
+        isUrgent: 0,
             state: 1, 
             medicalId: medicalRecordId.value,
             objective: requirement.value,
@@ -598,7 +598,7 @@ async function saveAsTemplate() {
                 loadTemplates(); // Refresh template list
             } else {
                 ElMessage.error(result.data.errMsg || '保存失败');
-            }
+    }
         } catch (error) {
             ElMessage.error('网络错误，保存失败');
         }

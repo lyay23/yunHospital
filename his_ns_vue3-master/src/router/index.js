@@ -80,7 +80,12 @@ const router = createRouter({
 				path:'/scheduling',
 				name:'排班计划',
 				component:defineAsyncComponent(() => import(`../components/neusys/Scheduling.vue`)),
-			}
+			},
+            {
+                path:'/operationlog',
+                name:'操作日志',
+                component:defineAsyncComponent(() => import(`../components/neusys/OperationLog.vue`)),
+            },
 		]
 	},
 	{

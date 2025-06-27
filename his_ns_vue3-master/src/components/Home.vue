@@ -74,6 +74,13 @@ const menus = computed(() => {
 		ElMessage.error('未找到对应的菜单配置')
 		return { children: [] }
 	}
+	// 动态插入操作日志菜单项，仅role:170（医院管理员）可见
+    if (userType === 170 && matchedRoute.children && !matchedRoute.children.find(m => m.path === '/operationlog')) {
+        matchedRoute.children.push({
+            path: '/operationlog',
+            name: '操作日志',
+        })
+    }
 	return matchedRoute
 })
 
