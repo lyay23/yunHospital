@@ -155,24 +155,45 @@ onMounted(async () => {
 });
 
 
-//加载当天未就诊患者数据
+//加载当天未就诊患者数据 (包括已挂号 state=1 和已缴费 state=2)
 async function loadData(pn){
-	loading.value=true
-	var date=formatDate(new Date())
-	let url=`/register/page?count=100&pn=${pn}&state=1&regDate=${date}`
-	url+=`&deptId=${userStore.getUserInfo.value.deptID}`
-	url+=`&docId=${userStore.getUserInfo.value.id}`
-	if(kw.value)
-		url+=`&keyword=${kw.value}`
+	loading.value = true;
+	const date = formatDate(new Date());
+	const commonParams = `count=100&pn=${pn}&regDate=${date}&deptId=${userStore.getUserInfo.value.deptID}&docId=${userStore.getUserInfo.value.id}${kw.value ? `&keyword=${kw.value}` : ''}`;
+	
+	try {
+		// 并行获取 state=1 和 state=2 的患者
+		const [result1, result2] = await Promise.all([
+			fetchData(`/register/page?state=1&${commonParams}`, null),
+			fetchData(`/register/page?state=2&${commonParams}`, null)
+		]);
 
-	const result = await fetchData(url,null);
-	if(result.result){
-		data.value = result.data
-		loading.value=false
-	}else{
-		if(result.errMsg=='未登录')
-			router.push('/login')		
-	}	
+		if (result1.result && result2.result) {
+			const records1 = result1.data.records || [];
+			const records2 = result2.data.records || [];
+			
+			const combinedRecords = [...records1, ...records2];
+			// 按挂号ID降序排列，ID越大越新
+			combinedRecords.sort((a, b) => b.id - a.id);
+
+			data.value = {
+				...result1.data, // 使用第一个结果作为分页基础
+				records: combinedRecords,
+				total: result1.data.total + result2.data.total,
+			};
+
+		} else {
+			ElMessage.error('加载未诊患者列表失败');
+			if(result1.errMsg === '未登录' || result2.errMsg === '未登录') {
+				router.push('/login');
+			}
+		}
+	} catch (error) {
+		ElMessage.error('网络错误，加载未诊患者列表失败');
+		console.error(error);
+	} finally {
+		loading.value = false;
+	}
 }
 
 

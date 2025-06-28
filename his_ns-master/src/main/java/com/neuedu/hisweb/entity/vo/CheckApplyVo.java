@@ -1,6 +1,8 @@
 package com.neuedu.hisweb.entity.vo;
 
+import com.neuedu.hisweb.aop.NoOperationLog;
 import com.neuedu.hisweb.entity.CheckApply;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.math.BigDecimal;
 

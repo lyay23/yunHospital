@@ -136,17 +136,17 @@ const router = createRouter({
 	  children:[
 		  {
 			path:'/tech01',
-			name:'医技检查',
+			name:'患者检查',
 			component:defineAsyncComponent(() => import(`../components/neuski/tech01.vue`)),
 		  },
 		  {
 			path:'/tech02',
-			name:'医技检验',
+			name:'患者检验',
 			component:defineAsyncComponent(() => import(`../components/neuski/tech02.vue`)),
 		  },
 		  {
 			path:'/tech03',
-			name:'处置管理',
+			name:'患者处置',
 			component:defineAsyncComponent(() => import(`../components/neuski/tech03.vue`)),
 		  },
 		  {

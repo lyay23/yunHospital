@@ -5,13 +5,10 @@ import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.entity.vo.PatientCostVo;
 import com.neuedu.hisweb.service.IPatientcostsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -33,6 +30,17 @@ public class PatientcostsController {
         List<PatientCostVo> list = iPatientcostsService.selectPatientCost(keyword,itemType);
 
         return new JsonResult<List<PatientCostVo>>(list);
+    }
+
+    @PostMapping("/doPay")
+    public JsonResult<Object> doPay(@RequestBody Map<String,Object> params){
+        Integer registId = (Integer) params.get("registId");
+        boolean result = iPatientcostsService.doPay(registId);
+        if(result){
+            return new JsonResult<>(true);
+        }else{
+            return new JsonResult<>("缴费失败");
+        }
     }
 }
 

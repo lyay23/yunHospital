@@ -10,6 +10,7 @@ import com.neuedu.hisweb.service.ICheckApplyService;
 import com.neuedu.hisweb.service.IFmeditemService;
 import com.neuedu.hisweb.service.IInvoiceService;
 import com.neuedu.hisweb.service.IPatientcostsService;
+import com.neuedu.hisweb.mapper.PatientcostsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,9 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
 
     @Autowired
     private IInvoiceService invoiceService;
+
+    @Autowired
+    private PatientcostsMapper patientcostsMapper;
 
     @Override
     public Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, Integer registId, Integer recordType) {
@@ -105,7 +109,7 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
                             cost.setAmount(1.0 * (num != null ? num : 1));
                             cost.setCreateOperID(checkApply.getDoctorId());//操作员id
                             cost.setCreatetime(LocalDateTime.now().toString());
-                            cost.setPayTime(LocalDateTime.now().toString());
+                            // cost.setPayTime(LocalDateTime.now().toString());
                             cost.setDeptID(fmeditem.getDeptID());
                             cost.setFeeType(fmeditem.getExpClassID());//费用类别
                             cost.setItemID(fmeditem.getId());
@@ -198,22 +202,49 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
     @Override
     @Transactional
     public boolean delete(List<Integer> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return false;
-        }
-        LambdaQueryWrapper<CheckApply> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(CheckApply::getId, ids)
-                .and(wrapper -> wrapper.eq(CheckApply::getState, 1)
-                        .or()
-                        .eq(CheckApply::getState, 0));
-
-        List<CheckApply> list = this.list(queryWrapper);
-
-        if (list.size() != ids.size()) {
-            // Not all items are in a deletable state
+        List<CheckApply> checkApplies = this.listByIds(ids);
+        if (checkApplies == null || checkApplies.isEmpty()) {
             return false;
         }
 
-        return this.removeByIds(ids);
+        List<Integer> paidIds = checkApplies.stream()
+                .filter(item -> item.getState() >= 2) // 已缴费
+                .map(CheckApply::getId)
+                .collect(Collectors.toList());
+
+        List<Integer> unpaidIds = checkApplies.stream()
+                .filter(item -> item.getState() < 2) // 未缴费
+                .map(CheckApply::getId)
+                .collect(Collectors.toList());
+
+        // 1. 处理未支付的项目：直接删除
+        if (!unpaidIds.isEmpty()) {
+            LambdaQueryWrapper<Patientcosts> costQuery = new LambdaQueryWrapper<>();
+            costQuery.in(Patientcosts::getItemID, unpaidIds).eq(Patientcosts::getItemType, 3);
+            patientcostsMapper.delete(costQuery);
+            this.removeByIds(unpaidIds);
+        }
+
+        // 2. 处理已支付的项目：标记为已退费
+        if (!paidIds.isEmpty()) {
+            // 2.1 更新 Patientcosts 记录，将其标记为已退费
+            LambdaQueryWrapper<Patientcosts> costUpdateQuery = new LambdaQueryWrapper<>();
+            costUpdateQuery.in(Patientcosts::getItemID, paidIds).eq(Patientcosts::getItemType, 3);
+            List<Patientcosts> costsToUpdate = patientcostsMapper.selectList(costUpdateQuery);
+
+            for (Patientcosts cost : costsToUpdate) {
+                cost.setBackID(cost.getId()); // 通过设置BackID来标记为已退费
+                patientcostsMapper.updateById(cost);
+            }
+
+            // 2.2 更新 CheckApply 记录的状态
+            LambdaQueryWrapper<CheckApply> updateWrapper = new LambdaQueryWrapper<>();
+            updateWrapper.in(CheckApply::getId, paidIds);
+            CheckApply updateEntity = new CheckApply();
+            updateEntity.setState(5); // 5: 已退费
+            this.update(updateEntity, updateWrapper);
+        }
+
+        return true;
     }
 } 

@@ -16,4 +16,6 @@ import java.util.List;
  */
 public interface IPatientcostsService extends IService<Patientcosts> {
     List<PatientCostVo> selectPatientCost(String keyword, Integer itemType);
+
+    boolean doPay(Integer registId);
 }

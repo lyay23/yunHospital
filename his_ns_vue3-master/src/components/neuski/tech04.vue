@@ -93,9 +93,9 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="warning" @click="dialogFormVisible = false" size="mini">取 消</el-button>
-          <el-button type="primary" @click="addNewData('addDrugForm')" size="mini">保 存</el-button>
-        </div>
+        <el-button type="warning" @click="dialogFormVisible = false" size="mini">取 消</el-button>
+        <el-button type="primary" @click="addNewData('addDrugForm')" size="mini">保 存</el-button>
+      </div>
       </template>
     </el-dialog>
     <el-dialog title="编辑药品" v-model="dialogFormVisible02" width="700px">
@@ -118,9 +118,9 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="warning" @click="dialogFormVisible02 = false" size="mini">取 消</el-button>
-          <el-button type="primary" @click="updateData" size="mini">保 存</el-button>
-        </div>
+        <el-button type="warning" @click="dialogFormVisible02 = false" size="mini">取 消</el-button>
+        <el-button type="primary" @click="updateData" size="mini">保 存</el-button>
+      </div>
       </template>
     </el-dialog>
     <!-- 编辑弹框---end -->
@@ -186,7 +186,7 @@ const showUpSuccess = (response, file, fileList) => {
     loadDatas(1, pageSize.value, ''); // 刷新列表
   } else {
     ElMessage.error(response.errMsg || "文件上传失败,请重新上传");
-  }
+        }
 };
 
 const showUpError = (response, file, fileList) => {
@@ -218,13 +218,13 @@ const addNewData = (formName) => {
           loadDatas(1, pageSize.value, '');
         } else {
           ElMessage.error(resp.data.errMsg || '新增失败!');
-        }
+          }
       } catch (error) {
         ElMessage.error('网络错误，新增失败!');
       } finally {
         loading.value = false;
       }
-    } else {
+          } else {
       ElMessage.error('请填写必要字段');
       return false;
     }
@@ -256,9 +256,9 @@ const updateData = async () => {
 
 const handleDelete = (index, row) => {
   ElMessageBox.confirm(`此操作将永久删除[${row.itemName}], 是否继续?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
   }).then(async () => {
     loading.value = true;
     try {
@@ -274,9 +274,9 @@ const handleDelete = (index, row) => {
     } finally {
       loading.value = false;
     }
-  }).catch(() => {
+        }).catch(() => {
     ElMessage.info('已取消删除');
-  });
+        });
 };
 
 const deleteAll = () => {
@@ -292,17 +292,17 @@ const deleteAll = () => {
       if (resp.data.result) {
         ElMessage.success('批量删除成功!');
         loadDatas(currentPage01.value, pageSize.value, keywords01.value);
-      } else {
+          } else {
         ElMessage.error(resp.data.errMsg || '批量删除失败!');
-      }
+          }
     } catch (error) {
       ElMessage.error('网络错误，批量删除失败!');
     } finally {
       loading.value = false;
-    }
+          }
   }).catch(() => {
     ElMessage.info('已取消删除');
-  });
+        });
 };
 
 const currentChange = (currentPage) => {
@@ -325,7 +325,7 @@ const loadDatas = async (pn, count, keyword) => {
     ElMessage.error('数据加载失败!');
   } finally {
     loading.value = false;
-  }
+      }
 };
 </script>
 

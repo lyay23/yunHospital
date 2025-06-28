@@ -27,12 +27,12 @@ public interface RegisterMapper extends BaseMapper<Register> {
                    r.RegistTime,r.RegisterID,u.RealName RegisterName,r.VisitState,r.MedicalCardId,
                    r.TimeInterval,r.Channel,ConstantName channelName
                    from register r
-                        inner join department d on r.DeptID=d.ID
-                        inner join registlevel rl on r.RegistLeID=rl.ID
-                        inner join medicalcard m on r.MedicalCardId=m.id
-                        inner join user doc on r.UserID=doc.ID
-                        inner join user u on r.RegisterID=u.ID
-                        inner join constantitem c on r.Channel=c.ID
+                        left join department d on r.DeptID=d.ID
+                        left join registlevel rl on r.RegistLeID=rl.ID
+                        left join medicalcard m on r.MedicalCardId=m.id
+                        left join user doc on r.UserID=doc.ID
+                        left join user u on r.RegisterID=u.ID
+                        left join constantitem c on r.Channel=c.ID
                     <where>
                         <if test='deptId != null and deptId!=""'>
                             and r.deptId=#{deptId}
