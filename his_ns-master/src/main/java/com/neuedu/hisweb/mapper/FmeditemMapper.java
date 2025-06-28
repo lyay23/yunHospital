@@ -25,8 +25,8 @@ public interface FmeditemMapper extends BaseMapper<Fmeditem> {
                 select f.id,ItemCode,ItemName,Format,Price,ExpClassID,expName,DeptId,DeptName,MnemonicCode,
                    RecordType,constantName RecordTypeName,CreationDate,LastUpdateDate
                    from fmeditem f
-                   INNER JOIN expenseclass e on f.ExpClassID=e.ID
-                   INNER JOIN department d on f.DeptId=d.ID
+                   LEFT JOIN expenseclass e on f.ExpClassID=e.ID
+                   LEFT JOIN department d on f.DeptId=d.ID
                    LEFT JOIN constantitem ci on f.RecordType=ci.ID
                     <where>
                         and f.DelMark=1

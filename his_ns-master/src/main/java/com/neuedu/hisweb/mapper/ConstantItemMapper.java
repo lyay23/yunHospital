@@ -8,6 +8,8 @@ import com.neuedu.hisweb.entity.vo.ConstantItemVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * <p>
  *  Mapper 接口
@@ -38,5 +40,13 @@ public interface ConstantItemMapper extends BaseMapper<ConstantItem> {
             """)
     Page<ConstantItemVo> selectPage(Page<ConstantItemVo> page, String keyword,String ctype);
 
+
+    @Select("""
+            select ci.id,ConstantTypeID,ConstantTypeName,ConstantCode,ConstantName 
+                from constantitem ci 
+                    inner join constanttype ct on ci.ConstantTypeID=ct.ID
+                    where ci.delMark=1 and ct.ConstantTypeCode=#{type}
+            """)
+    List<ConstantItemVo> selectByType(String type);
 
 }

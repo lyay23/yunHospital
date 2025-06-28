@@ -6,6 +6,8 @@ import com.neuedu.hisweb.entity.ConstantItem;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.neuedu.hisweb.entity.vo.ConstantItemVo;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -16,4 +18,6 @@ import com.neuedu.hisweb.entity.vo.ConstantItemVo;
  */
 public interface IConstantItemService extends IService<ConstantItem> {
     Page<ConstantItemVo> selectPage(Page<ConstantItemVo> page, String keyword,String ctype);
+
+    List<ConstantItemVo> selectByType(String type);
 }

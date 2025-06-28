@@ -129,7 +129,34 @@ const router = createRouter({
 	  
 	  ]
 	},
-   
+	{
+	  path: '/home',
+	  role:173,
+	  component: defineAsyncComponent(() => import(`../components/Home.vue`)),
+	  children:[
+		  {
+			path:'/tech01',
+			name:'医技检查',
+			component:defineAsyncComponent(() => import(`../components/neuski/tech01.vue`)),
+		  },
+		  {
+			path:'/tech02',
+			name:'医技检验',
+			component:defineAsyncComponent(() => import(`../components/neuski/tech02.vue`)),
+		  },
+		  {
+			path:'/tech03',
+			name:'处置管理',
+			component:defineAsyncComponent(() => import(`../components/neuski/tech03.vue`)),
+		  },
+		  {
+			path:'/tech04',
+			name:'医技管理',
+			component:defineAsyncComponent(() => import(`../components/neuski/tech04.vue`)),
+		  }
+	  ]
+	},
+
   ]
 })
 
@@ -156,6 +183,8 @@ router.beforeEach((to, from, next) => {
 						next('/customer');
 					} else if (user.userType === 172) {
 						next('/docHome');
+					} else if (user.userType === 173) {
+						next('/tech01');
 					} else {
 						next();
 					}

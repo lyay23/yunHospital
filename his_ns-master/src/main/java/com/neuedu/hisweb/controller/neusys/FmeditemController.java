@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,8 +58,8 @@ public class FmeditemController {
 
 
 
-    @PostMapping("/del")
-    public JsonResult<Object> delUser(@RequestParam(value = "id",required = true) Integer id){
+    @DeleteMapping("/del")
+    public JsonResult<Object> delFmeditem(@RequestParam(value = "id",required = true) Integer id){
         boolean rs= iService.removeById(id);
         if(rs){
             JsonResult<Object> jsonResult= new JsonResult<>();
@@ -66,6 +67,24 @@ public class FmeditemController {
             return jsonResult;
         }
         else return new JsonResult<>("删除失败");
+    }
+
+    @PostMapping("/del-batch")
+    public JsonResult<Object> delBatchFmeditem(@RequestBody List<Integer> ids){
+        boolean rs= iService.removeByIds(ids);
+        if(rs){
+            JsonResult<Object> jsonResult= new JsonResult<>();
+            jsonResult.setResult(true);
+            return jsonResult;
+        }
+        else return new JsonResult<>("删除失败");
+    }
+
+    @PostMapping("/import")
+    public JsonResult<Integer> importFmeditem(MultipartFile file){
+        Integer count=iService.importFmeditem(file);
+        if(count>0)return new JsonResult<>(count);
+        else return new JsonResult<>("导入失败");
     }
 }
 

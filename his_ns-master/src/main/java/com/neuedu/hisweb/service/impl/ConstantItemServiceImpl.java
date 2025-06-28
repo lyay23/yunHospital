@@ -9,6 +9,8 @@ import com.neuedu.hisweb.service.IConstantItemService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务实现类
@@ -23,5 +25,10 @@ public class ConstantItemServiceImpl extends ServiceImpl<ConstantItemMapper, Con
     @Override
     public Page<ConstantItemVo> selectPage(Page<ConstantItemVo> page, String keyword,String ctype) {
         return getBaseMapper().selectPage(page,keyword,ctype);
+    }
+
+    @Override
+    public List<ConstantItemVo> selectByType(String type) {
+        return getBaseMapper().selectByType(type);
     }
 }

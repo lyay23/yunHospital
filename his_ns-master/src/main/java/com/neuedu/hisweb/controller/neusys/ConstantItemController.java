@@ -8,6 +8,8 @@ import com.neuedu.hisweb.service.IConstantItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -32,6 +34,11 @@ public class ConstantItemController {
         return new JsonResult<Page>(page);
     }
 
+    @GetMapping("/listByType")
+    public JsonResult<List<ConstantItemVo>> getConstantItemList(@RequestParam(value = "keywords",required = false)String keywords){
+        List<ConstantItemVo> list= iConstantItemService.selectByType(keywords);
+        return new JsonResult<List<ConstantItemVo>>(list);
+    }
 
     @PostMapping("/add")
     public JsonResult<ConstantItem>addConstantItem(@RequestBody ConstantItem constantItem){

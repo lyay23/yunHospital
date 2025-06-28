@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.Fmeditem;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.neuedu.hisweb.entity.vo.FmeditemVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,4 +18,6 @@ import java.util.List;
  */
 public interface IFmeditemService extends IService<Fmeditem> {
     Page<FmeditemVo> selectPage(Page<FmeditemVo> page, String keyword, List<String> expClassIds, String dept);
+
+    Integer importFmeditem(MultipartFile file);
 }
