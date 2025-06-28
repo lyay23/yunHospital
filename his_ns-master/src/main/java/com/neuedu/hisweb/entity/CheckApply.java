@@ -62,4 +62,6 @@ public class CheckApply implements Serializable {
     private Integer state;
 
     private Integer recordType;
-} 
+
+
+}

@@ -18,9 +18,13 @@ import com.neuedu.hisweb.mapper.InvoiceMapper;
 import com.neuedu.hisweb.mapper.RegisterMapper;
 import com.neuedu.hisweb.utils.Utils;
 import org.springframework.transaction.annotation.Transactional;
+import com.neuedu.hisweb.service.IInvoiceService;
+import com.neuedu.hisweb.service.IRegisterService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import com.neuedu.hisweb.entity.Invoice;
 
 /**
  * <p>
@@ -40,6 +44,12 @@ public class PatientcostsServiceImpl extends ServiceImpl<PatientcostsMapper, Pat
 
     @Autowired
     private RegisterMapper registerMapper;
+    
+    @Autowired
+    private IRegisterService registerService;
+
+    @Autowired
+    private IInvoiceService invoiceService;
     
     @Override
     public List<PatientCostVo> selectPatientCost(String keyword, Integer itemType) {
@@ -62,41 +72,43 @@ public class PatientcostsServiceImpl extends ServiceImpl<PatientcostsMapper, Pat
 
     @Override
     @Transactional
-    public boolean doPay(Integer registId) {
-        // 1. 找到所有未支付的项目
+    public boolean doPay(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return false;
+        }
+        Integer registId = ids.get(0);
         LambdaQueryWrapper<Patientcosts> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Patientcosts::getRegistID, registId).isNull(Patientcosts::getPayTime);
         List<Patientcosts> unpaidItems = mapper.selectList(queryWrapper);
 
-        if (unpaidItems.isEmpty()) {
-            return true; // 没有需要支付的项目
+        if(unpaidItems.isEmpty()){
+            return true;
         }
 
-        // 2. 计算总金额
-        double totalAmount = unpaidItems.stream()
-                .mapToDouble(item -> item.getPrice() * item.getAmount())
-                .sum();
+        BigDecimal totalAmount = unpaidItems.stream()
+                .map(item -> new BigDecimal(String.valueOf(item.getPrice())).multiply(new BigDecimal(String.valueOf(item.getAmount()))))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 3. 创建发票
+        Register register = registerService.getById(registId);
+        if(register == null) return false;
+        register.setVisitState(2);
+        registerService.updateById(register);
+
         Invoice invoice = new Invoice();
-        invoice.setInvoiceNum(Utils.getInvoiceNum());
-        invoice.setMoney(totalAmount);
-        invoice.setState(3); // 正常状态
-        invoice.setCreationTime(LocalDateTime.now().toString());
-        invoice.setUserID(1); // 模拟收费员ID
-        invoice.setRegistID(registId);
-        invoice.setFeeType(1); // 费用类型,可根据实际情况调整
-        invoiceMapper.insert(invoice);
+        invoice.setInvoiceNum(String.valueOf(System.currentTimeMillis()));
+        invoice.setMoney(totalAmount.doubleValue());
+        invoice.setState(1);
+        invoice.setCreationTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        invoice.setUserID(register.getRegisterID());
+        invoice.setRegistID(register.getId());
+        invoice.setFeeType(1); // 假设1为线下支付
+        invoiceService.save(invoice);
 
-        // 4. 更新所有项目的支付时间和发票ID
         for (Patientcosts item : unpaidItems) {
-            item.setPayTime(LocalDateTime.now().toString());
+            item.setPayTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             item.setInvoiceID(invoice.getId());
             mapper.updateById(item);
         }
-
-        // 5. 更新挂号表状态为已缴费
-        registerMapper.updateVisitState(registId, 2);
 
         return true;
     }

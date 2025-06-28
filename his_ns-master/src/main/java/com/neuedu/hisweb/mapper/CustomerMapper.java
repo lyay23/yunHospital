@@ -7,6 +7,7 @@ import com.neuedu.hisweb.entity.vo.CustomerVo;
 import com.neuedu.hisweb.entity.vo.MedicalCardVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -37,5 +38,7 @@ public interface CustomerMapper extends BaseMapper<Customer> {
             """)
     Page<CustomerVo> selectPage(Page<CustomerVo> page, String keyword);
 
+    @Select("select * from customer where case_number = #{caseNumber}")
+    Customer selectByCaseNumber(@Param("caseNumber") String caseNumber);
 
 }

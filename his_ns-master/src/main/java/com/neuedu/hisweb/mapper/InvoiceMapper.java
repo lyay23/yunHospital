@@ -2,7 +2,8 @@ package com.neuedu.hisweb.mapper;
 
 import com.neuedu.hisweb.entity.Invoice;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -12,7 +13,8 @@ import org.apache.ibatis.annotations.Mapper;
  * @author lynn
  * @since 2023-08-09
  */
-@Mapper
 public interface InvoiceMapper extends BaseMapper<Invoice> {
 
+    @Select("select * from invoice where registId = #{registId} limit 1")
+    Invoice selectByRegistId(@Param("registId") Integer registId);
 }

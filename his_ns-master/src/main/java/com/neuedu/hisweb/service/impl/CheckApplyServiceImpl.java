@@ -5,20 +5,24 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.neuedu.hisweb.entity.*;
 import com.neuedu.hisweb.entity.vo.CheckApplyVo;
+import com.neuedu.hisweb.entity.vo.RegisterVo;
+import com.neuedu.hisweb.entity.vo.CheckResultVo;
 import com.neuedu.hisweb.mapper.CheckApplyMapper;
-import com.neuedu.hisweb.service.ICheckApplyService;
-import com.neuedu.hisweb.service.IFmeditemService;
-import com.neuedu.hisweb.service.IInvoiceService;
-import com.neuedu.hisweb.service.IPatientcostsService;
+import com.neuedu.hisweb.service.*;
 import com.neuedu.hisweb.mapper.PatientcostsMapper;
+import com.neuedu.hisweb.mapper.InvoiceMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import com.neuedu.hisweb.utils.UserUtils;
 
 /**
  * <p>
@@ -45,6 +49,22 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
 
     @Autowired
     private PatientcostsMapper patientcostsMapper;
+
+    @Autowired
+    private IRegisterService registerService;
+    @Autowired
+    private IUserService userService;
+    @Autowired
+    private IDepartmentService departmentService;
+    @Autowired
+    private ISettlecategoryService settlecategoryService;
+    @Autowired
+    private IMedicalCardService medicalCardService;
+    @Autowired
+    private InvoiceMapper invoiceMapper;
+
+    @Autowired
+    private IMedicalResultService medicalResultService;
 
     @Override
     public Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, Integer registId, Integer recordType) {
@@ -243,6 +263,163 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
             CheckApply updateEntity = new CheckApply();
             updateEntity.setState(5); // 5: 已退费
             this.update(updateEntity, updateWrapper);
+        }
+
+        return true;
+    }
+
+    @Override
+    public Map<String, Object> getCheckApplyDetails(Integer registId) {
+        // 1. 获取挂号信息
+        Register register = registerService.getById(registId);
+        if (register == null) return null;
+
+        RegisterVo registerVo = new RegisterVo();
+        BeanUtils.copyProperties(register, registerVo);
+
+        // 2. 丰富挂号信息
+        // 2.1 医生姓名
+        if (registerVo.getUserID() != null) {
+            User doctor = userService.getById(registerVo.getUserID());
+            if(doctor!=null) registerVo.setDoctorName(doctor.getRealName());
+        }
+        // 2.2 科室名称
+        if (registerVo.getDeptID() != null) {
+            Department department = departmentService.getById(registerVo.getDeptID());
+            if(department!=null) registerVo.setDeptName(department.getDeptName());
+        }
+        // 2.3 结算类别
+        if(registerVo.getSettleID()!=null){
+            Settlecategory settlecategory = settlecategoryService.getById(registerVo.getSettleID());
+            if(settlecategory!=null) {
+                registerVo.setSettleCategoryName(settlecategory.getSettleName());
+            } else {
+                registerVo.setSettleCategoryName("线下"); // 默认值
+            }
+        } else {
+            registerVo.setSettleCategoryName("线下"); // 默认值
+        }
+        // 2.4 患者姓名
+        if(register.getMedicalCardId() != null){
+            MedicalCard medicalCard = medicalCardService.getById(register.getMedicalCardId());
+            if(medicalCard != null){
+                registerVo.setRealName(medicalCard.getRealname());
+            }
+        }
+        // 2.5 发票号
+        Invoice invoice = invoiceMapper.selectByRegistId(registId);
+        if(invoice != null) {
+            registerVo.setInvoiceNum(invoice.getInvoiceNum());
+        }
+
+
+        // 3. 获取并丰富检查申请列表
+        LambdaQueryWrapper<CheckApply> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CheckApply::getRegistId, registId);
+        queryWrapper.in(CheckApply::getState, 0, 2, 4, 5); // 查询已作废、已开立、已登记和已执行完的项目
+        List<CheckApply> checkApplies = this.list(queryWrapper);
+        List<CheckApplyVo> checkApplyVos = new ArrayList<>();
+
+        if (checkApplies != null && !checkApplies.isEmpty()) {
+            // 将第一个检查单的状态作为总状态
+            registerVo.setState(checkApplies.get(0).getState());
+            for (CheckApply checkApply : checkApplies) {
+                CheckApplyVo vo = new CheckApplyVo();
+                BeanUtils.copyProperties(checkApply, vo);
+                if(checkApply.getItemId() != null){
+                    Fmeditem fmeditem = fmeditemService.getById(checkApply.getItemId());
+                    if(fmeditem!=null){
+                        vo.setItemName(fmeditem.getItemName());
+                        vo.setPrice(fmeditem.getPrice());
+                        BigDecimal num = new BigDecimal(vo.getNum() == null ? 1 : vo.getNum());
+                        vo.setTotalAmount(fmeditem.getPrice().multiply(num));
+                    }
+                }
+                checkApplyVos.add(vo);
+            }
+        }
+
+
+        // 4. 组装返回结果
+        Map<String, Object> result = new HashMap<>();
+        result.put("checkApply", registerVo);
+        result.put("checkDetail", checkApplyVos);
+        return result;
+    }
+
+    @Override
+    public boolean executeCheck(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return false;
+        }
+        Integer userId = UserUtils.getLoginUser().getId();
+        List<CheckApply> checkApplies = this.listByIds(ids);
+        for (CheckApply checkApply : checkApplies) {
+            // 只有已开立的项目可以执行
+            if (checkApply.getState() == 2) {
+                checkApply.setState(4); // 4: 已登记
+                checkApply.setCheckOperId(userId);
+                checkApply.setCheckTime(LocalDateTime.now());
+            }
+        }
+        return this.updateBatchById(checkApplies);
+    }
+
+    @Override
+    public boolean cancelExecuteCheck(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return false;
+        }
+        List<CheckApply> checkApplies = this.listByIds(ids);
+        for (CheckApply checkApply : checkApplies) {
+            // 只有已登记的项目可以取消
+            if (checkApply.getState() == 4) {
+                checkApply.setState(0); // 0: 已作废
+                checkApply.setCheckOperId(null);
+                checkApply.setCheckTime(null);
+            }
+        }
+        return this.updateBatchById(checkApplies);
+    }
+
+    @Override
+    @Transactional
+    public boolean saveResult(CheckResultVo resultVo) {
+        // 1. 保存结果到 medical_result 表
+        MedicalResult medicalResult = new MedicalResult();
+        medicalResult.setRegistId(resultVo.getRegistId());
+        medicalResult.setResultDesc(resultVo.getResultDesc());
+        medicalResult.setResultImages(resultVo.getResultImages());
+        medicalResult.setCreateTime(LocalDateTime.now());
+
+        // 设置操作员ID
+        User loginUser = UserUtils.getLoginUser();
+        if (loginUser != null) {
+            medicalResult.setOperatorId(loginUser.getId());
+        }
+
+        // 关联到第一个检查项，并设置类型为检查
+        if (resultVo.getCheckApplyIds() != null && !resultVo.getCheckApplyIds().isEmpty()) {
+            medicalResult.setItemId(resultVo.getCheckApplyIds().get(0));
+            medicalResult.setItemType(1); // 1 代表检查
+        }
+
+        medicalResultService.save(medicalResult);
+
+        // 2. 更新所有相关 checkapply 的状态为 5 (已执行完)
+        if (resultVo.getCheckApplyIds() != null && !resultVo.getCheckApplyIds().isEmpty()) {
+            List<CheckApply> appliesToUpdate = new ArrayList<>();
+            for (Integer id : resultVo.getCheckApplyIds()) {
+                CheckApply update = new CheckApply();
+                update.setId(id);
+                update.setState(5); // 5: 已执行完
+                update.setResultTime(LocalDateTime.now());
+                if (loginUser != null) {
+                    update.setResultOperId(loginUser.getId());
+                }
+                appliesToUpdate.add(update);
+            }
+            this.updateBatchById(appliesToUpdate);
         }
 
         return true;

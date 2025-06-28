@@ -18,12 +18,20 @@
             <el-table-column type="selection" width="30" align="center" :selectable="() => !isDiagnosed"/>
             <el-table-column prop="name" label="申请名称" width="120" align="center"/>
             <el-table-column prop="itemName" label="项目名称" width="180" align="center"/>
-            <el-table-column prop="execDept" label="执行科室" align="center"/>
+            <el-table-column prop="deptName" label="执行科室" align="center"/>
             <el-table-column prop="execState" label="执行状态" align="center"/>
             <el-table-column prop="price" label="单价" align="center"/>
             <el-table-column label="检查结果" align="center">
               <template #default="scope">
-                <el-link type="primary" v-if="scope.row.state === 5" @click="viewResult(scope.row)">查看结果</el-link>
+                <el-button
+                    v-if="scope.row.resultDesc || scope.row.resultImages"
+                    type="primary"
+                    link
+                    size="small"
+                    @click="viewResult(scope.row)">
+                  查看
+                </el-button>
+                <span v-else>--</span>
               </template>
             </el-table-column>
           </el-table>
@@ -144,6 +152,38 @@
       <el-table-column property="deptName" label="执行科室"></el-table-column>
     </el-table>
   </el-dialog>
+
+  <!-- 查看结果 Dialog -->
+  <el-dialog title="检查结果详情" v-model="resultDialogVisible" width="50%">
+    <div v-if="currentResult">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label-class-name="result-label" label="结果描述">
+          {{ currentResult.resultDesc || '暂无描述' }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <el-divider content-position="left">结果图片</el-divider>
+
+      <div class="result-images-container" v-if="currentResult.resultImages && currentResult.resultImages.length > 0">
+        <el-image
+            v-for="(url, index) in currentResult.resultImages"
+            :key="index"
+            class="result-image-item"
+            :src="url"
+            :preview-src-list="currentResult.resultImages"
+            :initial-index="index"
+            fit="cover"
+            lazy
+        />
+      </div>
+      <el-empty v-else description="暂无图片" />
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="resultDialogVisible = false">确 定</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -197,6 +237,10 @@ const newItemForm = ref({
   isUrgent: false,
   price: 0,
 });
+
+// 结果查看弹窗
+const resultDialogVisible = ref(false);
+const currentResult = ref(null);
 
 watch(() => props.patient, (newPatient) => {
     if (newPatient) {
@@ -469,8 +513,12 @@ const formatState = (state) => {
     return stateMap[state] || '未知';
 }
 
-function viewResult(row) { 
-    // TODO
+function viewResult(row) {
+  currentResult.value = {
+    resultDesc: row.resultDesc,
+    resultImages: row.resultImages ? row.resultImages.split(',') : []
+  };
+  resultDialogVisible.value = true;
 }
 
 async function loadCommonTemplates() {
@@ -605,5 +653,19 @@ defineExpose({
 }
 .clearfix:after {
   clear: both
+}
+.result-label {
+  width: 120px;
+}
+.result-images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.result-image-item {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 </style> 

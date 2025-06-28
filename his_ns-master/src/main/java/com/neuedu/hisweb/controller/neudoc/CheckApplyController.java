@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.CheckApply;
 import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.entity.vo.CheckApplyVo;
+import com.neuedu.hisweb.entity.vo.CheckResultVo;
 import com.neuedu.hisweb.service.ICheckApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +74,38 @@ public class CheckApplyController {
             return new JsonResult<>(true);
         } else {
             return new JsonResult<>("删除失败");
+        }
+    }
+
+    @PostMapping("/execute")
+    public JsonResult<Object> executeCheck(@RequestBody List<Integer> ids){
+        boolean result = iService.executeCheck(ids);
+        return result ? new JsonResult<>(true) : new JsonResult<>("执行失败");
+    }
+
+    @PostMapping("/cancel-execute")
+    public JsonResult<Object> cancelExecuteCheck(@RequestBody List<Integer> ids){
+        boolean result = iService.cancelExecuteCheck(ids);
+        return result ? new JsonResult<>(true) : new JsonResult<>("取消失败");
+    }
+
+    @PostMapping("/save-result")
+    public JsonResult<Boolean> saveResult(@RequestBody CheckResultVo resultVo) {
+        boolean result = iService.saveResult(resultVo);
+        if (result) {
+            return new JsonResult<>(true);
+        } else {
+            return new JsonResult<>("保存失败");
+        }
+    }
+
+    @GetMapping("/getCheckApply")
+    public JsonResult<Map<String, Object>> getCheckApply(@RequestParam("registId") Integer registId) {
+        Map<String, Object> result = iService.getCheckApplyDetails(registId);
+        if (result != null && !result.isEmpty()) {
+            return new JsonResult<>(result);
+        } else {
+            return new JsonResult<>(new HashMap<>());
         }
     }
 }

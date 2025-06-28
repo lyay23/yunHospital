@@ -3,7 +3,9 @@ package com.neuedu.hisweb.entity.vo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.neuedu.hisweb.entity.Register;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -16,7 +18,8 @@ import java.io.Serializable;
  * @since 2023-08-09
  */
 @Data
-public class RegisterVo implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class RegisterVo extends Register implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -142,6 +145,11 @@ public class RegisterVo implements Serializable {
     private Integer channel;
     private String channelName;
 
+    private String doctorName;
+    private String deptName;
+    private String settleCategoryName;
+    private String invoiceNum;
+    private Integer state;
 
     @Override
     public String toString() {

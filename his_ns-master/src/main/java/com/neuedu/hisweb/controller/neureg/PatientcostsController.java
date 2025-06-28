@@ -35,7 +35,7 @@ public class PatientcostsController {
     @PostMapping("/doPay")
     public JsonResult<Object> doPay(@RequestBody Map<String,Object> params){
         Integer registId = (Integer) params.get("registId");
-        boolean result = iPatientcostsService.doPay(registId);
+        boolean result = iPatientcostsService.doPay(java.util.Collections.singletonList(registId));
         if(result){
             return new JsonResult<>(true);
         }else{
