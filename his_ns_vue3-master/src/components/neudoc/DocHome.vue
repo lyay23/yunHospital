@@ -1,9 +1,9 @@
 <template>
 <el-container>
-	<el-aside  v-show="isShowMenu"  width="250px">
+	<el-aside  v-show="isShowMenu"  width="250px" class="sidebar-card">
 		<el-row>
 			<el-col :span="12" style="text-align: left">
-			  <el-tag size="mini" style="width: 100%;">患者选择：</el-tag>
+			  <el-tag size="mini" style="width: 100%;" class="sidebar-section-title">患者选择：</el-tag>
 			</el-col>
 			<el-col :span="12" style="text-align: right">
 				<el-button type="primary" :icon="Refresh" size="small"  @click="refreshPatientLists"
@@ -13,7 +13,7 @@
 		<!--挂号信息 start -->
 		<el-row>
 			<el-col :span="24" >
-				<el-input v-model="kw" placeholder="请输入内容" class="input-with-select">
+				<el-input v-model="kw" placeholder="请输入内容" class="input-with-select sidebar-search">
 					<template #prepend>患者名:</template>
 					<template #append><el-button :icon="Search" @click="searchPatients"/></template>
 				</el-input>	
@@ -24,9 +24,9 @@
 		<!-- 未患者列表 start -->
 		<el-row>
 			<el-col :span="24" style="margin-top: 20px;">
-				<el-tag size="mini" style="width: 100%">未诊患者：</el-tag>
+				<el-tag size="mini" style="width: 100%" class="sidebar-section-title">未诊患者：</el-tag>
 				<el-table :data="data.records" style="width:100%;"
-					v-loading="loading" @row-click="handleRowClick">
+					v-loading="loading" @row-click="handleRowClick" class="sidebar-table">
 					<el-table-column prop="caseNumber" label="病历号" align="center"/>
 					<el-table-column prop="realName" label="姓名"  align="center" />
 					<el-table-column prop="gender" label="性别"   width="70" align="center">
@@ -43,9 +43,9 @@
 		<!-- 已患者列表 start -->
 		<el-row>
 			<el-col :span="24" style="margin-top: 20px;">
-				<el-tag size="mini" style="width: 100%">已诊患者：</el-tag>
+				<el-tag size="mini" style="width: 100%" class="sidebar-section-title">已诊患者：</el-tag>
 				<el-table :data="data2.records" style="width:100%;"
-					v-loading="loading2" @row-click="handleDiagnosedRowClick">
+					v-loading="loading2" @row-click="handleDiagnosedRowClick" class="sidebar-table">
 					<el-table-column prop="caseNumber" label="病历号" align="center"/>
 					<el-table-column prop="realName" label="姓名"  align="center" />
 					<el-table-column prop="gender" label="性别"   width="70" align="center">
@@ -61,20 +61,28 @@
 		
 	</el-aside>
 	<el-main style="padding-top: 0px;">
-		<el-row>
-			<el-button type="primary" plain @click="isShowMenu=!isShowMenu" :span="2" size="small">
-			    {{isShowMenu?"隐藏患者栏":"显示患者栏"}}
-			</el-button>
-			<el-tag :span="20" style="margin-left: 20px; margin-right: 20px;">
-				{{patientInfo}}
-			</el-tag>
-			<el-button type="primary" size="small" v-if="isOver" :span="2" @click="finishConsultation">
+		<div class="patient-info-bar">
+			<el-button :icon="isShowMenu ? Hide : View" text circle @click="isShowMenu = !isShowMenu"
+				:title="isShowMenu ? '隐藏患者栏' : '显示患者栏'" />
+
+			<div class="patient-details" v-if="currentPatient">
+				<el-space :size="20" spacer="|">
+					<span><strong>姓名:</strong> {{ currentPatient.realName }}</span>
+					<span><strong>病历号:</strong> {{ currentPatient.caseNumber }}</span>
+					<span><strong>性别:</strong> {{ currentPatient.gender === 71 ? '男' : '女' }}</span>
+					<span><strong>年龄:</strong> {{ currentPatient.age }}</span>
+				</el-space>
+			</div>
+			<div v-else class="placeholder-text">
+				请从左侧选择一位患者
+			</div>
+
+			<el-button type="success" v-if="currentPatient && isOver" @click="finishConsultation" :icon="Select" round>
 				诊毕
 			</el-button>
-		</el-row>
+		</div>
 		<el-row>
-			<el-tabs v-model="activeName" type="card" class="demo-tabs"
-			     @tab-click="handleClick">
+			<el-tabs v-model="activeName" type="card" class="demo-tabs" @tab-click="handleClick">
 			    <el-tab-pane label="病历首页" name="1">
 					<Medicalrecord ref="medicalRecordComp" :patient="currentPatient" :is-diagnosed="isDiagnosed"></Medicalrecord>
 				</el-tab-pane>
@@ -121,7 +129,7 @@ import { ref,onMounted } from 'vue'
 import { fetchData,postReq } from '../../utils/api'
 import router from '../../router';
 import { formatDate } from '../../utils/utils.js'
-import { Search,Refresh } from '@element-plus/icons-vue'	
+import { Search,Refresh, View, Hide, Select } from '@element-plus/icons-vue'	
 import { useUserStore } from '../../store/user.js'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
@@ -144,8 +152,6 @@ const kw=ref('')
 const isShowMenu=ref(true)
 const currentPatient = ref(null)
 const isDiagnosed = ref(false);
-//看诊人信息
-const patientInfo=ref('请先选择一位患者')
 //是否显示诊毕
 const isOver=ref(true)
 
@@ -224,13 +230,12 @@ const handleClick=()=>{
 }
 
 const handleRowClick=(val, column, event)=>{
-	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
 	currentPatient.value = val
 	isOver.value=true
+	isDiagnosed.value = false;
 }
 
 const handleDiagnosedRowClick=(val, column, event)=>{
-	patientInfo.value=`患者姓名：${val.realName}    病历号：${val.caseNumber}    年龄：${val.age}    性别：${val.gender==71?"男":"女"}`
 	isOver.value=false
 	currentPatient.value = val;
 	isDiagnosed.value = true;
@@ -248,7 +253,7 @@ function refreshPatientLists() {
 
 const finishConsultation = async () => {
     if (!currentPatient.value) {
-        ElMessage.warning('请先选择一位患者');
+        ElMessage.error("请先选择一位患者");
         return;
     }
 
@@ -272,7 +277,6 @@ const finishConsultation = async () => {
             ElMessage.success('诊毕成功');
             refreshPatientLists();
 			currentPatient.value = null;
-			patientInfo.value = '请先选择一位患者';
 			isOver.value=false
 			activeName.value='1'
         } else {
@@ -294,5 +298,122 @@ const finishConsultation = async () => {
 <style>
 .input-with-select .el-input-group__prepend {
   background-color: var(--el-fill-color-blank);
+}
+
+.el-main{
+	padding-left:5px;
+	padding-right:5px;
+}
+
+.patient-info-bar {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	background-color: #ecf5ff;
+	/* A light blue background */
+	border: 1px solid #d9ecff;
+	border-radius: 8px;
+	margin-bottom: 16px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.patient-info-bar .el-button.is-text {
+	font-size: 20px;
+	color: #409eff;
+}
+
+.patient-details {
+	flex-grow: 1;
+	margin: 0 20px;
+	font-size: 14px;
+	text-align: center;
+}
+
+.patient-details .el-space span {
+	color: #303133;
+}
+
+.patient-details .el-space span strong {
+	color: #909399;
+	font-weight: normal;
+	margin-right: 5px;
+}
+
+.placeholder-text {
+	flex-grow: 1;
+	text-align: center;
+	color: #909399;
+	font-size: 14px;
+	margin: 0 20px;
+}
+
+.sidebar-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 24px 16px 16px 16px;
+  margin-right: 16px;
+  min-height: 96vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sidebar-section-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #409EFF !important;
+  background: #f4f8ff !important;
+  border: none !important;
+  margin: 10px 0 4px 0;
+  display: flex;
+  align-items: center;
+  border-radius: 8px !important;
+  padding-left: 10px !important;
+}
+.sidebar-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  background: #409EFF;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+.sidebar-search .el-input__wrapper {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(64,158,255,0.08);
+  border: 1px solid #e0eaff;
+  background: #f8fafc;
+}
+.sidebar-search .el-input__inner {
+  font-size: 15px;
+}
+.sidebar-search .el-button {
+  border-radius: 8px;
+  background: #409EFF;
+  color: #fff;
+}
+.sidebar-table {
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 15px;
+}
+.sidebar-table th {
+  background: #f5f7fa !important;
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+  padding: 6px 0;
+}
+.sidebar-table td {
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #222;
+  padding: 6px 0;
+  transition: background 0.2s;
+}
+.sidebar-table tr:hover td {
+  background: #e6f0ff !important;
 }
 </style>

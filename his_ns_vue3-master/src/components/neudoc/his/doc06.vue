@@ -8,7 +8,7 @@
             <el-col :span="12">
               <el-tag>当前诊断:</el-tag>
               <el-tag type="info" style="margin-left: 10px;">{{ patientDiagnosis || '暂无' }}</el-tag>
-          </el-col>
+            </el-col>
             <el-col :span="12" style="text-align: right;">
               <el-button-group>
                 <el-button type="primary" :icon="CirclePlus" @click="openAddPrescriptionDialog" :disabled="isDiagnosed">增方</el-button>
@@ -17,14 +17,14 @@
                 <el-button type="warning" :icon="DeleteFilled" @click="cancelPrescription" :disabled="isDiagnosed">作废</el-button>
                 <el-button :icon="Refresh" @click="refreshAll" :disabled="isDiagnosed">刷新</el-button>
               </el-button-group>
-          </el-col>
-        </el-row>
+            </el-col>
+          </el-row>
         </el-card>
-          </el-col>
-        </el-row>
+      </el-col>
+    </el-row>
 
     <!-- Main Content -->
-    <el-row :gutter="10" style="flex: 1; min-height: 0;">
+    <el-row :gutter="10" style="height:calc(100% - 120px);">
       <!-- Left: Prescription List -->
       <el-col :span="6">
         <el-card shadow="never" style="height: 100%; display: flex; flex-direction: column;">
@@ -33,7 +33,7 @@
             <el-table-column prop="prescriptionName" label="名称" />
             <el-table-column prop="prescriptionState" label="状态" width="70">
               <template #default="scope">{{ formatState(scope.row.prescriptionState) }}</template>
-      </el-table-column>
+            </el-table-column>
             <template #empty><el-empty description="暂无处方" /></template>
           </el-table>
         </el-card>
@@ -48,6 +48,7 @@
               <el-button-group>
                 <el-button type="primary" :icon="CirclePlus" size="small" @click="openAddDrugDialog" :disabled="!selectedPrescription || isDiagnosed">增药</el-button>
                 <el-button type="danger" :icon="Delete" size="small" @click="deleteDrugs" :disabled="selectedDetails.length === 0 || isDiagnosed">删药</el-button>
+                <el-button type="info" size="small" @click="analyzePrescription" :disabled="!selectedPrescription || prescriptionDetails.length === 0">分析药方</el-button>
               </el-button-group>
             </div>
           </template>
@@ -61,10 +62,10 @@
             <el-table-column prop="frequency" label="频次" width="80" />
             <el-table-column prop="amount" label="数量" width="80" />
             <template #empty><el-empty description="请先在左侧选择处方" /></template>
-		</el-table>
-		</el-card>
+          </el-table>
+        </el-card>
       </el-col>
-              </el-row>
+    </el-row>
 
     <!-- Footer: Templates -->
     <el-row :gutter="10" style="margin-top: 10px;">
@@ -80,26 +81,26 @@
                     <template #default="scope">{{ formatScope(scope.row.scope) }}</template>
                   </el-table-column>
                 </el-table>
-				  </el-aside>
+              </el-aside>
               <el-main style="padding:0;">
                 <el-card shadow="never">
                   <template #header>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span>模板明细</span>
                       <el-button type="primary" @click="useTemplate" :disabled="!selectedTemplate || !selectedPrescription || isDiagnosed">使用该模板</el-button>
-		    	</div>
-                </template>
+                    </div>
+                  </template>
                   <el-table :data="templateDetails" size="small">
                     <el-table-column prop="drugsName" label="药品" />
                     <el-table-column prop="drugsFormat" label="规格" />
                     <el-table-column prop="drugsUsage" label="用法" />
                     <el-table-column prop="dosage" label="用量" />
-					    </el-table>
-					</el-card>
-				  </el-main>
-				</el-container>
-		    </el-tab-pane>
-		  </el-tabs>
+                  </el-table>
+                </el-card>
+              </el-main>
+            </el-container>
+          </el-tab-pane>
+        </el-tabs>
       </el-col>
     </el-row>
 
@@ -132,15 +133,48 @@
         <el-button type="primary" @click="confirmAddDrug">确定</el-button>
       </template>
     </el-dialog>
-	</el-container>
+
+    <!-- AI分析结果弹窗 -->
+    <el-dialog v-model="showAiCard" width="540px" :close-on-click-modal="false" :close-on-press-escape="true" class="ai-dialog-beauty">
+      <template #title>
+        <div class="ai-dialog-title">
+          <i class="el-icon-s-opportunity ai-title-icon"></i>
+          <span class="ai-title-gradient">AI药方分析</span>
+          <el-tag v-if="aiLoading" type="info" size="mini" style="margin-left:10px;">分析中...</el-tag>
+        </div>
+      </template>
+      <div class="ai-dialog-content">
+        <el-empty v-if="!aiContent && !aiLoading" description="暂无AI分析结果" />
+        <el-scrollbar v-else class="ai-scrollbar-beauty" ref="aiScrollbarRef">
+          <transition name="ai-fade-expand" mode="out-in">
+            <div v-if="aiParsedContent.analysis || aiParsedContent.comment" key="ai-content" class="ai-typewriter-content-beauty ai-dialog-content-inner" ref="aiContentRef">
+              <div v-if="aiParsedContent.analysis" class="ai-section-block">
+                <span class="ai-section-title">药方分析结果</span>
+                <div class="ai-section-text" v-html="aiParsedContent.analysis"></div>
+              </div>
+              <div v-if="aiParsedContent.comment" class="ai-section-block ai-section-comment">
+                <div class="ai-section-divider"></div>
+                <span class="ai-section-title ai-section-title-comment">AI综合评价</span>
+                <div class="ai-section-text ai-section-text-comment" v-html="aiParsedContent.comment"></div>
+              </div>
+            </div>
+          </transition>
+        </el-scrollbar>
+      </div>
+      <template #footer>
+        <el-button @click="showAiCard = false">关闭</el-button>
+      </template>
+    </el-dialog>
+  </el-container>
 </template>
 
 <script setup>
-import { ref, computed, watch, defineProps } from 'vue';
+import { ref, computed, watch, defineProps, nextTick } from 'vue';
 import { getReq, postReq } from '../../../utils/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { CirclePlus, Delete, SuccessFilled, DeleteFilled, Refresh } from '@element-plus/icons-vue';
 import { useUserStore } from '../../../store/user';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 const userStore = useUserStore();
 const props = defineProps({
@@ -175,6 +209,15 @@ const editDrugDialogVisible = ref(false);
 const newPrescriptionName = ref('');
 const drugKw = ref('');
 const currentDrug = ref({});
+
+const aiContent = ref('');
+const aiLoading = ref(false);
+const showAiCard = ref(false);
+let eventSource = null;
+let typewriterTimer = null;
+let contentBuffer = '';
+const aiScrollbarRef = ref(null);
+const aiContentRef = ref(null);
 
 // Watcher
 watch(() => props.patient, (newPatient) => {
@@ -463,6 +506,131 @@ function formatScope(scope) {
   const map = { '1': '个人', '2': '科室', '3': '全院' };
   return map[scope] || '未知';
 }
+
+function filterAIContent(raw) {
+  return raw.replace(/\*\*[^*]+\*\*/g, '').replace(/\*\*/g, '').trim();
+}
+function parseAIContent(raw) {
+  const filtered = filterAIContent(raw);
+  const result = { analysis: '', comment: '' };
+  const match = filtered.match(/([\s\S]*?)(评价[：:][\s\S]*)/);
+  if (match) {
+    result.analysis = match[1].trim();
+    result.comment = match[2].replace(/^评价[：:]/, '').trim();
+  } else {
+    result.analysis = filtered;
+  }
+  return result;
+}
+
+function highlightUnreasonable(text) {
+  // 扩大关键词范围
+  const keywords = [
+    '存在问题', '不合理', '建议调整', '警惕', '注意', '需改进', '风险', '警告', '需关注', '需注意', '需警惕',
+    '不建议', '错误', '禁忌', '冲突', '重复', '剂量过大', '剂量过小', '超量', '漏用', '遗漏', '慎用',
+    '警示', '警报', '异常', '疑似', '需优化', '需调整', '需完善', '需补充', '需修正', '需排查', '需规避',
+    '需防范', '需警觉', '需警醒', '需重视', '需避免', '需防止', '需纠正', '需补救', '需修复', '需补全',
+    '需补强', '需补偿', '需补足', '需补齐'
+  ];
+  // 构造正则，匹配关键词及其后面一句（到句号、分号、换行或结尾）
+  const pattern = new RegExp(`(${keywords.join('|')})([\s\S]*?)([。；;\n]|$)`, 'g');
+  return text.replace(pattern, (match, kw, content, end) => {
+    return `<span class='ai-unreasonable-highlight'>${kw}${content}${end}</span>`;
+  });
+}
+
+const aiParsedContent = computed(() => {
+  const parsed = parseAIContent(aiContent.value);
+  // 对分析和评价部分都做高亮
+  return {
+    analysis: parsed.analysis ? highlightUnreasonable(parsed.analysis) : '',
+    comment: parsed.comment ? highlightUnreasonable(parsed.comment) : ''
+  };
+});
+
+function resetAIResult() {
+  aiContent.value = '';
+  if (typewriterTimer) clearInterval(typewriterTimer);
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
+  contentBuffer = '';
+}
+function streamTypewriter(fullText) {
+  if (typewriterTimer) clearInterval(typewriterTimer);
+  let i = 0;
+  const prev = aiContent.value;
+  const filteredText = filterAIContent(fullText);
+  typewriterTimer = setInterval(() => {
+    aiContent.value = prev + filteredText.slice(prev.length, prev.length + i + 1);
+    i++;
+    if (prev.length + i >= filteredText.length) {
+      clearInterval(typewriterTimer);
+    }
+  }, 18);
+}
+watch(aiContent, async () => {
+  await nextTick();
+  if (aiScrollbarRef.value && aiScrollbarRef.value.wrapRef) {
+    aiScrollbarRef.value.wrapRef.scrollTop = aiScrollbarRef.value.wrapRef.scrollHeight;
+  }
+  if (aiContentRef.value && aiContentRef.value.scrollIntoView) {
+    aiContentRef.value.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+});
+
+async function analyzePrescription() {
+  if (!selectedPrescription.value || prescriptionDetails.value.length === 0) {
+    ElMessage.warning('请选择处方并确保有药品');
+    return;
+  }
+  resetAIResult();
+  aiLoading.value = true;
+  showAiCard.value = true;
+  // 组装诊断和药品信息
+  const data = {
+    diagnosis: patientDiagnosis.value,
+    drugs: prescriptionDetails.value.map(d => ({
+      name: d.drugsName,
+      usage: d.drugsUsage,
+      dosage: d.dosage,
+      frequency: d.frequency,
+      amount: d.amount
+    }))
+  };
+  const message = encodeURIComponent(JSON.stringify(data));
+  const token = userStore.userInfo.token || localStorage.getItem('token');
+  // 修改为后端新接口 /ai/ana
+  eventSource = new EventSourcePolyfill(`/ai/ana?message=${message}`, {
+    headers: { token }
+  });
+  eventSource.onmessage = function(event) {
+    let raw = event.data.trim();
+    if (raw.startsWith('data:')) {
+      raw = raw.substring(5).trim();
+    }
+    if(raw === '' || raw.startsWith(':')){
+      return;
+    }
+    try {
+      const data = JSON.parse(raw);
+      if (data.output && data.output.choices && data.output.choices.length > 0) {
+        const message = data.output.choices[0].message;
+        if (message && message.content) {
+          contentBuffer = message.content;
+          streamTypewriter(contentBuffer);
+        }
+      }
+    } catch (e) {
+      console.warn('无法解析SSE中的JSON片段:', event.data, e);
+    }
+  };
+  eventSource.onerror = function() {
+    aiLoading.value = false;
+    if (eventSource) eventSource.close();
+  };
+}
 </script>
 
 <style scoped>
@@ -474,5 +642,180 @@ function formatScope(scope) {
 }
 .el-table {
   min-height: 200px; /* Adjust as needed */
+}
+.ai-card-beauty {
+  height: auto;
+  min-height: 320px;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 6px 32px 0 rgba(80,120,255,0.13), 0 2px 8px 0 rgba(80,120,255,0.07);
+  background: linear-gradient(135deg, #fafdff 60%, #e6f0ff 100%);
+  border: none;
+  transition: box-shadow 0.3s;
+}
+.ai-card-beauty:hover {
+  box-shadow: 0 10px 40px 0 rgba(80,120,255,0.18), 0 4px 16px 0 rgba(80,120,255,0.10);
+}
+.ai-title-bar {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #e0eaff 0%, #fafdff 100%);
+  border-radius: 16px 16px 0 0;
+  padding: 14px 24px 14px 16px;
+  font-weight: bold;
+  font-size: 22px;
+  color: #2563eb;
+  letter-spacing: 1.2px;
+  box-shadow: 0 2px 8px 0 rgba(80,120,255,0.04);
+}
+.ai-title-icon {
+  font-size: 26px;
+  color: #4b8cff;
+  margin-right: 10px;
+}
+.ai-title-text {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+}
+.ai-scrollbar-beauty {
+  max-height: 400px;
+  min-height: 120px;
+  overflow: auto;
+  background: #f6faff;
+  border-radius: 16px;
+  padding: 22px 26px 22px 26px;
+  transition: max-height 0.4s cubic-bezier(.4,0,.2,1);
+}
+.ai-typewriter-content-beauty {
+  font-size: 18px;
+  color: #1a237e;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  background: #f4f8ff;
+  border-radius: 12px;
+  padding: 22px 28px;
+  line-height: 2.2;
+  margin-top: 6px;
+  word-break: break-all;
+  box-shadow: 0 2px 8px rgba(75,140,255,0.08);
+  min-height: 80px;
+  transition: background 0.2s, min-height 0.4s cubic-bezier(.4,0,.2,1);
+  text-indent: 2em;
+  letter-spacing: 0.7px;
+}
+.ai-section-block {
+  margin-bottom: 18px;
+  padding: 0 0 0 0;
+}
+.ai-section-title {
+  display: inline-block;
+  font-weight: bold;
+  color: #2563eb;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.ai-section-text {
+  display: inline;
+  color: #1a237e;
+  font-size: 18px;
+  margin-left: 8px;
+}
+.ai-section-comment {
+  background: linear-gradient(90deg, #e3f0ff 0%, #fafdff 100%);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px 0 rgba(80,120,255,0.08);
+  padding: 16px 18px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  border-left: 5px solid #2563eb;
+}
+.ai-section-title-comment {
+  color: #e65100;
+  font-size: 19px;
+}
+.ai-section-text-comment {
+  color: #e65100;
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+.ai-unreasonable-highlight {
+  background: #fff3e0;
+  color: #e65100;
+  border-radius: 5px;
+  padding: 0 3px;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(230,81,0,0.06);
+  transition: background 0.2s;
+}
+.ai-dialog-beauty {
+  border-radius: 18px;
+  box-shadow: 0 8px 40px 0 rgba(80,120,255,0.13), 0 2px 8px 0 rgba(80,120,255,0.07);
+  background: linear-gradient(135deg, #fafdff 60%, #e6f0ff 100%);
+}
+.ai-dialog-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 1.2px;
+  padding: 8px 0 2px 0;
+  background: none;
+}
+.ai-title-gradient {
+  background: linear-gradient(90deg, #2563eb 10%, #4b8cff 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 26px;
+  margin-left: 8px;
+  margin-right: 2px;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+}
+.ai-dialog-content {
+  padding: 0 6px 0 6px;
+}
+.ai-dialog-content-inner {
+  padding: 18px 8px 8px 8px;
+  border-radius: 12px;
+  background: #fafdff;
+  min-height: 120px;
+}
+.ai-section-divider {
+  height: 1.5px;
+  background: linear-gradient(90deg, #e0eaff 0%, #fafdff 100%);
+  margin: 18px 0 12px 0;
+  border-radius: 2px;
+}
+.ai-section-comment {
+  background: linear-gradient(90deg, #f7faff 0%, #fafdff 100%);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px 0 rgba(80,120,255,0.06);
+  padding: 18px 18px 10px 18px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  border-left: 5px solid #2563eb;
+}
+.ai-section-title-comment {
+  color: #e65100;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.ai-section-text-comment {
+  color: #e65100;
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 0;
+  line-height: 2.1;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+}
+.ai-unreasonable-highlight {
+  background: #fff3e0;
+  color: #e65100;
+  border-radius: 6px;
+  padding: 0 4px;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(230,81,0,0.08);
+  border: 1px solid #ffe0b2;
+  transition: background 0.2s;
 }
 </style>

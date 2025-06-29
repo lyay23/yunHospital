@@ -1,92 +1,166 @@
 <template>
 <!-- 页面正文 -->
-<el-main style="width:100%;background:#fff;height:800px;overflow-y: auto">
-	<el-row :gutter="20">
+<el-main class="medical-record-main">
+	<el-row :gutter="40">
 		<!-- 左侧：病历表单 -->
 		<el-col :span="16">
-			<el-form ref="form"  label-width="80px" label-position="left" size="mini" >
-				<el-row style="background-color: #EAF1F5;margin-top: -20px">
-					<el-col :span="8" style="margin-top: 4px;"></el-col>
-					<el-col :span="4" >
-						<el-button type="text" size="small" class="el-icon-tickets" @click="save" :disabled="isFormDisabled">暂存</el-button>
-					</el-col>
-					<el-col :span="4" >
-						<el-button type="text" size="small" class="el-icon-success" @click="submit" :disabled="isFormDisabled">提交</el-button>
-					</el-col>
-					<el-col :span="4" >
-						<el-button type="text" size="small" class="el-icon-printer" @click="clearAll" :disabled="isFormDisabled">清空所有</el-button>
-					</el-col>
-					<el-col :span="4" >
-						<el-button type="text" size="small" class="el-icon-circle-plus-outline" @click="refresh">刷新</el-button>
-					</el-col>
-					<el-col :span="4">
-						<el-button type="primary" size="small" @click="analyzeByAI" :disabled="isFormDisabled">AI分析</el-button>
-					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="24" align="left" >
-						<el-tag>病史内容：</el-tag>
-					</el-col>
-				</el-row>
+			<div class="medical-form-container">
+				<div class="action-bar">
+					<div class="action-group">
+						<el-button :icon="Tickets" type="default" plain @click="save" :disabled="isFormDisabled">
+							暂存
+						</el-button>
+						<el-button type="success" :icon="CircleCheck" @click="submit" :disabled="isFormDisabled">
+							提交
+						</el-button>
+						<el-button type="danger" plain :icon="Delete" @click="clearAll" :disabled="isFormDisabled">
+							清空
+						</el-button>
+						<el-button :icon="Refresh" @click="refresh">
+							刷新
+						</el-button>
+						<el-button type="primary" class="ai-btn-highlight" @click="analyzeByAI" :disabled="isFormDisabled">
+							AI分析 <el-icon class="el-icon--right"><MagicStick /></el-icon>
+						</el-button>
+					</div>
+				</div>
 
-				<el-form-item label="主诉">
-					<el-input v-model="medicalRecord.readme" placeholder="患者陈述的主要症状、体征及其持续时间" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
-				<el-form-item label="现病史">
-					<el-input v-model="medicalRecord.present" placeholder="围绕主诉，详细描述病情发生、发展、演变、诊疗的过程" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
-				<el-form-item label="现病治疗情况">
-					<el-input v-model="medicalRecord.presentTreat" placeholder="患者在来本院就诊前，针对现病做过的治疗" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
-				<el-form-item label="既往史">
-					<el-input v-model="medicalRecord.history" placeholder="患者既往的健康状况和疾病历史" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
-				<el-form-item label="过敏史">
-					<el-input v-model="medicalRecord.allergy" placeholder="患者的过敏史" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
-				<el-form-item label="体格检查">
-					<el-input v-model="medicalRecord.physique" placeholder="医生的体格检查结果" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
+				<el-form ref="form" label-width="100px" label-position="left" class="medical-form">
+					<div class="form-section">
+						<div class="section-header">
+							<el-icon><Document /></el-icon>
+							<span>病史内容</span>
+						</div>
 
-				<el-form-item label="评估/诊断">
-					<el-input type="textarea" :rows="3" :value="diagnosisSummary" readonly
-						:disabled="isFormDisabled"></el-input>
-					<el-button type="primary" @click="openAssessmentDialog" :disabled="isFormDisabled">评估/诊断</el-button>
-				</el-form-item>
+						<el-form-item label="主诉">
+							<el-input v-model="medicalRecord.readme" 
+								:placeholder="isDiagnosed ? '暂无内容' : '患者陈述的主要症状、体征及其持续时间'" 
+								:disabled="isDiagnosed"
+								class="custom-input"></el-input>
+						</el-form-item>
 
-				<el-form-item label="检查建议">
-					<el-input v-model="medicalRecord.proposal" placeholder="医生的检查建议" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
+						<el-form-item label="现病史">
+							<el-input type="textarea" v-model="medicalRecord.present" 
+								:placeholder="isDiagnosed ? '暂无内容' : '围绕主诉，详细描述病情发生、发展、演变、诊疗的过程'"
+								:disabled="isDiagnosed"
+								:rows="3"
+								class="custom-textarea"></el-input>
+						</el-form-item>
 
-				<el-form-item label="注意事项">
-					<el-input v-model="medicalRecord.careful" placeholder="医生的注意事项" :disabled="isDiagnosed"></el-input>
-				</el-form-item>
+						<el-form-item label="现病治疗情况">
+							<el-input type="textarea" v-model="medicalRecord.presentTreat" 
+								:placeholder="isDiagnosed ? '暂无内容' : '患者在来本院就诊前，针对现病做过的治疗'"
+								:disabled="isDiagnosed"
+								:rows="2"
+								class="custom-textarea"></el-input>
+						</el-form-item>
 
-				<el-form-item label="检查结果">
-					<el-input type=
-					"textarea" :rows="2" v-model="medicalRecord.checkResult" 
-						:disabled="isFormDisabled"></el-input>
-				</el-form-item>
+						<el-form-item label="既往史">
+							<el-input v-model="medicalRecord.history" 
+								:placeholder="isDiagnosed ? '暂无内容' : '患者既往的健康状况和疾病历史'"
+								:disabled="isDiagnosed"
+								class="custom-input"></el-input>
+						</el-form-item>
 
-				<el-form-item label="处理意见">
-					<el-input type=
-					"textarea" :rows="2" v-model="medicalRecord.handling" 
-						:disabled="isFormDisabled"></el-input>
-				</el-form-item>
-				
-			</el-form>
+						<el-form-item label="过敏史">
+							<el-input v-model="medicalRecord.allergy" 
+								:placeholder="isDiagnosed ? '暂无内容' : '患者的过敏史'"
+								:disabled="isDiagnosed"
+								class="custom-input"></el-input>
+						</el-form-item>
 
-			<el-dialog title="选择诊断" v-model="diseaseSelectDialogVisible" width="50%">
-				<el-table :data="diseases" @selection-change="handleSelectionChange" max-height="300px" ref="diseaseTable">
+						<el-form-item label="体格检查">
+							<el-input type="textarea" v-model="medicalRecord.physique" 
+								:placeholder="isDiagnosed ? '暂无内容' : '医生的体格检查结果'"
+								:disabled="isDiagnosed"
+								:rows="2"
+								class="custom-textarea"></el-input>
+						</el-form-item>
+					</div>
+
+					<div class="form-section">
+						<div class="section-header">
+							<el-icon><List /></el-icon>
+							<span>诊断信息</span>
+						</div>
+
+						<el-form-item label="评估/诊断">
+							<div class="diagnosis-wrapper">
+								<el-input type="textarea" :rows="3" :value="diagnosisSummary" readonly
+									:disabled="isFormDisabled" 
+									:placeholder="isDiagnosed ? '暂无内容' : '点击右侧按钮进行诊断'"
+									class="custom-textarea"></el-input>
+								<el-button type="primary" @click="openAssessmentDialog" 
+									:disabled="isFormDisabled" 
+									class="diagnosis-btn">
+									评估/诊断
+								</el-button>
+							</div>
+						</el-form-item>
+
+						<el-form-item label="检查建议">
+							<el-input type="textarea" v-model="medicalRecord.proposal" 
+								:placeholder="isDiagnosed ? '暂无内容' : '医生的检查建议'"
+								:disabled="isDiagnosed"
+								:rows="2"
+								class="custom-textarea"></el-input>
+						</el-form-item>
+
+						<el-form-item label="注意事项">
+							<el-input type="textarea" v-model="medicalRecord.careful" 
+								:placeholder="isDiagnosed ? '暂无内容' : '医生的注意事项'"
+								:disabled="isDiagnosed"
+								:rows="2"
+								class="custom-textarea"></el-input>
+						</el-form-item>
+					</div>
+
+					<div class="form-section">
+						<div class="section-header">
+							<el-icon><DocumentChecked /></el-icon>
+							<span>检查结果</span>
+						</div>
+
+						<el-form-item label="检查结果">
+							<el-input type="textarea" :rows="3" v-model="medicalRecord.checkResult" 
+								:disabled="isFormDisabled"
+								:placeholder="isDiagnosed ? '暂无内容' : '请输入检查结果'"
+								class="custom-textarea"></el-input>
+						</el-form-item>
+
+						<el-form-item label="处理意见">
+							<el-input type="textarea" :rows="3" v-model="medicalRecord.handling" 
+								:disabled="isFormDisabled"
+								:placeholder="isDiagnosed ? '暂无内容' : '请输入处理意见'"
+								class="custom-textarea"></el-input>
+						</el-form-item>
+					</div>
+				</el-form>
+			</div>
+
+			<!-- Dialogs -->
+			<el-dialog title="选择诊断" v-model="diseaseSelectDialogVisible" width="50%" class="custom-dialog">
+				<div class="dialog-search">
+					<el-input v-model="searchKeyword" placeholder="按疾病编码或名称搜索" 
+						clearable @clear="handleSearch" 
+						@keyup.enter="handleSearch">
+						<template #append>
+							<el-button :icon="Search" @click="handleSearch"></el-button>
+						</template>
+					</el-input>
+				</div>
+
+				<el-table :data="diseases" 
+					@selection-change="handleSelectionChange" 
+					max-height="300px" 
+					ref="diseaseTable"
+					class="custom-table">
 					<el-table-column type="selection" width="55"></el-table-column>
 					<el-table-column property="diseaseCode" label="ICD编码"></el-table-column>
 					<el-table-column property="diseaseName" label="名称"></el-table-column>
 				</el-table>
-				<div style="display: flex; margin-bottom: 10px; margin-top: 10px;">
-					<el-input v-model="searchKeyword" placeholder="按疾病编码或名称搜索" clearable @clear="handleSearch" @keyup.enter="handleSearch" />
-					<el-button type="primary" @click="handleSearch" style="margin-left: 10px;">搜索</el-button>
-				</div>
-				<div style="margin-top: 20px; text-align: right;">
+
+				<div class="dialog-pagination">
 					<el-pagination
 						v-model:current-page="currentPage"
 						v-model:page-size="pageSize"
@@ -97,6 +171,7 @@
 						@current-change="handleCurrentChange"
 					/>
 				</div>
+
 				<template #footer>
 					<span class="dialog-footer">
 						<el-button @click="diseaseSelectDialogVisible = false">取 消</el-button>
@@ -105,47 +180,87 @@
 				</template>
 			</el-dialog>
 
-			<el-dialog title="评估/诊断" v-model="assessmentDialogVisible" width="60%" @open="onAssessmentDialogOpen">
+			<el-dialog title="评估/诊断" 
+				v-model="assessmentDialogVisible" 
+				width="60%" 
+				@open="onAssessmentDialogOpen"
+				class="custom-dialog">
 				<div class="diagnosis-section">
 					<div class="diagnosis-category">
 						<div class="diagnosis-header">
-							<span>西医诊断</span>
-							<div>
-								<el-button size="mini" @click="addDiagnosis('west')" :disabled="tempChineseDiseases.length > 0">增加</el-button>
-								<el-button size="mini" type="danger" @click="removeDiagnosis('west')" :disabled="!isTempWestActive">删除</el-button>
+							<div class="header-title">
+								<el-icon><FirstAidKit /></el-icon>
+								<span>西医诊断</span>
+							</div>
+							<div class="header-actions">
+								<el-button type="primary" plain @click="addDiagnosis('west')" 
+									:disabled="tempChineseDiseases.length > 0">
+									增加
+								</el-button>
+								<el-button type="danger" plain @click="removeDiagnosis('west')" 
+									:disabled="!isTempWestActive">
+									删除
+								</el-button>
 							</div>
 						</div>
-						<el-table :data="tempWesternDiseases" @selection-change="handleWestSelection" ref="westTable" max-height="200px">
+						<el-table :data="tempWesternDiseases" 
+							@selection-change="handleWestSelection" 
+							ref="westTable" 
+							max-height="200px"
+							class="custom-table">
 							<el-table-column type="selection" width="55" :disabled="!isTempWestActive"></el-table-column>
 							<el-table-column prop="disease.diseaseCode" label="ICD编码"></el-table-column>
 							<el-table-column prop="disease.diseaseName" label="名称"></el-table-column>
-							<el-table-column label="发病日期">
+							<el-table-column label="发病日期" width="180">
 								<template #default="scope">
-									<el-date-picker v-model="scope.row.getSiskDate" type="date" placeholder="选择日期" size="mini" style="width: 100%;"></el-date-picker>
+									<el-date-picker v-model="scope.row.getSiskDate" 
+										type="date" 
+										placeholder="选择日期"
+										style="width: 100%;"
+										class="custom-date-picker"></el-date-picker>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
+
 					<div class="diagnosis-category">
 						<div class="diagnosis-header">
-							<span>中医诊断</span>
-							<div>
-								<el-button size="mini" @click="addDiagnosis('east')" :disabled="tempWesternDiseases.length > 0">增加</el-button>
-								<el-button size="mini" type="danger" @click="removeDiagnosis('east')" :disabled="!isTempEastActive">删除</el-button>
+							<div class="header-title">
+								<el-icon><Coin /></el-icon>
+								<span>中医诊断</span>
+							</div>
+							<div class="header-actions">
+								<el-button type="primary" plain @click="addDiagnosis('east')" 
+									:disabled="tempWesternDiseases.length > 0">
+									增加
+								</el-button>
+								<el-button type="danger" plain @click="removeDiagnosis('east')" 
+									:disabled="!isTempEastActive">
+									删除
+								</el-button>
 							</div>
 						</div>
-						<el-table :data="tempChineseDiseases" @selection-change="handleEastSelection" ref="eastTable" max-height="200px">
+						<el-table :data="tempChineseDiseases" 
+							@selection-change="handleEastSelection" 
+							ref="eastTable" 
+							max-height="200px"
+							class="custom-table">
 							<el-table-column type="selection" width="55" :disabled="!isTempEastActive"></el-table-column>
 							<el-table-column prop="disease.diseaseCode" label="ICD编码"></el-table-column>
 							<el-table-column prop="disease.diseaseName" label="名称"></el-table-column>
-							<el-table-column label="发病日期">
+							<el-table-column label="发病日期" width="180">
 								<template #default="scope">
-									<el-date-picker v-model="scope.row.getSiskDate" type="date" placeholder="选择日期" size="mini" style="width: 100%;"></el-date-picker>
+									<el-date-picker v-model="scope.row.getSiskDate" 
+										type="date" 
+										placeholder="选择日期"
+										style="width: 100%;"
+										class="custom-date-picker"></el-date-picker>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
 				</div>
+
 				<template #footer>
 					<span class="dialog-footer">
 						<el-button @click="assessmentDialogVisible = false">取 消</el-button>
@@ -154,31 +269,41 @@
 				</template>
 			</el-dialog>
 		</el-col>
+
 		<!-- 右侧：AI分析结果 -->
 		<el-col :span="8">
 			<el-card class="ai-card-beauty">
 				<template #header>
 					<div class="ai-title-bar">
-						<i class="el-icon-s-opportunity ai-title-icon"></i>
+						<el-icon class="ai-title-icon"><MagicStick /></el-icon>
 						<span class="ai-title-text">AI分析结果</span>
-						<el-tag v-if="aiLoading" type="info" size="mini" style="margin-left:10px;">分析中...</el-tag>
+						<el-tag v-if="aiLoading" type="info" effect="dark" class="ai-status-tag">分析中...</el-tag>
 					</div>
 				</template>
 				<el-empty v-if="!aiContent && !aiLoading" description="暂无AI分析结果" />
-				<el-scrollbar v-else class="ai-scrollbar-beauty" ref="aiScrollbarRef">
+				<div v-else class="ai-content-wrapper">
 					<transition name="ai-fade-expand" mode="out-in">
-						<div v-if="aiParsedContent.analysis || aiParsedContent.comment" key="ai-content" class="ai-typewriter-content-beauty" ref="aiContentRef">
+						<div v-if="aiParsedContent.analysis || aiParsedContent.comment" 
+							key="ai-content" 
+							class="ai-typewriter-content-beauty" 
+							ref="aiContentRef">
 							<div v-if="aiParsedContent.analysis" class="ai-section-block">
-								<span class="ai-section-title">病历分析结果：</span>
-								<span class="ai-section-text">{{ aiParsedContent.analysis }}</span>
+								<div class="ai-section-title">
+									<el-icon><DataAnalysis /></el-icon>
+									<span>病历分析结果：</span>
+								</div>
+								<div class="ai-section-text">{{ aiParsedContent.analysis }}</div>
 							</div>
 							<div v-if="aiParsedContent.comment" class="ai-section-block ai-section-comment">
-								<span class="ai-section-title ai-section-title-comment">评价：</span>
-								<span class="ai-section-text ai-section-text-comment">{{ aiParsedContent.comment }}</span>
+								<div class="ai-section-title ai-section-title-comment">
+									<el-icon><ChatLineRound /></el-icon>
+									<span>评价：</span>
+								</div>
+								<div class="ai-section-text ai-section-text-comment">{{ aiParsedContent.comment }}</div>
 							</div>
 						</div>
 					</transition>
-				</el-scrollbar>
+				</div>
 			</el-card>
 		</el-col>
 	</el-row>
@@ -200,6 +325,21 @@ import {
 } from 'element-plus'
 import { useUserStore } from '../../../store/user.js'
 import { EventSourcePolyfill } from 'event-source-polyfill'
+import { 
+	Tickets, 
+	CircleCheck, 
+	Delete, 
+	Refresh, 
+	MagicStick,
+	Document,
+	DocumentChecked,
+	FirstAidKit,
+	Coin,
+	Search,
+	DataAnalysis,
+	ChatLineRound,
+	List
+} from '@element-plus/icons-vue'
 
 const props = defineProps({
     patient: {
@@ -631,132 +771,386 @@ defineExpose({
 </script>
 
 <style>
-.diagnosis-section {
-	border: 1px solid #eee;
-	padding: 10px;
-	margin-bottom: 20px;
+/* 主容器样式 */
+.medical-record-main {
+	width: 100%;
+	background: #f8fafc;
+	min-height: 100vh;
+	padding: 24px;
+	overflow-x: hidden;
+	max-width: 1600px;
+	margin: 0 auto;
 }
 
-.diagnosis-category {
-	margin-top: 10px;
+/* 医疗表单容器 */
+.medical-form-container {
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	padding: 24px;
+	transition: all 0.3s ease;
+	height: 97%;
+	width: 100%;
 }
 
-.diagnosis-header {
+/* 操作栏样式 */
+.action-bar {
 	display: flex;
-	justify-content: space-between;
+	flex-direction: row;
 	align-items: center;
-	margin-bottom: 10px;
+	padding: 0 0 24px 0;
+	margin-bottom: 24px;
+	border-bottom: 1px solid #e9ecef;
 }
 
-.ai-card-beauty {
-  height: 780px;
-  overflow: hidden;
-  border-radius: 22px;
-  box-shadow: 0 6px 32px 0 rgba(80,120,255,0.13), 0 2px 8px 0 rgba(80,120,255,0.07);
-  background: linear-gradient(135deg, #fafdff 60%, #e6f0ff 100%);
-  border: none;
-  transition: box-shadow 0.3s;
+.action-group {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	gap: 6px;
+	align-items: center;
 }
-.ai-card-beauty:hover {
-  box-shadow: 0 10px 40px 0 rgba(80,120,255,0.18), 0 4px 16px 0 rgba(80,120,255,0.10);
+
+.action-group .el-button {
+	min-width: 72px;
+	height: 34px;
+	font-size: 14px;
+	border-radius: 7px;
+	font-weight: 500;
+	letter-spacing: 0.1px;
+	padding: 0 14px;
+	transition: all 0.2s;
 }
-.ai-title-bar {
+
+.action-group .el-button[type="success"] {
+	font-weight: 600;
+}
+
+
+
+.ai-btn-highlight {
+	font-weight: 600;
+	box-shadow: 0 2px 8px rgba(64,158,255,0.10);
+	border-radius: 7px;
+	letter-spacing: 0.3px;
+}
+
+.ai-btn-highlight:active {
+	box-shadow: 0 1px 4px rgba(64,158,255,0.10);
+}
+
+@media (max-width: 1400px) {
+	.action-group .el-button {
+		min-width: 60px;
+		font-size: 13px;
+		padding: 0 10px;
+	}
+}
+
+/* 表单区域样式 */
+.medical-form {
+	padding: 0 24px;
+}
+
+.form-section {
+	margin-bottom: 20px;
+	background: #fff;
+	border-radius: 12px;
+	padding: 16px;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+	transition: all 0.3s ease;
+}
+
+.section-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 16px;
+	padding-bottom: 8px;
+	border-bottom: 2px solid #e9ecef;
+	color: #2c3e50;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.section-header .el-icon {
+	margin-right: 8px;
+	font-size: 18px;
+	color: #409EFF;
+}
+
+/* 输入框样式 */
+.custom-input.el-input .el-input__wrapper {
+	box-shadow: 0 0 0 1px #e9ecef inset;
+	padding: 8px 12px;
+	border-radius: 6px;
+	transition: all 0.3s ease;
+}
+
+.custom-textarea.el-textarea .el-textarea__inner {
+	padding: 8px 12px;
+	border-color: #e9ecef;
+	border-radius: 6px;
+	transition: all 0.3s ease;
+	line-height: 1.5;
+	min-height: 60px !important;
+}
+
+:deep(.el-form-item) {
+	margin-bottom: 16px;
+}
+
+:deep(.el-form-item__label) {
+	font-size: 16px;
+	font-weight: 600;
+	color: #2c3e50;
+	padding-right: 12px;
+}
+
+.custom-input.el-input .el-input__wrapper,
+.custom-textarea.el-textarea .el-textarea__inner {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.custom-textarea.el-textarea .el-textarea__inner::placeholder,
+.custom-input.el-input .el-input__wrapper input::placeholder {
+  font-size: 15px;
+  color: #b0b3b8;
+}
+
+/* 诊断按钮样式 */
+.diagnosis-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+}
+.diagnosis-wrapper .custom-textarea {
+  flex: 1;
+}
+.diagnosis-btn {
+  margin-left: 8px;
+  height: 100%;
+  min-width: 100px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  box-shadow: none;
+  background: #f4f8ff;
+  color: #409EFF;
+  border: 1px solid #b3d8ff;
+  transition: background 0.2s, color 0.2s, border 0.2s;
   display: flex;
   align-items: center;
-  background: linear-gradient(90deg, #e0eaff 0%, #fafdff 100%);
-  border-radius: 16px 16px 0 0;
-  padding: 14px 24px 14px 16px;
-  font-weight: bold;
-  font-size: 22px;
-  color: #2563eb;
-  letter-spacing: 1.2px;
-  box-shadow: 0 2px 8px 0 rgba(80,120,255,0.04);
+  justify-content: center;
 }
-.ai-title-icon {
-  font-size: 26px;
-  color: #4b8cff;
-  margin-right: 10px;
+.diagnosis-btn:hover {
+  background: #e6f0ff;
+  color: #337ecc;
+  border-color: #409EFF;
 }
-.ai-title-text {
-  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+
+/* 表格样式 */
+.custom-table {
+	border-radius: 8px;
 }
-.ai-scrollbar-beauty {
-  max-height: 700px;
-  min-height: 220px;
-  overflow: auto;
-  background: #f6faff;
-  border-radius: 16px;
-  padding: 22px 26px 22px 26px;
-  transition: max-height 0.4s cubic-bezier(.4,0,.2,1);
+
+.custom-table th {
+	padding: 8px 0;
+	font-size: 14px;
 }
+
+.custom-table td {
+	padding: 6px 0;
+	font-size: 14px;
+}
+
+/* AI分析卡片样式优化 */
+.ai-card-beauty {
+	min-height: calc(150vh);
+	border-radius: 16px;
+	background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+	border: none;
+	box-shadow: 0 4px 24px rgba(31, 45, 61, 0.08);
+	transition: all 0.3s ease;
+	position: sticky;
+	margin-left: 20px;
+	display: flex;
+	flex-direction: column;
+}
+
+.ai-content-wrapper {
+	flex: 1;
+	padding: 24px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
 .ai-typewriter-content-beauty {
-  font-size: 20px;
-  color: #1a237e;
-  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-  background: #f4f8ff;
-  border-radius: 12px;
-  padding: 22px 28px;
-  line-height: 2.2;
-  margin-top: 6px;
-  word-break: break-all;
-  box-shadow: 0 2px 8px rgba(75,140,255,0.08);
-  min-height: 80px;
-  transition: background 0.2s, min-height 0.4s cubic-bezier(.4,0,.2,1);
-  text-indent: 2em;
-  letter-spacing: 0.7px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 }
-/* 平滑展开动画 */
-.ai-fade-expand-enter-active, .ai-fade-expand-leave-active {
-  transition: all 0.4s cubic-bezier(.4,0,.2,1);
-}
-.ai-fade-expand-enter-from, .ai-fade-expand-leave-to {
-  opacity: 0;
-  transform: scaleY(0.98);
-}
-/* 美化滚动条 */
-.ai-scrollbar-beauty ::-webkit-scrollbar {
-  width: 8px;
-  background: #eaf2ff;
-  border-radius: 8px;
-}
-.ai-scrollbar-beauty ::-webkit-scrollbar-thumb {
-  background: #c6d8ff;
-  border-radius: 8px;
-}
+
 .ai-section-block {
-  margin-bottom: 18px;
-  padding: 0 0 0 0;
+	padding: 16px;
+	margin-bottom: 16px;
 }
+
 .ai-section-title {
-  display: inline-block;
-  font-weight: bold;
-  color: #2563eb;
-  font-size: 18px;
-  margin-bottom: 6px;
+	margin-bottom: 8px;
 }
+
 .ai-section-text {
-  display: inline;
-  color: #1a237e;
-  font-size: 18px;
-  margin-left: 8px;
+	font-size: 20px;
+	line-height: 1.8;
 }
+
 .ai-section-comment {
-  background: linear-gradient(90deg, #e3f0ff 0%, #fafdff 100%);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px 0 rgba(80,120,255,0.08);
-  padding: 16px 18px;
-  margin-top: 10px;
-  margin-bottom: 0;
-  border-left: 5px solid #2563eb;
+	background: #fff9f0;
+	border-left: 4px solid #e6a23c;
 }
+
 .ai-section-title-comment {
-  color: #e65100;
-  font-size: 19px;
+	color: #b88230;
 }
+
 .ai-section-text-comment {
-  color: #e65100;
-  font-size: 18px;
-  font-weight: 500;
-  margin-left: 8px;
+	color: #8c6428;
+	font-size: 18px;
+	line-height: 1.8;
 }
+
+/* 动画效果 */
+.ai-fade-expand-enter-active,
+.ai-fade-expand-leave-active {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-fade-expand-enter-from,
+.ai-fade-expand-leave-to {
+	opacity: 0;
+	transform: translateY(-8px);
+}
+
+/* 日期选择器美化 */
+.custom-date-picker {
+	width: 100%;
+}
+
+.custom-date-picker .el-input__wrapper {
+	border-radius: 8px;
+	transition: all 0.3s ease;
+}
+
+.custom-date-picker .el-input__wrapper:hover {
+	box-shadow: 0 0 0 1px #409EFF inset;
+}
+
+/* Element Plus 组件全局样式覆盖 */
+:deep(.el-button) {
+	border-radius: 8px;
+	font-weight: 500;
+	letter-spacing: 0.3px;
+}
+
+:deep(.el-dialog) {
+	border-radius: 16px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-dialog__header) {
+	padding: 20px 24px;
+	margin: 0;
+	border-bottom: 1px solid #e9ecef;
+}
+
+:deep(.el-dialog__body) {
+	padding: 16px;
+}
+
+:deep(.el-dialog__footer) {
+	padding: 12px 16px;
+	border-top: 1px solid #e9ecef;
+}
+
+:deep(.el-form-item__label) {
+	font-weight: 500;
+	color: #2c3e50;
+}
+
+:deep(.el-table) {
+	--el-table-border-color: #e9ecef;
+	--el-table-border: 1px solid #e9ecef;
+}
+
+:deep(.el-table th) {
+	font-weight: 600;
+	background: #f8fafc !important;
+}
+
+:deep(.el-pagination) {
+	--el-pagination-button-bg-color: #fff;
+	--el-pagination-hover-color: #409EFF;
+}
+
+:deep(.el-tag) {
+	border-radius: 6px;
+}
+
+/* 诊断对话框样式 */
+.diagnosis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.header-title {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #409EFF;
+  gap: 6px;
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 0;
+}
+.header-actions .el-button {
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 0 14px;
+  height: 28px;
+  min-width: 56px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.header-actions .el-button--primary {
+  background: #f4f8ff;
+  color: #409EFF;
+  border: 1px solid #b3d8ff;
+}
+.header-actions .el-button--primary:hover {
+  background: #e6f0ff;
+  color: #337ecc;
+  border-color: #409EFF;
+}
+.header-actions .el-button--danger {
+  background: #fff6f6;
+  color: #f56c6c;
+  border: 1px solid #fbc4c4;
+}
+.header-actions .el-button--danger:hover {
+  background: #ffeaea;
+  color: #c45656;
+  border-color: #f56c6c;
+}
+.diagnosis-category {
+  margin-bottom: 24px;
+}
+
 </style>
