@@ -167,7 +167,16 @@
 				<el-empty v-if="!aiContent && !aiLoading" description="暂无AI分析结果" />
 				<el-scrollbar v-else class="ai-scrollbar-beauty" ref="aiScrollbarRef">
 					<transition name="ai-fade-expand" mode="out-in">
-						<div v-if="aiContent" key="ai-content" class="ai-typewriter-content-beauty" ref="aiContentRef">{{ aiContent }}</div>
+						<div v-if="aiParsedContent.analysis || aiParsedContent.comment" key="ai-content" class="ai-typewriter-content-beauty" ref="aiContentRef">
+							<div v-if="aiParsedContent.analysis" class="ai-section-block">
+								<span class="ai-section-title">病历分析结果：</span>
+								<span class="ai-section-text">{{ aiParsedContent.analysis }}</span>
+							</div>
+							<div v-if="aiParsedContent.comment" class="ai-section-block ai-section-comment">
+								<span class="ai-section-title ai-section-title-comment">评价：</span>
+								<span class="ai-section-text ai-section-text-comment">{{ aiParsedContent.comment }}</span>
+							</div>
+						</div>
 					</transition>
 				</el-scrollbar>
 			</el-card>
@@ -181,13 +190,16 @@ import {
 	ref,
 	onMounted,
 	watch,
-	computed
+	computed,
+	nextTick
 } from 'vue'
 import { get,postReq } from '../../../utils/api.js'
 import {
 	ElMessage,
 	ElMessageBox
 } from 'element-plus'
+import { useUserStore } from '../../../store/user.js'
+import { EventSourcePolyfill } from 'event-source-polyfill'
 
 const props = defineProps({
     patient: {
@@ -512,54 +524,23 @@ function resetAIResult() {
   contentBuffer = '';
 }
 
-async function analyzeByAI() {
-	if (!props.patient) {
-    ElMessage.error('请先选择一位患者');
-    return;
-  }
-  resetAIResult();
-  aiLoading.value = true;
-  const message = encodeURIComponent(JSON.stringify(medicalRecord.value));
-  eventSource = new EventSource(`/api/ai/stream?message=${message}`);
-  eventSource.onmessage = function(event) {
-    let raw = event.data.trim();
-    if (raw.startsWith('data:')) {
-			raw = raw.substring(5).trim();
-		}
-		if(raw === "" || raw.startsWith(':')){
-			return;
-    }
-
-    try {
-      const data = JSON.parse(raw);
-			//  解析阿里云百炼服务返回的JSON结构
-			if (data.output && data.output.choices && data.output.choices.length > 0) {
-				const message = data.output.choices[0].message;
-				if (message && message.content) {
-					// 百炼API每次返回的是完整的句子，而不是增量，所以直接赋值
-					contentBuffer = message.content;
-        streamTypewriter(contentBuffer);
-      }
-      }
-    } catch (e) {
-			console.warn('无法解析SSE中的JSON片段:', event.data, e);
-    }
-  };
-  eventSource.onerror = function() {
-    aiLoading.value = false;
-    if (eventSource) eventSource.close();
-  };
+// 过滤AI内容中的**包裹内容和多余星号
+function filterAIContent(raw) {
+  // 移除**包裹的内容和所有**
+  return raw.replace(/\*\*[^*]+\*\*/g, '').replace(/\*\*/g, '').trim();
 }
 
-// 打字机流式输出
+// 打字机流式输出（带过滤）
 function streamTypewriter(fullText) {
   if (typewriterTimer) clearInterval(typewriterTimer);
   let i = 0;
   const prev = aiContent.value;
+  // 过滤掉**内容
+  const filteredText = filterAIContent(fullText);
   typewriterTimer = setInterval(() => {
-    aiContent.value = prev + fullText.slice(prev.length, prev.length + i + 1);
+    aiContent.value = prev + filteredText.slice(prev.length, prev.length + i + 1);
     i++;
-    if (prev.length + i >= fullText.length) {
+    if (prev.length + i >= filteredText.length) {
       clearInterval(typewriterTimer);
     }
   }, 18);
@@ -576,6 +557,69 @@ watch(aiContent, async () => {
   if (aiContentRef.value && aiContentRef.value.scrollIntoView) {
     aiContentRef.value.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
+});
+
+async function analyzeByAI() {
+  if (!props.patient) {
+    ElMessage.error('请先选择一位患者');
+    return;
+  }
+  resetAIResult();
+  aiLoading.value = true;
+  const message = encodeURIComponent(JSON.stringify(medicalRecord.value));
+  const userStore = useUserStore();
+  const token = userStore.userInfo.token || localStorage.getItem('token');
+  // 使用GET方式拼接参数
+  eventSource = new EventSourcePolyfill(`/ai/stream?message=${message}`, {
+    headers: { token }
+  });
+  eventSource.onmessage = function(event) {
+    let raw = event.data.trim();
+    if (raw.startsWith('data:')) {
+      raw = raw.substring(5).trim();
+    }
+    if(raw === "" || raw.startsWith(':')){
+      return;
+    }
+    try {
+      const data = JSON.parse(raw);
+      //  解析阿里云百炼服务返回的JSON结构
+      if (data.output && data.output.choices && data.output.choices.length > 0) {
+        const message = data.output.choices[0].message;
+        if (message && message.content) {
+          // 百炼API每次返回的是完整的句子，而不是增量，所以直接赋值
+          contentBuffer = message.content;
+          streamTypewriter(contentBuffer);
+        }
+      }
+    } catch (e) {
+      console.warn('无法解析SSE中的JSON片段:', event.data, e);
+    }
+  };
+  eventSource.onerror = function() {
+    aiLoading.value = false;
+    if (eventSource) eventSource.close();
+  };
+}
+
+// 主题分明的分块渲染AI内容
+function parseAIContent(raw) {
+  // 过滤**内容
+  const filtered = filterAIContent(raw);
+  // 按"评价："分块
+  const result = { analysis: '', comment: '' };
+  const match = filtered.match(/([\s\S]*?)(评价[：:][\s\S]*)/);
+  if (match) {
+    result.analysis = match[1].trim();
+    result.comment = match[2].replace(/^评价[：:]/, '').trim();
+  } else {
+    result.analysis = filtered;
+  }
+  return result;
+}
+
+const aiParsedContent = computed(() => {
+  return parseAIContent(aiContent.value);
 });
 
 defineExpose({
@@ -607,55 +651,59 @@ defineExpose({
 .ai-card-beauty {
   height: 780px;
   overflow: hidden;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(80,120,255,0.08), 0 1.5px 4px 0 rgba(80,120,255,0.04);
-  background: #fafdff;
+  border-radius: 22px;
+  box-shadow: 0 6px 32px 0 rgba(80,120,255,0.13), 0 2px 8px 0 rgba(80,120,255,0.07);
+  background: linear-gradient(135deg, #fafdff 60%, #e6f0ff 100%);
   border: none;
+  transition: box-shadow 0.3s;
+}
+.ai-card-beauty:hover {
+  box-shadow: 0 10px 40px 0 rgba(80,120,255,0.18), 0 4px 16px 0 rgba(80,120,255,0.10);
 }
 .ai-title-bar {
   display: flex;
   align-items: center;
   background: linear-gradient(90deg, #e0eaff 0%, #fafdff 100%);
-  border-radius: 12px 12px 0 0;
-  padding: 10px 18px 10px 12px;
+  border-radius: 16px 16px 0 0;
+  padding: 14px 24px 14px 16px;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 22px;
   color: #2563eb;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   box-shadow: 0 2px 8px 0 rgba(80,120,255,0.04);
 }
 .ai-title-icon {
-  font-size: 22px;
+  font-size: 26px;
   color: #4b8cff;
-  margin-right: 8px;
+  margin-right: 10px;
 }
 .ai-title-text {
   font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
 }
 .ai-scrollbar-beauty {
   max-height: 700px;
-  min-height: 200px;
+  min-height: 220px;
   overflow: auto;
   background: #f6faff;
-  border-radius: 12px;
-  padding: 18px 20px 18px 20px;
+  border-radius: 16px;
+  padding: 22px 26px 22px 26px;
   transition: max-height 0.4s cubic-bezier(.4,0,.2,1);
 }
 .ai-typewriter-content-beauty {
-  font-size: 18px;
-  color: #2563eb;
+  font-size: 20px;
+  color: #1a237e;
   font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
   background: #f4f8ff;
-  border-radius: 10px;
-  padding: 18px 22px;
-  line-height: 2.1;
-  margin-top: 4px;
+  border-radius: 12px;
+  padding: 22px 28px;
+  line-height: 2.2;
+  margin-top: 6px;
   word-break: break-all;
-  box-shadow: 0 1.5px 6px rgba(75,140,255,0.06);
-  min-height: 60px;
+  box-shadow: 0 2px 8px rgba(75,140,255,0.08);
+  min-height: 80px;
   transition: background 0.2s, min-height 0.4s cubic-bezier(.4,0,.2,1);
   text-indent: 2em;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
 }
 /* 平滑展开动画 */
 .ai-fade-expand-enter-active, .ai-fade-expand-leave-active {
@@ -674,5 +722,41 @@ defineExpose({
 .ai-scrollbar-beauty ::-webkit-scrollbar-thumb {
   background: #c6d8ff;
   border-radius: 8px;
+}
+.ai-section-block {
+  margin-bottom: 18px;
+  padding: 0 0 0 0;
+}
+.ai-section-title {
+  display: inline-block;
+  font-weight: bold;
+  color: #2563eb;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.ai-section-text {
+  display: inline;
+  color: #1a237e;
+  font-size: 18px;
+  margin-left: 8px;
+}
+.ai-section-comment {
+  background: linear-gradient(90deg, #e3f0ff 0%, #fafdff 100%);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px 0 rgba(80,120,255,0.08);
+  padding: 16px 18px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  border-left: 5px solid #2563eb;
+}
+.ai-section-title-comment {
+  color: #e65100;
+  font-size: 19px;
+}
+.ai-section-text-comment {
+  color: #e65100;
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 8px;
 }
 </style>

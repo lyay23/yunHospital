@@ -35,6 +35,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         // 通过注入的实例调用verify方法
         if (null == token || "".equals(token) || !jwtUtils.verify(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 设置401状态码
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json; charset=utf-8");
             try (PrintWriter writer = response.getWriter()) {
@@ -48,6 +49,14 @@ public class JwtInterceptor implements HandlerInterceptor {
         Object userObj = jwtUtils.getUserByToken(token);
         if (userObj == null) {
             // token无效或已过期
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 设置401状态码
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json; charset=utf-8");
+            try (PrintWriter writer = response.getWriter()) {
+                writer.print(new JsonResult<User>("未登录"));
+            } catch (Exception e) {
+                logger.error("login token error is {}", e.getMessage());
+            }
             return false;
         }
         if (userObj instanceof Customer){

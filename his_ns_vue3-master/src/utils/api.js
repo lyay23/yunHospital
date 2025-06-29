@@ -20,6 +20,7 @@ export const putReq = (url, params) => {
     data: params,
     headers: {
       'Content-Type': 'application/json',
+      'token': localStorage.getItem("token"),
     }
   });
 }
@@ -61,6 +62,7 @@ export const postJsonRequest = (url, params) => {
     data: params,  // axios 自动将对象序列化为 JSON
     headers: {
       'Content-Type': 'application/json',
+      'token': localStorage.getItem("token"),
     }
   });
 }
@@ -119,6 +121,7 @@ export const putRequest = (url, params) => {
     data: params,
     headers: {
       'Content-Type': 'application/json',
+      'token': localStorage.getItem("token"),
     }
   });
 };
@@ -126,7 +129,10 @@ export const putRequest = (url, params) => {
 export const deleteRequest = (url) => {
   return axios({
     method: 'delete',
-    url: `${base}${url}`
+    url: `${base}${url}`,
+    headers: {
+      'token': localStorage.getItem("token"),
+    }
   });
 }
 

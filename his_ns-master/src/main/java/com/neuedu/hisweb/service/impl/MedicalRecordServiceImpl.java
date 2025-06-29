@@ -69,6 +69,7 @@ public class MedicalRecordServiceImpl extends ServiceImpl<MedicalRecordMapper, M
                     medicalDisease.setRegistID(medicalRecord.getRegistId());
                     medicalDisease.setDiseaseID(diseaseVo.getDisease().getId());
                     medicalDisease.setDiagnoseType(diseaseVo.getDiagnoseType());
+                    medicalDisease.setSiskDate(diseaseVo.getSiskDate());
                     medicalDisease.setDiagnoseCate(diseaseVo.getDiagnoseCate());
                     diseaseMapper.insert(medicalDisease);
                 }

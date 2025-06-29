@@ -105,10 +105,10 @@
 
 <script setup>
 import { ref, reactive, watch, onMounted, defineProps } from 'vue';
-import { get, post, put, del } from '@/utils/api';
+import { get, post, put, del } from '../../../utils/api';
 import { ElMessage, ElMessageBox, ElTable } from 'element-plus';
 import { DocumentChecked, Plus, Delete, Search } from '@element-plus/icons-vue';
-import { useUserStore } from '@/store/user';
+import { useUserStore } from '../../../store/user';
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -272,40 +272,25 @@ const addSelectedDiseases = () => {
 
 // --- 保存逻辑 ---
 const saveAll = async () => {
-  if (!props.patient || !props.patient.id) {
-    ElMessage.error("请先选择一位患者");
+  if (!medicalRecord.value.id) {
+    ElMessage.error('无法获取病历ID，无法保存');
     return;
   }
   
+  // 1. 组合要保存的数据
+  const saveData = {
+    ...medicalRecord.value,
+    medicalDiseases: finalDiagnoses.value,
+  };
+
   try {
-    // 构建一个符合后端MedicalRecordVo的payload
-    const payload = {
-      ...medicalRecord.value,
-      registId: props.patient.id,
-      caseNumber: props.patient.caseNumber,
-      // 直接从 finalDiagnoses 中取值，因为字段名已经匹配
-      medicalDiseases: finalDiagnoses.value,
-    };
-    
-    const res = await post('/neudoc/medicalrecord/save', payload);
-
+    const res = await post('/neudoc/medicalrecord/save', saveData);
     if (res.data && res.data.result) {
-      // 确诊信息保存成功后，调用诊毕接口
-      try {
-        const finishRes = await post(`/register/finish?id=${props.patient.id}`);
-        if (finishRes.data && finishRes.data.result) {
-            ElMessage.success('患者已诊毕，病历已锁定');
-        } else {
-            ElMessage.error(finishRes.data.errMsg || '标记诊毕失败');
-        }
-      } catch (finishError) {
-        ElMessage.error('调用诊毕接口时发生网络或服务器错误');
-      }
-
-      // 保存后重新加载数据，以获取新ID等信息
+      ElMessage.success('确诊信息保存成功');
+      // 保存成功后，重新加载数据以获取最新的ID等信息
       await loadData();
     } else {
-       ElMessage.error(res.data.errMsg || '保存失败');
+      ElMessage.error(res.data.errMsg || '保存失败');
     }
   } catch (error) {
     console.error("保存失败:", error);

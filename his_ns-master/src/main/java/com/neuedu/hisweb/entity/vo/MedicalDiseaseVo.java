@@ -41,4 +41,7 @@ public class MedicalDiseaseVo extends MedicalDisease implements Serializable {
     private Disease disease;
 
     private Integer diseCategoryID;
-    }
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date siskDate;
+}

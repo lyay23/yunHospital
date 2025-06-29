@@ -14,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import reactor.core.publisher.Flux;
+
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -53,7 +56,7 @@ public class AIChatController {
     private String bailianBaseUrl;
 
 
-    @PostMapping("/chat")
+    @GetMapping("/chat")
     public String chat(@RequestParam String message) {
         String url = ollamaBaseUrl + "/api/chat";
         HttpHeaders headers = new HttpHeaders();
@@ -80,16 +83,19 @@ public class AIChatController {
         return response;
     }
 
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter chatStream(@RequestParam String message) {
-        logger.info("开始AI流式请求（阿里云百炼），消息: {}", message);
-        SseEmitter emitter = new SseEmitter(300000L); // 5分钟超时
+    @GetMapping(value = "/stream")
+    public Flux<String> chatStream(@RequestParam String message, HttpServletResponse response) {
+        // 强制设置响应头
+        response.setContentType("text/event-stream");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Connection", "keep-alive");
 
-        // AI身份设定
+        logger.info("开始AI流式请求（阿里云百炼），消息: {}", message);
+
         String systemPrompt = "你现在是一名专业的医院教授，你需要根据医生给病人写的病历进行分析，直接分析病历的结果并予以评价，不需要思考的过程(医生没有那么多的时间看你思考)。";
         String finalPrompt = systemPrompt + message;
 
-        // 构造百炼API请求体
         Map<String, Object> input = new HashMap<>();
         input.put("prompt", finalPrompt);
 
@@ -98,7 +104,7 @@ public class AIChatController {
         parameters.put("stream", true);
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", model); // "qwen-turbo"
+        requestBody.put("model", model);
         requestBody.put("input", input);
         requestBody.put("parameters", parameters);
 
@@ -108,38 +114,17 @@ public class AIChatController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + apiKey);
 
-        webClient.post()
+        return webClient.post()
                 .uri(bailianBaseUrl)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .bodyValue(requestBody)
-                .accept(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM) //明确要求流式响应
                 .retrieve()
                 .bodyToFlux(String.class)
-                .filter(line -> !line.trim().isEmpty())
-                .doOnNext(chunk -> {
-                    try {
-                        logger.debug("收到百炼响应: {}", chunk);
-                        emitter.send("data: " + chunk + "\n\n");
-                    } catch (Exception e) {
-                        logger.error("发送SSE数据失败: {}", e.getMessage());
-                        emitter.completeWithError(e);
-                    }
-                })
-                .doOnError(error -> {
-                    if (error instanceof WebClientResponseException) {
-                        WebClientResponseException ex = (WebClientResponseException) error;
-                        logger.error("百炼API错误: 状态码={}, 响应体={}", ex.getRawStatusCode(), ex.getResponseBodyAsString());
-                    } else {
-                        logger.error("百炼流式请求出错: {}", error.getMessage());
-                    }
-                    emitter.completeWithError(error);
-                })
-                .doOnComplete(() -> {
-                    logger.info("百炼AI流式请求完成");
-                    emitter.complete();
-                })
-                .subscribe();
-
-        return emitter;
+                .map(chunk -> "data: " + chunk + "\n\n") // 格式化为SSE
+                .doOnSubscribe(subscription -> logger.info("成功订阅百炼API响应流"))
+                .doOnNext(data -> logger.debug("发送给客户端的数据: {}", data))
+                .doOnError(error -> logger.error("处理百炼流时出错: ", error))
+                .doOnComplete(() -> logger.info("百炼流处理完成"));
     }
 }

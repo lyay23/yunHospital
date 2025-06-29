@@ -2,6 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.neuedu.hisweb.mapper.MedicalRecordMapper">
 
+    <resultMap id="MedicalDiseaseResultMap" type="com.neuedu.hisweb.entity.vo.MedicalDiseaseVo">
+        <id property="id" column="id"/>
+        <result property="medicalID" column="MedicalID"/>
+        <result property="registID" column="RegistID"/>
+        <result property="diseaseID" column="DiseaseID"/>
+        <result property="diagnoseType" column="DiagnoseType"/>
+        <result property="siskDate" column="GetSiskDate"/>
+        <result property="diagnoseCate" column="DiagnoseCate"/>
+        <association property="disease" javaType="com.neuedu.hisweb.entity.Disease">
+            <id property="id" column="disease.id"/>
+            <result property="diseaseCode" column="disease.diseaseCode"/>
+            <result property="diseaseName" column="disease.diseaseName"/>
+            <result property="diseaseICD" column="disease.diseaseICD"/>
+            <result property="diseCategoryID" column="disease.diseCategoryID"/>
+        </association>
+    </resultMap>
+
     <!-- 新的、安全的查询：明确列出所有字段，并使用驼峰式别名 -->
     <select id="getMedicalRecordByRegistId" resultType="com.neuedu.hisweb.entity.vo.MedicalRecordVo">
         select
@@ -25,10 +42,11 @@
     </select>
 
     <!-- 新的查询：根据病历ID获取所有诊断信息 -->
-    <select id="getMedicalDiseasesByMedicalId" resultType="com.neuedu.hisweb.entity.vo.MedicalDiseaseVo">
+    <select id="getMedicalDiseasesByMedicalId" resultMap="MedicalDiseaseResultMap">
         select
             md.ID as id,
             md.MedicalID,
+            md.RegistID,
             md.DiseaseID,
             md.DiagnoseType,
             md.GetSiskDate,
