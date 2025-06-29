@@ -78,7 +78,7 @@
             <el-table :data="applyData" style="width: 100%;" @selection-change="handleApplySelectionChange" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
                 <el-table-column type="selection" :selectable="() => !isDiagnosed"></el-table-column>
                 <el-table-column property="itemName" label="项目名称" ></el-table-column>
-                <el-table-column property="execDept" label="执行科室" width="100"></el-table-column>
+                <el-table-column property="deptName" label="执行科室" width="100"></el-table-column>
                 <el-table-column label="加急" width="60" align="center">
                    <template #default="scope">
                       <el-tag :type="scope.row.isUrgent === 1 ? 'danger' : 'info'" size="small">{{ scope.row.isUrgent === 1 ? '是' : '否' }}</el-tag>
