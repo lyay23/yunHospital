@@ -137,7 +137,6 @@ public class PrescriptionServiceImpl extends ServiceImpl<PrescriptionMapper, Pre
                                 cost.setAmount(pd.getAmount().doubleValue());
                                 cost.setCreateOperID(p.getUserId());//操作员id
                                 cost.setCreatetime(LocalDateTime.now().toString());
-                                cost.setPayTime(LocalDateTime.now().toString());
                                 cost.setDeptID(register.getDeptID());
                                 cost.setFeeType(register.getSettleID());//费用类别
                                 cost.setItemID(drugs.getId());
@@ -147,7 +146,6 @@ public class PrescriptionServiceImpl extends ServiceImpl<PrescriptionMapper, Pre
                                 cost.setRegistID(p.getRegistId());
                                 cost.setInvoiceID(invoice.getId());
                                 cost.setRegisterID(invoice.getUserID());
-
                                 costList.add(cost);
                             }
                         }
@@ -182,7 +180,6 @@ public class PrescriptionServiceImpl extends ServiceImpl<PrescriptionMapper, Pre
                             cancellation.setAmount(-existingCost.getAmount());
                             cancellation.setBackID(existingCost.getId());
                             cancellation.setCreatetime(LocalDateTime.now().toString());
-                            cancellation.setPayTime(LocalDateTime.now().toString());
                             cancellation.setCreateOperID(p.getUserId());
                             cancellation.setRegisterID(existingCost.getRegisterID());
                             cancellation.setDeptID(existingCost.getDeptID());

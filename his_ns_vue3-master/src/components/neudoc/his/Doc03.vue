@@ -664,11 +664,12 @@ const viewResult = (row) => {
 const getExecStateName = (state) => {
   const stateMap = {
     0: '已作废',
-    1: '已开立',
-    2: '已交费',
-    3: '已登记',
-    4: '已执行',
-    5: '已完成',
+    1: '暂存',
+    2: '已开立',
+    3: '已交费',
+    4: '已登记',
+    5: '已执行',
+    6: '已完成',
   };
   return stateMap[state] || '未知状态';
 };

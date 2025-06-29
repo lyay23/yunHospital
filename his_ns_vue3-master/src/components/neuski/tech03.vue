@@ -208,13 +208,15 @@ const updateItemsState = async (ids, state) => {
 
 const handleExecute = async () => {
   const ids = selectedItems.value.map(item => item.id);
-  const success = await updateItemsState(ids, 4); // 4: 已登记
-  if (!success) return;
-
-  ElMessage.success('执行确认成功');
-  // 重新加载当前患者的处置列表以刷新状态
-  if (currentPatient.value) {
-    await selectPatient(currentPatient.value);
+  const res = await postReq('/checkapply/updateState', { ids, state: 4 }); // 4: 已登记
+  if (res.data.result) {
+    ElMessage.success('执行确认成功');
+    // 重新加载当前患者的处置列表以刷新所有状态
+    if (currentPatient.value?.id) {
+      await selectPatient(currentPatient.value);
+    }
+  } else {
+    ElMessage.error(res.data.errMsg || '执行确认失败');
   }
 };
 

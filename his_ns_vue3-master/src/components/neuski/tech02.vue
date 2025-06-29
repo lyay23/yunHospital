@@ -199,13 +199,16 @@ const updateItemsState = async (ids, state) => {
 
 const handleExecute = async () => {
   const ids = selectedItems.value.map(item => item.id);
-  const success = await updateItemsState(ids, 4); // 4: 已登记
-  if (!success) return;
-
-  ElMessage.success('执行确认成功');
-  // 重新加载当前患者的检查/检验列表以刷新状态
-  if (currentPatient.value) {
-    await loadCheckApply(currentPatient.value.id);
+  // 直接调用后端更新，成功后重新加载数据
+  const res = await postReq('/checkapply/updateState', { ids, state: 4 }); // 4: 已登记
+  if (res.data.result) {
+    ElMessage.success('执行确认成功');
+    // 重新加载当前患者的检验列表以刷新所有状态
+    if (currentPatient.value?.id) {
+      await selectPatient(currentPatient.value);
+    }
+  } else {
+    ElMessage.error(res.data.errMsg || '执行确认失败');
   }
 };
 
