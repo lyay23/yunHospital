@@ -7,6 +7,7 @@ import com.neuedu.hisweb.entity.User;
 import com.neuedu.hisweb.entity.vo.UserVo;
 import com.neuedu.hisweb.service.IUserService;
 import com.neuedu.hisweb.utils.JwtUtils;
+import com.neuedu.hisweb.utils.MD5Util;
 import com.neuedu.hisweb.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +40,13 @@ public class UserController {
         String uname = user.getUserName();
         String pwd = user.getPassword();
 
-        // 构建查询条件：用户名、密码匹配且未删除
+        // 对传入的密码进行MD5加密
+        String md5Pwd = MD5Util.getMD5(pwd);
+
+        // 构建查询条件：用户名、加密后的密码匹配且未删除
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUserName, uname)
-                .eq(User::getPassword, pwd)
+                .eq(User::getPassword, md5Pwd)
                 .eq(User::getDelMark, 1);
 
         // 调用服务层查询用户
@@ -111,8 +115,8 @@ public class UserController {
      */
     @PostMapping("/add")
     public JsonResult<User> addUser(@RequestBody User user){
-        // 设置默认密码为"123456"
-        user.setPassword("123456");
+        // 设置默认密码为"123456"的MD5哈希值
+        user.setPassword(MD5Util.getMD5("123456"));
         // 调用服务层保存用户
         boolean rs = iUserService.save(user);
         if (rs) {
@@ -131,6 +135,13 @@ public class UserController {
      */
     @PostMapping("/update")
     public JsonResult<User> updateUser(@RequestBody User user){
+        // 如果请求中包含了密码，则对其进行加密
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(MD5Util.getMD5(user.getPassword()));
+        } else {
+            // 防止密码被意外清空
+            user.setPassword(null);
+        }
         // 调用服务层更新用户
         boolean rs = iUserService.updateById(user);
         if (rs) {
@@ -153,8 +164,12 @@ public class UserController {
     public JsonResult<User> updateChangePwd(@RequestParam(value = "uid", required = true) Integer uid,
                                             @RequestParam(value = "oldPwd", required = true) String oldPwd,
                                             @RequestParam(value = "newPwd", required = true) String newPwd) {
+        // 对密码进行MD5加密
+        String md5OldPwd = MD5Util.getMD5(oldPwd);
+        String md5NewPwd = MD5Util.getMD5(newPwd);
+
         // 调用服务层修改密码
-        boolean rs = iUserService.updatePwd(uid, oldPwd, newPwd);
+        boolean rs = iUserService.updatePwd(uid, md5OldPwd, md5NewPwd);
         if (rs) {
             // 修改成功
             JsonResult<User> jsonResult = new JsonResult<>();
