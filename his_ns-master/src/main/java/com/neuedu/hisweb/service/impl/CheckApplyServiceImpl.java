@@ -1,6 +1,7 @@
 package com.neuedu.hisweb.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.neuedu.hisweb.entity.*;
@@ -11,6 +12,7 @@ import com.neuedu.hisweb.mapper.CheckApplyMapper;
 import com.neuedu.hisweb.service.*;
 import com.neuedu.hisweb.mapper.PatientcostsMapper;
 import com.neuedu.hisweb.mapper.InvoiceMapper;
+import com.neuedu.hisweb.mapper.MedicalResultMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,7 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
 
     @Autowired
     private CheckApplyMapper checkApplyMapper;
-    
+
     @Autowired
     private IPatientcostsService patientcostsService;
 
@@ -66,9 +68,12 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
     @Autowired
     private IMedicalResultService medicalResultService;
 
+    @Autowired
+    private MedicalResultMapper medicalResultMapper;
+
     @Override
-    public Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, Integer registId, Integer recordType) {
-        return checkApplyMapper.selectPage(page, registId, recordType);
+    public Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, CheckApplyVo checkApplyVo) {
+        return checkApplyMapper.selectPage(page,checkApplyVo);
     }
 
     @Override
@@ -77,14 +82,14 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
         for (CheckApply item : items) {
             if(item.getId() == null) { //it's a new item
                 item.setName(item.getItemName());
-            item.setState(1); // 1-暂存
-            item.setCreationTime(LocalDateTime.now());
-            //如果前端没有传入
+                item.setState(1); // 1-暂存
+                item.setCreationTime(LocalDateTime.now());
+                //如果前端没有传入
                 if (item.getCheckOperId() == null) {
-                item.setCheckOperId(item.getDoctorId());
-            }
+                    item.setCheckOperId(item.getDoctorId());
+                }
                 if (item.getResultOperId() == null) {
-                item.setResultOperId(item.getDoctorId());
+                    item.setResultOperId(item.getDoctorId());
                 }
             }
         }
@@ -167,7 +172,7 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
                     cancellation.setBackID(existingCost.getId());
                     cancellation.setCreatetime(LocalDateTime.now().toString());
                     cancellation.setPayTime(LocalDateTime.now().toString());
-                    cancellation.setCreateOperID(checkApply.getDoctorId()); 
+                    cancellation.setCreateOperID(checkApply.getDoctorId());
                     cancellation.setRegisterID(existingCost.getRegisterID());
                     cancellation.setDeptID(existingCost.getDeptID());
                     cancellation.setFeeType(existingCost.getFeeType());
@@ -203,7 +208,7 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
             if (checkApply.getDeptId() != null) {
                 checkApply.setPosition(String.valueOf(checkApply.getDeptId()));
             }
-            
+
             // Set creation time for new entities
             if (checkApply.getId() == null) {
                 checkApply.setCreationTime(LocalDateTime.now());
@@ -385,43 +390,32 @@ public class CheckApplyServiceImpl extends ServiceImpl<CheckApplyMapper, CheckAp
     @Override
     @Transactional
     public boolean saveResult(CheckResultVo resultVo) {
-        // 1. 保存结果到 medical_result 表
-        MedicalResult medicalResult = new MedicalResult();
-        medicalResult.setRegistId(resultVo.getRegistId());
-        medicalResult.setResultDesc(resultVo.getResultDesc());
-        medicalResult.setResultImages(resultVo.getResultImages());
-        medicalResult.setCreateTime(LocalDateTime.now());
-
-        // 设置操作员ID
-        User loginUser = UserUtils.getLoginUser();
-        if (loginUser != null) {
-            medicalResult.setOperatorId(loginUser.getId());
+        List<Integer> ids = resultVo.getCheckApplyIds();
+        if (ids == null || ids.isEmpty()) {
+            return false;
         }
 
-        // 关联到第一个检查项，并设置类型为检查
-        if (resultVo.getCheckApplyIds() != null && !resultVo.getCheckApplyIds().isEmpty()) {
-            medicalResult.setItemId(resultVo.getCheckApplyIds().get(0));
-            medicalResult.setItemType(1); // 1 代表检查
+        CheckApply firstItem = this.getById(ids.get(0));
+        if (firstItem == null) {
+            return false;
+        }
+        Integer recordType = firstItem.getRecordType();
+
+        for (Integer checkApplyId : ids) {
+            MedicalResult mr = new MedicalResult();
+            mr.setItemId(checkApplyId);
+            mr.setRegistId(resultVo.getRegistId());
+            mr.setResultDesc(resultVo.getResultDesc());
+            mr.setResultImages(resultVo.getResultImages());
+            mr.setItemType(recordType);
+            mr.setCreateTime(LocalDateTime.now());
+            medicalResultMapper.insert(mr);
         }
 
-        medicalResultService.save(medicalResult);
-
-        // 2. 更新所有相关 checkapply 的状态为 5 (已执行完)
-        if (resultVo.getCheckApplyIds() != null && !resultVo.getCheckApplyIds().isEmpty()) {
-            List<CheckApply> appliesToUpdate = new ArrayList<>();
-            for (Integer id : resultVo.getCheckApplyIds()) {
-                CheckApply update = new CheckApply();
-                update.setId(id);
-                update.setState(5); // 5: 已执行完
-                update.setResultTime(LocalDateTime.now());
-                if (loginUser != null) {
-                    update.setResultOperId(loginUser.getId());
-                }
-                appliesToUpdate.add(update);
-            }
-            this.updateBatchById(appliesToUpdate);
-        }
+        UpdateWrapper<CheckApply> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.in("ID", ids).set("State", 5);
+        this.update(updateWrapper);
 
         return true;
     }
-} 
+}

@@ -13,22 +13,32 @@ public interface CheckApplyMapper extends BaseMapper<CheckApply> {
 
     @Select("""
             <script>
-            select ca.*,d.DeptName as deptName,fm.Price, fm.ItemName as itemName,
-            mr.result_desc as resultDesc, mr.result_images as resultImages
+            select
+                ca.*,
+                d.DeptName as deptName,
+                fm.Price,
+                fm.ItemName as itemName,
+                u.RealName as doctorName,
+                sc.SettleName as settleCategoryName,
+                mr.result_desc as resultDesc,
+                mr.result_images as resultImages
             from checkapply ca
             left join fmeditem fm on ca.ItemID=fm.ID
-            left join department d on ca.Position=d.ID
-            left join medical_result mr on ca.id = mr.item_id and mr.item_type = 1
+            left join department d on fm.DeptID=d.ID
+            left join user u on ca.DoctorID = u.ID
+            left join register r on ca.RegistID = r.ID
+            left join settlecategory sc on r.SettleID = sc.ID
+            left join medical_result mr on ca.ID = mr.item_id and mr.item_type = ca.RecordType
             <where>
-                <if test='registId != null' >
-                    and ca.RegistID = #{registId}
+                <if test="ca.registId != null" >
+                    and ca.RegistID = #{ca.registId}
                 </if>
-                <if test='recordType != null' >
-                    and ca.RecordType = #{recordType}
+                <if test="ca.recordType != null" >
+                    and ca.RecordType = #{ca.recordType}
                 </if>
             </where>
             order by ca.CreationTime desc
             </script>
             """)
-    Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, @Param("registId") Integer registId, @Param("recordType") Integer recordType);
-} 
+    Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, @Param("ca") CheckApplyVo checkApply);
+}

@@ -102,11 +102,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="6">
-            <el-form-item label="结算类别:">
-              <el-input v-model="currentCheckApply.settleCategoryName" readonly />
-          </el-form-item>
-          </el-col>
+      
           <el-col :span="6">
             <el-form-item label="就诊科室:">
               <el-input v-model="currentCheckApply.deptName" readonly />
@@ -129,11 +125,7 @@
               <el-input v-model="currentCheckApply.doctorName" readonly />
           </el-form-item>
           </el-col>
-          <el-col :span="6">
-            <el-form-item label="发票号:">
-              <el-input v-model="currentCheckApply.invoiceNum" readonly />
-          </el-form-item>
-          </el-col>
+    
         </el-row>
       </el-form>
 
@@ -228,7 +220,12 @@ const selectPatient = async (patient) => {
   const result = await getReq(`/checkapply/getCheckApply?registId=${patient.id}`);
   if (result.status === 200 && result.data.result && result.data.data && result.data.data.checkApply) {
     currentCheckApply.value = result.data.data.checkApply;
-    checkItems.value = result.data.data.checkDetail;
+    // 添加客户端过滤，只显示检查项目 (recordType = 1)
+    if (result.data.data.checkDetail) {
+      checkItems.value = result.data.data.checkDetail.filter(item => item.recordType === 1);
+    } else {
+      checkItems.value = [];
+    }
   } else {
     currentCheckApply.value = {};
     checkItems.value = [];

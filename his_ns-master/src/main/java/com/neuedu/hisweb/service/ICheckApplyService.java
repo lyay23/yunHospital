@@ -12,7 +12,7 @@ import java.util.Map;
 
 
 public interface ICheckApplyService extends IService<CheckApply> {
-    Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, Integer registId, Integer recordType);
+    Page<CheckApplyVo> selectPage(Page<CheckApplyVo> page, CheckApplyVo checkApplyVo);
 
     boolean addItems(List<CheckApply> items);
 
@@ -29,4 +29,4 @@ public interface ICheckApplyService extends IService<CheckApply> {
     boolean cancelExecuteCheck(List<Integer> ids);
 
     boolean saveResult(CheckResultVo resultVo);
-} 
+}

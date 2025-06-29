@@ -1,5 +1,6 @@
 package com.neuedu.hisweb.controller.neudoc;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.CheckApply;
 import com.neuedu.hisweb.entity.JsonResult;
@@ -23,16 +24,12 @@ public class CheckApplyController {
     private ICheckApplyService iService;
 
     @GetMapping("/page")
-    public JsonResult<Page<CheckApplyVo>> getCheckApplyPage(
-            @RequestParam(value = "pn", defaultValue = "1") Integer pn,
-            @RequestParam(value = "count", defaultValue = "10") Integer count,
-            @RequestParam(value = "registId", required = false) Integer registId,
-            @RequestParam(value = "recordType", required = false) Integer recordType) {
-
-        Page<CheckApplyVo> page = Page.of(pn, count);
-        iService.selectPage(page, registId, recordType);
-
-        return new JsonResult<>(page);
+    public JsonResult<IPage<CheckApplyVo>> getCheckApplyPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                         @RequestParam(value = "count", defaultValue = "10") Integer count,
+                                                         CheckApplyVo keywords){
+        Page<CheckApplyVo> pageDomain=new Page<>(page,count);
+        if(keywords==null)keywords=new CheckApplyVo();
+        return JsonResult.success(iService.selectPage(pageDomain,keywords));
     }
 
     @PostMapping("/add")
@@ -92,11 +89,7 @@ public class CheckApplyController {
     @PostMapping("/save-result")
     public JsonResult<Boolean> saveResult(@RequestBody CheckResultVo resultVo) {
         boolean result = iService.saveResult(resultVo);
-        if (result) {
-            return new JsonResult<>(true);
-        } else {
-            return new JsonResult<>("保存失败");
-        }
+        return JsonResult.success(result);
     }
 
     @GetMapping("/getCheckApply")
@@ -109,4 +102,3 @@ public class CheckApplyController {
         }
     }
 }
- 

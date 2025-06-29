@@ -12,6 +12,18 @@ export const postReq = (url, params) => {
 	}
   });
 }
+
+export const putReq = (url, params) => {
+  return axios({
+    method: 'put',
+    url: `${base}${url}`,
+    data: params,
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+}
+
 export const getReq = (url,params) => {
   return  axios({
     method: 'get',

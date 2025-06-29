@@ -77,19 +77,27 @@
             </template>
             <el-table :data="checkApplyData" style="width: 100%;" @selection-change="handleCheckApplySelectionChange" :row-style="{ cursor: isDiagnosed ? 'default' : 'pointer' }">
                 <el-table-column type="selection" :selectable="() => !isDiagnosed"></el-table-column>
-                <el-table-column property="itemName" label="项目名称" ></el-table-column>
-                <el-table-column property="deptName" label="执行科室" width="100"></el-table-column>
-                <el-table-column label="加急" width="60" align="center">
-                   <template #default="scope">
-                      <el-tag :type="scope.row.isUrgent === 1 ? 'danger' : 'info'" size="small">{{ scope.row.isUrgent === 1 ? '是' : '否' }}</el-tag>
-                   </template>
+                <el-table-column prop="itemName" label="项目名称" width="180" align="center"/>
+                <el-table-column prop="deptName" label="执行科室" align="center"/>
+                <el-table-column prop="state" label="执行状态" align="center">
+                  <template #default="scope">
+                    {{ getExecStateName(scope.row.state) }}
+                  </template>
                 </el-table-column>
-                <el-table-column label="状态" width="80" align="center">
-                   <template #default="scope">
-                      <span>{{ scope.row.state === 1 ? '暂存' : (scope.row.state === 2 ? '已开立' : '已作废') }}</span>
-                   </template>
+                <el-table-column prop="price" label="单价" align="center"/>
+                <el-table-column label="检验结果" align="center">
+                  <template #default="scope">
+                    <el-button
+                        v-if="scope.row.resultDesc || scope.row.resultImages"
+                        type="primary"
+                        link
+                        size="small"
+                        @click="viewResult(scope.row)">
+                      查看
+                    </el-button>
+                    <span v-else>--</span>
+                  </template>
                 </el-table-column>
-                <el-table-column property="price" label="单价" width="80"></el-table-column>
                  <template #empty>
                     <el-empty description="暂无检验项目" />
                 </template>
@@ -141,6 +149,38 @@
             <el-button @click="detailsDialogVisible = false">关 闭</el-button>
         </template>
   </el-dialog>
+
+  <!-- 查看结果 Dialog -->
+  <el-dialog title="检验结果详情" v-model="resultDialogVisible" width="50%">
+    <div v-if="currentResult">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label-class-name="result-label" label="结果描述">
+          {{ currentResult.resultDesc || '暂无描述' }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <el-divider content-position="left">结果图片</el-divider>
+
+      <div class="result-images-container" v-if="currentResult.resultImages && currentResult.resultImages.length > 0">
+        <el-image
+            v-for="(url, index) in currentResult.resultImages"
+            :key="index"
+            class="result-image-item"
+            :src="url"
+            :preview-src-list="currentResult.resultImages"
+            :initial-index="index"
+            fit="cover"
+            lazy
+        />
+      </div>
+      <el-empty v-else description="暂无图片" />
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="resultDialogVisible = false">确 定</el-button>
+      </span>
+    </template>
+  </el-dialog>
   </div>
 </template>
 
@@ -148,7 +188,7 @@
 import { ref, computed, watch, defineProps } from 'vue';
 import { getReq, postReq } from '../../../utils/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Plus, Delete, Document, SuccessFilled, DeleteFilled, Collection } from '@element-plus/icons-vue';
+import { Search, Plus, Delete, Document, SuccessFilled, DeleteFilled, Collection, Refresh } from '@element-plus/icons-vue';
 import { useUserStore } from '../../../store/user';
 
 const userStore = useUserStore();
@@ -182,6 +222,10 @@ const templateData = ref([]);
 const medicalRecordId = ref(null);
 const detailsDialogVisible = ref(false);
 const templateDetails = ref([]);
+
+// 结果查看弹窗
+const resultDialogVisible = ref(false);
+const currentResult = ref(null);
 
 // Computed total amount
 const totalAmount = computed(() => {
@@ -606,8 +650,46 @@ async function saveAsTemplate() {
         // Cancelled
     });
 }
+
+const viewResult = (row) => {
+  if (row.resultImages && typeof row.resultImages === 'string') {
+    row.resultImages = row.resultImages.split(',').map(url => url.trim()).filter(url => url);
+  } else if (!row.resultImages) {
+    row.resultImages = [];
+  }
+  currentResult.value = row;
+  resultDialogVisible.value = true;
+};
+
+const getExecStateName = (state) => {
+  const stateMap = {
+    0: '已作废',
+    1: '已开立',
+    2: '已交费',
+    3: '已登记',
+    4: '已执行',
+    5: '已完成',
+  };
+  return stateMap[state] || '未知状态';
+};
 </script>
 
 <style scoped>
+.result-label {
+  width: 100px;
+}
 
+.result-images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.result-image-item {
+  width: 100px;
+  height: 100px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #ebeef5;
+}
 </style>
