@@ -90,6 +90,19 @@
                    </template>
                 </el-table-column>
                 <el-table-column property="price" label="单价" width="80"></el-table-column>
+                <el-table-column label="处置结果" align="center">
+                  <template #default="scope">
+                    <el-button
+                        v-if="scope.row.resultDesc || scope.row.resultImages"
+                        type="primary"
+                        link
+                        size="small"
+                        @click="viewResult(scope.row)">
+                      查看
+                    </el-button>
+                    <span v-else>--</span>
+                  </template>
+                </el-table-column>
                  <template #empty>
                     <el-empty :description="isDiagnosed ? '患者已诊毕' : '暂无处置项目'" />
                 </template>
@@ -141,6 +154,38 @@
             <el-button @click="detailsDialogVisible = false">关 闭</el-button>
         </template>
   </el-dialog>
+
+    <!-- 查看结果 Dialog -->
+    <el-dialog title="处置结果详情" v-model="resultDialogVisible" width="50%">
+      <div v-if="currentResult">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label-class-name="result-label" label="结果描述">
+            {{ currentResult.resultDesc || '暂无描述' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider content-position="left">结果图片</el-divider>
+
+        <div class="result-images-container" v-if="currentResult.resultImages && currentResult.resultImages.length > 0">
+          <el-image
+              v-for="(url, index) in currentResult.resultImages"
+              :key="index"
+              class="result-image-item"
+              :src="url"
+              :preview-src-list="currentResult.resultImages"
+              :initial-index="index"
+              fit="cover"
+              lazy
+          />
+        </div>
+        <el-empty v-else description="暂无图片" />
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="resultDialogVisible = false">确 定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -184,6 +229,10 @@ const templateData = ref([]);
 const medicalRecordId = ref(null);
 const detailsDialogVisible = ref(false);
 const templateDetails = ref([]);
+
+// 结果查看弹窗
+const resultDialogVisible = ref(false);
+const currentResult = ref(null);
 
 // Computed total amount
 const totalAmount = computed(() => {
@@ -539,4 +588,35 @@ async function saveAsTemplate() {
     }).catch(() => {
     });
 }
+
+const viewResult = (row) => {
+  if (row.resultImages && typeof row.resultImages === 'string') {
+    row.resultImages = row.resultImages.split(',').map(url => url.trim()).filter(url => url);
+  } else if (!row.resultImages) {
+    row.resultImages = [];
+  }
+  currentResult.value = row;
+  resultDialogVisible.value = true;
+};
 </script>
+
+<style scoped>
+.container {
+  height: 100%;
+}
+.result-label {
+  width: 100px;
+}
+.result-images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.result-image-item {
+  width: 100px;
+  height: 100px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #ebeef5;
+}
+</style>

@@ -13,22 +13,34 @@ public interface CheckApplyMapper extends BaseMapper<CheckApply> {
 
     @Select("""
             <script>
-            select
+            SELECT
                 ca.*,
+                r.CaseNumber as caseNumber,
+                mc.RealName as patientName,
+                r.age as age,
                 d.DeptName as deptName,
-                fm.Price,
+                fm.Price as price,
                 fm.ItemName as itemName,
-                u.RealName as doctorName,
+                doc.RealName as doctorName,
                 sc.SettleName as settleCategoryName,
                 mr.result_desc as resultDesc,
                 mr.result_images as resultImages
-            from checkapply ca
-            left join fmeditem fm on ca.ItemID=fm.ID
-            left join department d on fm.DeptID=d.ID
-            left join user u on ca.DoctorID = u.ID
-            left join register r on ca.RegistID = r.ID
-            left join settlecategory sc on r.SettleID = sc.ID
-            left join medical_result mr on ca.ID = mr.item_id and mr.item_type = ca.RecordType
+            FROM
+                checkapply ca
+            LEFT JOIN
+                fmeditem fm ON ca.ItemID = fm.ID
+            LEFT JOIN
+                register r ON ca.RegistID = r.ID
+            LEFT JOIN
+                medicalcard mc ON r.MedicalCardId = mc.id
+            LEFT JOIN
+                department d ON r.DeptID = d.ID
+            LEFT JOIN
+                user doc ON ca.DoctorID = doc.ID
+            LEFT JOIN
+                settlecategory sc ON r.SettleID = sc.ID
+            LEFT JOIN
+                medical_result mr ON ca.ID = mr.item_id AND mr.item_type = ca.RecordType
             <where>
                 <if test="ca.registId != null" >
                     and ca.RegistID = #{ca.registId}

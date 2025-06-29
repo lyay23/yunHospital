@@ -24,12 +24,23 @@ public class CheckApplyController {
     private ICheckApplyService iService;
 
     @GetMapping("/page")
-    public JsonResult<IPage<CheckApplyVo>> getCheckApplyPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                         @RequestParam(value = "count", defaultValue = "10") Integer count,
-                                                         CheckApplyVo keywords){
-        Page<CheckApplyVo> pageDomain=new Page<>(page,count);
-        if(keywords==null)keywords=new CheckApplyVo();
-        return JsonResult.success(iService.selectPage(pageDomain,keywords));
+    public JsonResult<Page<CheckApplyVo>> getList(Page<CheckApplyVo> page,
+                                              @RequestParam(value = "patientName",required = false) String patientName,
+                                              @RequestParam(value = "caseNumber",required = false) String caseNumber,
+                                              @RequestParam(value = "recordType",required = false) Integer recordType,
+                                              @RequestParam(value = "registId", required = false) Integer registId,
+                                              @RequestParam(value = "startTime",required = false) String startTime,
+                                              @RequestParam(value = "endTime",required = false) String endTime){
+
+        CheckApplyVo checkApply =new CheckApplyVo();
+        checkApply.setPatientName(patientName);
+        checkApply.setCaseNumber(caseNumber);
+        checkApply.setStartTime(startTime);
+        checkApply.setEndTime(endTime);
+        checkApply.setRecordType(recordType);
+        checkApply.setRegistId(registId);
+        Page<CheckApplyVo> page1= iService.selectPage(page,checkApply);
+        return JsonResult.success(page1);
     }
 
     @PostMapping("/add")
