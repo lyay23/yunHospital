@@ -297,7 +297,10 @@ const finishConsultation = async () => {
 </script>
 <style>
 .input-with-select .el-input-group__prepend {
-  background-color: var(--el-fill-color-blank);
+  min-width: 60px;
+  white-space: nowrap;
+  font-size: 15px;
+  padding: 0 8px;
 }
 
 .el-main{

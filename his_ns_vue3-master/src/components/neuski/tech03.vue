@@ -21,19 +21,19 @@
     </el-dialog>
 
     <!-- 左侧患者列表 -->
-    <el-aside width="350px">
+    <el-aside width="350px" class="aside-card">
       <el-container>
-        <el-header>
-          <el-input placeholder="请输入病历号/姓名" v-model="keywords" class="input-with-select" style="width: 100%">
+        <el-header class="search-header">
+          <el-input placeholder="请输入病历号/姓名" v-model="keywords" class="input-with-select search-input" style="width: 100%">
             <template #prepend>患者查询：</template>
             <template #append><el-button :icon="Search" @click="searchPatient"></el-button></template>
           </el-input>
         </el-header>
-        <el-main style="height: 700px; border: 1px solid #eee; padding: 0; margin: 0">
+        <el-main class="patient-list-main" style="height: 700px; border: 1px solid #eee; padding: 0; margin: 0">
           <el-tabs type="border-card">
             <el-tab-pane label="医技处置">
               <el-tag>患者：</el-tag>
-              <el-table ref="singleTable" :data="patients" highlight-current-row @current-change="selectPatient" style="width: 100%" :show-header="false" size="mini">
+              <el-table ref="singleTable" :data="patients" highlight-current-row @current-change="selectPatient" style="width: 100%" :show-header="false" size="mini" class="patient-table">
                 <el-table-column property="caseNumber" label="病历号"/>
                 <el-table-column property="realName" label="姓名" width="80"/>
                 <el-table-column property="id" label="id" width="100"/>
@@ -45,7 +45,7 @@
     </el-aside>
 
     <!-- 右侧内容 -->
-    <el-container direction="vertical" style="height: 100%">
+    <el-container direction="vertical" class="main-card" style="height: 100%">
       <el-row style="background-color: #EAF1F5">
         <el-col :span="9" style="margin-top: 4px;">
           <el-tag size="mini">处置明细信息：</el-tag>
@@ -60,27 +60,27 @@
           <el-button type="text" size="small" :icon="Edit" @click="openResultDialog" :disabled="!isResultEnabled">填写结果</el-button>
         </el-col>
       </el-row>
-      <el-form ref="form" :model="currentCheckApply" label-width="80px" size="mini" :inline="true">
-    <el-row><div style="font-size:large;text-align: center">处置明细单</div><hr/></el-row>
-    <el-row>
-        <el-col :span="8"><el-form-item label="病历号:"><el-input v-model="currentCheckApply.caseNumber" readonly/></el-form-item></el-col>
-        <el-col :span="8"><el-form-item label="患者姓名:"><el-input v-model="currentCheckApply.patientName" readonly/></el-form-item></el-col>
-        <el-col :span="8"><el-form-item label="年龄:"><el-input v-model="currentCheckApply.age" readonly/></el-form-item></el-col>
-    </el-row>
-    <el-row>
-        
-        <el-col :span="8"><el-form-item label="就诊科室:"><el-input v-model="currentCheckApply.deptName" readonly/></el-form-item></el-col>
-        <el-col :span="8"><el-form-item label="处方状态:"><el-input :value="formatState(currentCheckApply.state)" readonly/></el-form-item></el-col>
-    </el-row>
-    <el-row>
-        <el-col :span="8"><el-form-item label="收费日期:"><el-input v-model="currentCheckApply.creationTime" readonly/></el-form-item></el-col>
-        <el-col :span="8"><el-form-item label="开单医生:"><el-input v-model="currentCheckApply.doctorName" readonly/></el-form-item></el-col>
+      <el-form ref="form" :model="currentCheckApply" label-width="80px" size="mini" :inline="true" class="detail-form">
+        <el-row><div style="font-size:large;text-align: center">处置明细单</div><hr/></el-row>
+        <el-row>
+            <el-col :span="8"><el-form-item label="病历号:"><el-input v-model="currentCheckApply.caseNumber" readonly/></el-form-item></el-col>
+            <el-col :span="8"><el-form-item label="患者姓名:"><el-input v-model="currentCheckApply.patientName" readonly/></el-form-item></el-col>
+            <el-col :span="8"><el-form-item label="年龄:"><el-input v-model="currentCheckApply.age" readonly/></el-form-item></el-col>
+        </el-row>
+        <el-row>
+            
+            <el-col :span="8"><el-form-item label="就诊科室:"><el-input v-model="currentCheckApply.deptName" readonly/></el-form-item></el-col>
+            <el-col :span="8"><el-form-item label="处方状态:"><el-input :value="formatState(currentCheckApply.state)" readonly/></el-form-item></el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="8"><el-form-item label="收费日期:"><el-input v-model="currentCheckApply.creationTime" readonly/></el-form-item></el-col>
+            <el-col :span="8"><el-form-item label="开单医生:"><el-input v-model="currentCheckApply.doctorName" readonly/></el-form-item></el-col>
        
-    </el-row>
-</el-form>
+        </el-row>
+    </el-form>
 
       <el-divider content-position="left">处置信息:</el-divider>
-      <el-table :data="checkItems" stripe style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table :data="checkItems" stripe style="width: 100%" @selection-change="handleSelectionChange" class="detail-table">
         <el-table-column type="selection" width="55"/>
         <el-table-column prop="itemName" label="处置名称"/>
         <el-table-column prop="position" label="处置部位"/>
@@ -289,5 +289,109 @@ const formatState = (state) => {
   font-size: 14px;
   font-weight: 500;
   font-family: "Microsoft YaHei","微软雅黑","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB",Arial,sans-serif;
+}
+
+/* 侧边栏卡片美化 */
+.aside-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 18px 10px 10px 10px;
+  margin: 18px 10px 18px 0;
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.search-header {
+  padding-bottom: 8px;
+  background: none;
+  border: none;
+}
+.search-input .el-input__wrapper {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(64,158,255,0.08);
+  border: 1px solid #e0eaff;
+  background: #f8fafc;
+}
+.search-input .el-input__inner {
+  font-size: 15px;
+}
+.search-input .el-button {
+  border-radius: 8px;
+  background: #409EFF;
+  color: #fff;
+}
+.patient-list-main {
+  padding: 0;
+  background: none;
+}
+.patient-table {
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 15px;
+}
+.patient-table tr {
+  transition: background 0.2s;
+}
+.patient-table tr:hover td {
+  background: #e6f0ff !important;
+}
+
+/* 主内容区卡片美化 */
+.main-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 24px 24px 16px 24px;
+  margin: 18px 0 18px 0;
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.detail-form .el-input__wrapper {
+  border-radius: 8px;
+  border: 1px solid #e0eaff;
+  background: #f8fafc;
+  font-size: 15px;
+}
+.detail-form .el-form-item__label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+.detail-table {
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 15px;
+  margin-top: 10px;
+}
+.detail-table th {
+  background: #f5f7fa !important;
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+  padding: 6px 0;
+}
+.detail-table td {
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #222;
+  padding: 6px 0;
+  transition: background 0.2s;
+}
+.detail-table tr:hover td {
+  background: #e6f0ff !important;
+}
+.el-button[type="text"] {
+  color: #409EFF;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.el-button[type="text"]:hover {
+  background: #f4f8ff;
 }
 </style>
