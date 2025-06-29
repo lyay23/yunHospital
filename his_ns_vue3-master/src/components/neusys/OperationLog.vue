@@ -46,6 +46,19 @@ const searchKeyword = ref('')
 const getChineseAction = (row) => {
   const { className, methodName } = row;
 
+  // 新增AI/收费/检查等特殊方法名映射
+  const specialMap = {
+    chat: 'AI药方问诊',
+    chatStream: 'AI问诊病历',
+    doPay: '收费',
+    executeCheck: '执行检查',
+    importFmeditem: '导入非药品项目',
+    cancelExecuteCheck:'取消执行检查'
+  };
+  if (specialMap[methodName]) {
+    return specialMap[methodName];
+  }
+
   // 统一处理方法名，例如将addUser, add, save都视为"新增"
   let action = '未知操作';
   if (methodName.toLowerCase().startsWith('add') || methodName.toLowerCase().startsWith('save')) {
@@ -91,7 +104,7 @@ const getChineseAction = (row) => {
   const resource = controllerMap[controllerName] || controllerName;
 
   // 对于查询、登录、登出等通用操作，直接显示操作名
-  if (['查询', '登录', '登出', '诊毕'].includes(action)) {
+  if (["查询", "登录", "登出", "诊毕"].includes(action)) {
       return action;
   }
   // 对于大部分增删改操作，显示为"操作+资源"
