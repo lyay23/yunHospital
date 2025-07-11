@@ -147,8 +147,8 @@
         v-model="detailsDialogVisible"
         width="30%">
         <el-table :data="templateDetails" border size="mini">
-            <el-table-column property="itemName" label="项目名称" />
-            <el-table-column property="price" label="单价" />
+            <el-table-column property="itemName" label="项目名称"></el-table-column>
+            <el-table-column property="price" label="单价"></el-table-column>
         </el-table>
         <template #footer>
             <el-button @click="detailsDialogVisible = false">关 闭</el-button>
@@ -426,12 +426,14 @@ async function removeApplyItem() {
 
 async function openApplyItems() {
   if (selectedApplyItems.value.length === 0) {
-        ElMessage.warning('请选择要开立的项目');
-        return;
-    }
-    
-  if (selectedApplyItems.value.some(item => !item.id)) {
-     ElMessage.warning('有新项目尚未暂存，请先点击"暂存"按钮。');
+    ElMessage.warning("请至少选择一个处置项目。");
+    return;
+  }
+
+  // 检查是否有新项目未暂存
+  if (applyData.value.some(item => !item.state)) {
+    ElMessage.warning("有新项目尚未暂存，请先点击“暂存”按钮。");
+    return;
   }
 
   const idsToOpen = selectedApplyItems.value
@@ -496,9 +498,11 @@ async function useTemplate(template) {
         if (result.data.result && result.data.data) {
             const items = result.data.data;
             if (items.length > 0) {
+                const newItems = [];
                 items.forEach(item => {
                     if (!applyData.value.some(existing => existing.itemId === item.id)) {
-                        applyData.value.push({
+                        newItems.push({
+                            id: null, // 明确这是新项目
                             registId: props.patient.id,
 							itemId: item.id,
 							itemName: item.itemName,
@@ -506,11 +510,18 @@ async function useTemplate(template) {
                             deptId: item.deptId, 
                             deptName: item.deptName,
 							isUrgent: 0,
-                            state: 1, 
+                            // state 属性会在暂存后由后端返回
                         });
                     }
                 });
-                ElMessage.success(`套组"${template.name}"已添加`);
+
+                if(newItems.length > 0) {
+                  applyData.value.push(...newItems);
+                  await saveApplyItems(); // 添加后立即暂存
+                  ElMessage.success(`套组"${template.name}"已添加并暂存`);
+                } else {
+                  ElMessage.info("套组中的项目已存在。");
+                }
             }
     } else {
             ElMessage.error('获取套组项目失败');

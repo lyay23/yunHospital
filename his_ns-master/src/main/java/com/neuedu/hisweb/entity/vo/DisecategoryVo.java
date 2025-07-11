@@ -50,15 +50,4 @@ public class DisecategoryVo implements Serializable {
 
     private String dicaTypeName;
 
-    @Override
-    public String toString() {
-        return "DisecategoryVo{" +
-                "id=" + id +
-                ", dicaCode='" + dicaCode + '\'' +
-                ", dicaName='" + dicaName + '\'' +
-                ", sequenceNo=" + sequenceNo +
-                ", dicaType=" + dicaType +
-                ", dicaTypeName='" + dicaTypeName + '\'' +
-                '}';
-    }
 }

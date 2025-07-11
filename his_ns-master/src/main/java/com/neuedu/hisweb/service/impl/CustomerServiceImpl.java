@@ -1,5 +1,6 @@
 package com.neuedu.hisweb.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.Customer;
 import com.neuedu.hisweb.entity.vo.CustomerVo;
@@ -22,5 +23,12 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
     @Override
     public Page<CustomerVo> selectPage(Page<CustomerVo> page, String keyword) {
         return getBaseMapper().selectPage(page,keyword);
+    }
+
+    @Override
+    public Customer selectByIdNumber(String idnumber) {
+        LambdaQueryWrapper<Customer> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Customer::getIdnumber, idnumber);
+        return getBaseMapper().selectOne(queryWrapper);
     }
 }

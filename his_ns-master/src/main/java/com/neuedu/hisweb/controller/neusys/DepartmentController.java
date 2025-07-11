@@ -41,6 +41,11 @@ public class DepartmentController {
         return new JsonResult<>(iDepartmentService.lambdaQuery().ge(Department::getId,22).list());
     }
 
+    @GetMapping("/all")
+    public JsonResult<List<Department>> getAllDept(){
+        return new JsonResult<>(iDepartmentService.list());
+    }
+
     @PostMapping("/add")
     public JsonResult<Department>addDepartment(@RequestBody Department department){
         boolean rs= iDepartmentService.save(department);

@@ -34,6 +34,8 @@ public class Customer implements Serializable {
 
     private String idnumber;
 
+    private String password;
+
     private String birthdate;
 
     private String phone;
@@ -54,6 +56,7 @@ public class Customer implements Serializable {
         ", realName=" + realName +
         ", gender=" + gender +
         ", idnumber=" + idnumber +
+        ", password=" + password +
         ", birthdate=" + birthdate +
         ", phone=" + phone +
         ", createdate=" + createdate +

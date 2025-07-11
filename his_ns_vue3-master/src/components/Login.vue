@@ -7,7 +7,7 @@
               <!-- 可替换LOGO图片 -->
               <!-- <img src="/logo.png" alt="logo" /> -->
             </div>
-            <h3 class="login_title">东软云医院系统登录</h3>
+            <h3 class="login_title">医院系统登录</h3>
             <el-form-item label="用户名" prop="userName">
                 <el-input v-model="loginForm.userName" placeholder="用户名" class="modern-input"></el-input>
             </el-form-item>

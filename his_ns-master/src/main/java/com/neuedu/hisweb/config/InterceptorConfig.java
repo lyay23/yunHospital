@@ -28,7 +28,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**") // 保护所有接口
-                .excludePathPatterns("/user/login","/customer/login","/upload/**", "/ai/**"); // 不拦截登录接口和AI接口
+                .excludePathPatterns("/user/login", "/yunapp/**", "/upload/**", "/ai/**"); // 不拦截登录接口和AI接口
     }
 
 

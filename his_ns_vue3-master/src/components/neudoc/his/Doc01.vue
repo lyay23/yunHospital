@@ -38,7 +38,6 @@
 								:disabled="isDiagnosed"
 								class="custom-input"></el-input>
 						</el-form-item>
-
 						<el-form-item label="现病史">
 							<el-input type="textarea" v-model="medicalRecord.present" 
 								:placeholder="isDiagnosed ? '暂无内容' : '围绕主诉，详细描述病情发生、发展、演变、诊疗的过程'"
@@ -46,7 +45,6 @@
 								:rows="3"
 								class="custom-textarea"></el-input>
 						</el-form-item>
-
 						<el-form-item label="现病治疗情况">
 							<el-input type="textarea" v-model="medicalRecord.presentTreat" 
 								:placeholder="isDiagnosed ? '暂无内容' : '患者在来本院就诊前，针对现病做过的治疗'"
@@ -54,21 +52,18 @@
 								:rows="2"
 								class="custom-textarea"></el-input>
 						</el-form-item>
-
 						<el-form-item label="既往史">
 							<el-input v-model="medicalRecord.history" 
 								:placeholder="isDiagnosed ? '暂无内容' : '患者既往的健康状况和疾病历史'"
 								:disabled="isDiagnosed"
 								class="custom-input"></el-input>
 						</el-form-item>
-
 						<el-form-item label="过敏史">
 							<el-input v-model="medicalRecord.allergy" 
 								:placeholder="isDiagnosed ? '暂无内容' : '患者的过敏史'"
 								:disabled="isDiagnosed"
 								class="custom-input"></el-input>
 						</el-form-item>
-
 						<el-form-item label="体格检查">
 							<el-input type="textarea" v-model="medicalRecord.physique" 
 								:placeholder="isDiagnosed ? '暂无内容' : '医生的体格检查结果'"

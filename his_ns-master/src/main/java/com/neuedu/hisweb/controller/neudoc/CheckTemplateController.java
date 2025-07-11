@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.CheckTemplate;
 import com.neuedu.hisweb.entity.JsonResult;
+import com.neuedu.hisweb.entity.User;
 import com.neuedu.hisweb.entity.vo.CheckTemplateItemVo;
 import com.neuedu.hisweb.service.ICheckTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/checktemplate")
@@ -62,7 +65,12 @@ public class CheckTemplateController {
     }
 
     @PostMapping("/add")
-    public JsonResult<Object> addCheckTemplate(@RequestBody CheckTemplateItemVo templateVo) {
+    public JsonResult<Object> addCheckTemplate(@RequestBody CheckTemplateItemVo templateVo, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            templateVo.setDoctorId(user.getId());
+        }
+        
         boolean result = iService.saveTemplate(templateVo);
         if (result) {
             return new JsonResult<>(true);

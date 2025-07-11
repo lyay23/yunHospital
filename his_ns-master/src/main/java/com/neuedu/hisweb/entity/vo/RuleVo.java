@@ -49,17 +49,4 @@ public class RuleVo implements Serializable {
 
     private Integer num;
 
-    @Override
-    public String toString() {
-        return "RuleVo{" +
-                "id=" + id +
-                ", ruleName='" + ruleName + '\'' +
-                ", deptID=" + deptID +
-                ", deptName='" + deptName + '\'' +
-                ", userID=" + userID +
-                ", realName='" + realName + '\'' +
-                ", week='" + week + '\'' +
-                ", num=" + num +
-                '}';
-    }
 }

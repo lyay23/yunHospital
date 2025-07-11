@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录页面原型设计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            padding: 20px;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        /* 移动端预览区域 */
+        .mobile-preview {
+            width: 375px;
+            height: 667px;
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .login-container {
+            padding: 40px 20px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #4A90E2;
+            border-radius: 20px;
+            margin: 40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-text h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #E5E9F2;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: #4A90E2;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-button:hover {
+            background: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        .login-button:active {
+            transform: translateY(1px);
+        }
+
+        /* 设计说明区域 */
+        .design-notes {
+            flex: 1;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .design-notes h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .design-note {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .design-note:last-child {
+            border-bottom: none;
+        }
+
+        .design-note h3 {
+            color: #4A90E2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .design-note p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .mobile-preview {
+                width: 100%;
+                height: auto;
+                min-height: 600px;
+            }
+            .design-notes {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 移动端预览 -->
+        <div class="mobile-preview">
+            <div class="login-container">
+                <div class="logo">A</div>
+                <div class="welcome-text">
+                    <h1>欢迎回来</h1>
+                    <p>请登录您的账号以继续</p>
+                </div>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="text" placeholder="请输入账号" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" placeholder="请输入密码" required>
+                    </div>
+                    <button type="submit" class="login-button">登录</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 设计说明 -->
+        <div class="design-notes">
+            <h2>设计说明</h2>
+            <div class="design-note">
+                <h3>1. 视觉层次</h3>
+                <p>采用清晰的视觉层次结构，从上到下依次是品牌标识、欢迎文案、输入框和操作按钮。这种布局符合用户的视觉浏览习惯，让界面更容易理解和使用。</p>
+            </div>
+            <div class="design-note">
+                <h3>2. 色彩运用</h3>
+                <p>主色调选用#4A90E2蓝色，传达专业、可信赖的品牌形象。背景采用柔和的白色，提供良好的对比度和清晰的视觉体验。</p>
+            </div>
+            <div class="design-note">
+                <h3>3. 交互设计</h3>
+                <p>输入框具有焦点状态反馈，按钮有悬停和点击效果，提供即时的视觉反馈。表单验证确保用户输入完整信息后才能提交。</p>
+            </div>
+            <div class="design-note">
+                <h3>4. 间距与留白</h3>
+                <p>合理的间距和留白设计让界面更加通透，各个元素之间保持适当的呼吸感，提升整体的视觉体验。</p>
+            </div>
+            <div class="design-note">
+                <h3>5. 响应式设计</h3>
+                <p>页面采用响应式设计，在不同尺寸的移动设备上都能保持良好的显示效果。输入框和按钮的尺寸适合手指点击。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('登录功能演示：表单提交成功！');
+        });
+    </script>
+</body>
+</html> 

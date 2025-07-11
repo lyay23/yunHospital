@@ -38,6 +38,26 @@ public class OperationLogAspect {
             return joinPoint.proceed();
         }
 
+        // 获取请求路径，检查是否是移动端请求
+        HttpServletRequest request = null;
+        try {
+            request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            String requestURI = request.getRequestURI();
+            // 如果是移动端的请求路径，直接放行不记录日志
+            if (requestURI != null && (
+                requestURI.startsWith("/medicalcard/") || 
+                requestURI.startsWith("/customer/") ||
+                requestURI.startsWith("/app/") ||
+                requestURI.startsWith("/mobile/") ||
+                requestURI.startsWith("/register/") ||
+                requestURI.startsWith("/yunapp/")
+            )) {
+                return joinPoint.proceed();
+            }
+        } catch (Exception e) {
+            // 忽略异常，例如在非HTTP请求上下文中
+        }
+
         // 采集操作方法和类名
         String methodName = method.getName();
         String lowerCaseMethodName = methodName.toLowerCase();
@@ -50,12 +70,13 @@ public class OperationLogAspect {
         // 优先从JWT token获取用户，因为ThreadLocal可能已被拦截器清除
         User user = null;
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            String token = request.getHeader("token");
-            if (token != null && !token.isEmpty()) {
-                Object userObj = jwtUtils.getUserByToken(token);
-                if (userObj instanceof User) {
-                    user = (User) userObj;
+            if (request != null) {
+                String token = request.getHeader("token");
+                if (token != null && !token.isEmpty()) {
+                    Object userObj = jwtUtils.getUserByToken(token);
+                    if (userObj instanceof User) {
+                        user = (User) userObj;
+                    }
                 }
             }
         } catch (Exception e) {

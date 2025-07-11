@@ -10,6 +10,7 @@ import com.neuedu.hisweb.entity.vo.CustomerVo;
 import com.neuedu.hisweb.entity.vo.MedicalCardVo;
 import com.neuedu.hisweb.service.ICustomerService;
 import com.neuedu.hisweb.service.IMedicalCardService;
+import com.neuedu.hisweb.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +47,8 @@ public class CustomerController {
 
     @PostMapping("/add")
     public JsonResult<Customer>addUser(@RequestBody Customer customer){
+        //对密码进行md5加密
+        customer.setPassword(MD5Util.getMD5(customer.getPassword()));
         boolean rs= iService.save(customer);
         if(rs) {
             return new JsonResult<Customer>(customer);

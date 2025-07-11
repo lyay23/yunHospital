@@ -61,9 +61,11 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         if (userObj instanceof Customer){
             UserUtils.setLoginCustomer((Customer) userObj);
+            request.getSession().setAttribute("user", userObj);
         }
         else{
             UserUtils.setLoginUser((User) userObj);
+            request.getSession().setAttribute("user", userObj);
         }
         return true;
     }

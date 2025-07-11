@@ -54,10 +54,5 @@ public class DiseaseVo extends Disease {
 
     private Disecategory disecategory;
 
-    @Override
-    public String toString() {
-        return "DiseaseVo{" +
-                "diseCategoryName='" + diseCategoryName + '\'' +
-                "} " + super.toString();
-    }
+
 }

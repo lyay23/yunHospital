@@ -53,16 +53,5 @@ public class DepartmentVo implements Serializable {
     private String deptTypeName;
 
 
-    @Override
-    public String toString() {
-        return "Department{" +
-                "id=" + id +
-                ", deptCode='" + deptCode + '\'' +
-                ", deptName='" + deptName + '\'' +
-                ", deptCategoryID=" + deptCategoryID +
-                ", deptCategoryName='" + deptCategoryName + '\'' +
-                ", deptType=" + deptType +
-                ", deptTypeName=" + deptTypeName +
-                '}';
-    }
+
 }

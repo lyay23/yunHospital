@@ -17,6 +17,7 @@ import com.neuedu.hisweb.service.IRegisterService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.neuedu.hisweb.service.ISchedulingService;
 import com.neuedu.hisweb.utils.Utils;
+import com.neuedu.hisweb.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +58,9 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         register.setVisitDate(date_str);//挂号时间
         register.setVisitState(1);//本次看诊状态
         register.setCaseNumber(String.valueOf(getBaseMapper().getMaxCaseNumber()+1));
+        if (param.getUserVo() != null) {
+            register.setRegisterID(param.getUserVo().getId());
+        }
         int rs=getBaseMapper().insert(register);
 
         Invoice invoice=new Invoice();
@@ -64,7 +68,9 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         invoice.setMoney(param.getScheduling().getRegistFee());
         invoice.setState(3);
         invoice.setCreationTime(register.getRegistTime());
-        invoice.setUserID(register.getUserID());
+        if (param.getUserVo() != null) {
+            invoice.setUserID(param.getUserVo().getId());
+        }
         invoice.setRegistID(register.getId());
         invoice.setFeeType(register.getSettleID());
         rs+=invoiceMapper.insert(invoice);
@@ -79,9 +85,13 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         patientcosts.setItemType(1);
         patientcosts.setAmount(1);
         patientcosts.setCreatetime(register.getRegistTime());
-        patientcosts.setCreateOperID(register.getRegisterID());
+        if (param.getUserVo() != null) {
+            patientcosts.setCreateOperID(param.getUserVo().getId());
+        }
         patientcosts.setPayTime(register.getRegistTime());
-        patientcosts.setRegisterID(register.getRegisterID());
+        if (param.getUserVo() != null) {
+            patientcosts.setRegisterID(param.getUserVo().getId());
+        }
         patientcosts.setFeeType(register.getSettleID());
         rs+=patientcostsMapper.insert(patientcosts);
 
@@ -127,7 +137,9 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         invoice.setMoney(oldInvoice.getMoney());
         invoice.setState(7);//发票冲红状态==7
         invoice.setCreationTime(date_str);
-        invoice.setUserID(param.getUserVo().getId());
+        if (param.getUserVo() != null) {
+            invoice.setUserID(param.getUserVo().getId());
+        }
         invoice.setRegistID(register.getId());
         invoice.setInvoiceNum(oldInvoice.getInvoiceNum());
         invoice.setFeeType(register.getSettleID());
@@ -149,7 +161,9 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
         patientcosts.setAmount(-1);
         patientcosts.setDeptID(register.getDeptID());
         patientcosts.setCreatetime(date_str);
-        patientcosts.setCreateOperID(register.getRegisterID());
+        if (param.getUserVo() != null) {
+            patientcosts.setCreateOperID(param.getUserVo().getId());
+        }
         patientcosts.setRegisterID(param.getUserVo().getId());
         patientcosts.setPayTime(date_str);
         patientcosts.setFeeType(register.getSettleID());

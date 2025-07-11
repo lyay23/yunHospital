@@ -7,6 +7,7 @@ import com.neuedu.hisweb.entity.vo.MedicalCardVo;
 import com.neuedu.hisweb.entity.vo.RegParam;
 import com.neuedu.hisweb.entity.vo.RegisterVo;
 import com.neuedu.hisweb.entity.vo.SchedulingVo;
+import com.neuedu.hisweb.entity.vo.UserVo;
 import com.neuedu.hisweb.service.IRegisterService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,7 +36,19 @@ public class RegisterController {
     private IRegisterService iService;
 
     @PostMapping("/add")
-    public JsonResult<Register> addUser(@RequestBody RegParam param){
+    public JsonResult<Register> addUser(@RequestBody RegParam param, HttpSession session){
+        Object user=session.getAttribute("user");
+        if(user instanceof Customer){
+            param.setUserVo(new UserVo());
+            param.getUserVo().setId(((Customer) user).getId());
+            param.getUserVo().setRealName(((Customer) user).getRealName());
+            param.getUserVo().setUserName(((Customer) user).getRealName());
+        } else if (user instanceof User) {
+            param.setUserVo(new UserVo());
+            param.getUserVo().setId(((User) user).getId());
+            param.getUserVo().setRealName(((User) user).getRealName());
+            param.getUserVo().setUserName(((User) user).getUserName());
+        }
         boolean rs= iService.saveRegister(param);
         if(rs)return new JsonResult<Register>(param.getRegister());
         else return new JsonResult<>("添加失败");

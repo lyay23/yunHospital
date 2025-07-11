@@ -52,13 +52,5 @@ public class ConstantItemVo implements Serializable {
 
 
 
-    @Override
-    public String toString() {
-        return "ConstantItem{" +
-        "id=" + id +
-        ", constantTypeID=" + constantTypeID +
-        ", constantCode=" + constantCode +
-        ", constantName=" + constantName +
-        "}";
-    }
+
 }

@@ -25,10 +25,10 @@ public class UploadController {
 
     @PostMapping("/upload")
     public JsonResult upload(MultipartFile file) throws Exception {
-        log.info("上传头像，参数：{}", file.getOriginalFilename());
+        log.info("上传图片，参数：{}", file.getOriginalFilename());
         // 需要讲文件交给oss存储管理
         String url=aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
-        log.info("上传头像成功，返回的url：{}", url);
+        log.info("上传图片成功，返回的url：{}", url);
 
         return JsonResult.success(url);
     }

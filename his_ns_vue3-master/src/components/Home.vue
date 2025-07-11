@@ -3,7 +3,7 @@
 		<el-container class="main-container">
 			<!--头部 start-->
 			<el-header class="top-header">
-				<el-text class="home_title">东软云医院HIS系统</el-text>
+				<el-text class="home_title">医院管理系统</el-text>
 				<div class="home_userinfoContainer">
 					<el-dropdown @command="handleCommand">
 						<el-button type="primary">

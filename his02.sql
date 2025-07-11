@@ -11,7 +11,7 @@
  Target Server Version : 80028
  File Encoding         : 65001
 
- Date: 29/06/2025 16:47:17
+ Date: 11/07/2025 20:39:34
 */
 
 SET NAMES utf8mb4;
@@ -41,7 +41,7 @@ CREATE TABLE `checkapply`  (
   `State` int(0) NULL DEFAULT NULL COMMENT '状态',
   `RecordType` int(0) NOT NULL COMMENT '记录类型 1-检查 2-检验 3-处置',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 180 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 222 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of checkapply
@@ -149,6 +149,24 @@ INSERT INTO `checkapply` VALUES (193, 64, 101, 1, '大抢救', '', '1', 0, 1, '2
 INSERT INTO `checkapply` VALUES (196, 64, 101, 61, '4441', '', '22', 0, NULL, '2025-06-29 15:55:31', 1, 1, 1, NULL, NULL, NULL, 0, 2);
 INSERT INTO `checkapply` VALUES (198, 64, 101, 12, '灌肠', '', '1', 0, 1, '2025-06-29 16:02:59', 1, 1, 1, NULL, NULL, NULL, 5, 180);
 INSERT INTO `checkapply` VALUES (199, 64, 101, 4, '中心吸氧', '', '22', 0, NULL, '2025-06-29 16:15:47', 1, 1, 1, NULL, NULL, NULL, 5, 2);
+INSERT INTO `checkapply` VALUES (200, 65, 102, 55, '雌二醇测定（化X发光法、荧光免疫法）', '', '', 0, 1, '2025-06-30 09:02:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (201, 65, 102, 36, '尿蛋白电泳分析（凝胶法）', '', '', 0, 1, '2025-06-30 09:02:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (202, 65, 102, 29, '脑室碘水造影', '', '', 0, 1, '2025-06-30 09:02:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (203, 65, 102, 5, '低流量吸氧', '', '', 0, 1, '2025-06-30 09:02:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (204, 65, 102, 2, '中抢救', '', '', 0, 1, '2025-06-30 09:02:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (205, 65, 102, 4, '中心吸氧', '', NULL, 0, NULL, '2025-06-30 09:03:03', 1, 1, 1, NULL, NULL, NULL, 2, 2);
+INSERT INTO `checkapply` VALUES (206, 66, 103, 3, '小抢救', '抢救', '头部', 0, 1, '2025-06-30 09:35:13', 1, 14, 1, '2025-06-30 09:36:14', NULL, NULL, 5, 1);
+INSERT INTO `checkapply` VALUES (208, 67, 109, 55, '雌二醇测定（化X发光法、荧光免疫法）', '', '', 0, 1, '2025-06-30 22:22:22', 1, 14, 1, '2025-06-30 22:39:35', NULL, NULL, 5, 1);
+INSERT INTO `checkapply` VALUES (209, 67, 109, 36, '尿蛋白电泳分析（凝胶法）', '', '', 0, 1, '2025-06-30 22:22:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (210, 67, 109, 29, '脑室碘水造影', '', '', 0, 1, '2025-06-30 22:22:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (211, 67, 109, 5, '低流量吸氧', '', '', 0, 1, '2025-06-30 22:22:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (212, 67, 109, 2, '中抢救', '', '', 0, 1, '2025-06-30 22:22:22', 1, 1, 1, NULL, NULL, NULL, 2, 1);
+INSERT INTO `checkapply` VALUES (213, 67, 109, 4, '中心吸氧', '', NULL, 0, NULL, '2025-06-30 22:22:32', 1, 1, 1, NULL, NULL, NULL, 2, 2);
+INSERT INTO `checkapply` VALUES (214, 67, 109, 61, '4441', '', '22', 0, NULL, '2025-06-30 22:22:39', 1, 1, 1, NULL, NULL, NULL, 2, 2);
+INSERT INTO `checkapply` VALUES (215, 67, 109, 61, '4441', '', '1', 0, 1, '2025-06-30 22:25:40', 1, 1, 1, NULL, NULL, NULL, 2, 180);
+INSERT INTO `checkapply` VALUES (219, 68, 110, 2, '中抢救', '检查', '头', 0, 1, '2025-07-02 09:46:34', 1, 14, 1, '2025-07-02 09:47:03', NULL, NULL, 5, 1);
+INSERT INTO `checkapply` VALUES (220, 69, 111, 3, '小抢救', '', '', 0, 1, '2025-07-02 11:02:23', 1, 14, 1, '2025-07-02 11:02:50', NULL, NULL, 5, 1);
+INSERT INTO `checkapply` VALUES (221, 70, 112, 1, '大抢救', '', '', 0, 1, '2025-07-11 20:17:57', 1, 14, 1, '2025-07-11 20:22:40', NULL, NULL, 5, 1);
 
 -- ----------------------------
 -- Table structure for checkrelation
@@ -160,7 +178,7 @@ CREATE TABLE `checkrelation`  (
   `CheckTempID` int(0) NOT NULL COMMENT '申请模板ID',
   `Position` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '检查部位',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of checkrelation
@@ -193,6 +211,12 @@ INSERT INTO `checkrelation` VALUES (25, 29, 16, NULL);
 INSERT INTO `checkrelation` VALUES (26, 5, 16, NULL);
 INSERT INTO `checkrelation` VALUES (27, 2, 16, NULL);
 INSERT INTO `checkrelation` VALUES (28, 4, 17, NULL);
+INSERT INTO `checkrelation` VALUES (29, 1, 18, NULL);
+INSERT INTO `checkrelation` VALUES (30, 61, 18, NULL);
+INSERT INTO `checkrelation` VALUES (31, 61, 19, NULL);
+INSERT INTO `checkrelation` VALUES (32, 61, 19, NULL);
+INSERT INTO `checkrelation` VALUES (33, 3, 20, NULL);
+INSERT INTO `checkrelation` VALUES (34, 61, 20, NULL);
 
 -- ----------------------------
 -- Table structure for checktemplate
@@ -207,7 +231,7 @@ CREATE TABLE `checktemplate`  (
   `RecordType` int(0) NOT NULL COMMENT '记录类型 1-检查  2-检验 3-处置',
   `DelMark` int(0) NOT NULL DEFAULT 1 COMMENT '删除标记',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of checktemplate
@@ -226,9 +250,12 @@ INSERT INTO `checktemplate` VALUES (11, '测试', 1, '2025-06-26 11:47:49', '3',
 INSERT INTO `checktemplate` VALUES (12, '吸氧套餐', 1, '2025-06-26 14:33:20', '3', 1, 0);
 INSERT INTO `checktemplate` VALUES (13, '抢救套餐', 1, '2025-06-26 14:42:19', '3', 180, 0);
 INSERT INTO `checktemplate` VALUES (14, '抢救一下', 1, '2025-06-26 14:47:34', '3', 180, 0);
-INSERT INTO `checktemplate` VALUES (15, '抢救一下', 1, '2025-06-26 14:48:38', '3', 180, 1);
+INSERT INTO `checktemplate` VALUES (15, '抢救一下', 1, '2025-06-26 14:48:38', '3', 180, 0);
 INSERT INTO `checktemplate` VALUES (16, '牙疼', 1, '2025-06-26 15:35:00', '3', 1, 1);
 INSERT INTO `checktemplate` VALUES (17, '嗯嗯', 1, '2025-06-26 16:59:33', '3', 2, 1);
+INSERT INTO `checktemplate` VALUES (18, '测试', 1, '2025-06-30 22:32:59', '3', 180, 0);
+INSERT INTO `checktemplate` VALUES (19, '哈哈', 1, '2025-06-30 22:37:27', '3', 180, 0);
+INSERT INTO `checktemplate` VALUES (20, '哈哈', 1, '2025-06-30 22:37:54', '3', 180, 1);
 
 -- ----------------------------
 -- Table structure for constantitem
@@ -376,7 +403,7 @@ CREATE TABLE `constanttype`  (
   `ConstantTypeName` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '常数类别名称',
   `DelMark` int(0) NOT NULL DEFAULT 1 COMMENT '删除标记',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of constanttype
@@ -403,6 +430,7 @@ INSERT INTO `constanttype` VALUES (24, '11q', 'iiii', 0);
 INSERT INTO `constanttype` VALUES (25, 'qwwe', 'weqwqwe', 0);
 INSERT INTO `constanttype` VALUES (26, 'QQQ1', 'QQQQQQ1', 0);
 INSERT INTO `constanttype` VALUES (27, 'CScsc', 'cscsc11', 0);
+INSERT INTO `constanttype` VALUES (28, 'HHH', 'hhh', 1);
 
 -- ----------------------------
 -- Table structure for customer
@@ -418,20 +446,20 @@ CREATE TABLE `customer`  (
   `createDate` date NULL DEFAULT NULL,
   `channel` int(0) NULL DEFAULT NULL,
   `delMark` int(0) NOT NULL DEFAULT 1,
+  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of customer
 -- ----------------------------
-INSERT INTO `customer` VALUES (1, '张三', 71, '420101200001010031', '2000-01-01', '18911111111', '2023-07-01', 182, 1);
-INSERT INTO `customer` VALUES (2, '李四', 72, '320101199802170022', '1998-02-17', '18600213421', '2023-08-12', 182, 1);
-INSERT INTO `customer` VALUES (3, '王五', 71, '120100199510232110', '1995-10-23', '13600012675', '2023-08-12', 182, 1);
-INSERT INTO `customer` VALUES (4, '赵六', 72, '240100199211070021', '1992-11-07', '15578666661', '2023-08-13', 182, 1);
-INSERT INTO `customer` VALUES (5, '李阳', 71, '413026200303081813', '2025-06-03', '17656765678', NULL, 181, 0);
-INSERT INTO `customer` VALUES (6, '白雪1', 71, '417627200401021919', '2024-05-07', '17678988768', '2025-06-21', 182, 0);
-INSERT INTO `customer` VALUES (7, '李阳', 72, '413020200505091913', '2025-06-04', '16766788762', '2025-06-21', 182, 0);
-INSERT INTO `customer` VALUES (8, '李阳', 71, '413026200303091918', '2019-06-06', '17898766787', '2025-06-27', 181, 1);
+INSERT INTO `customer` VALUES (1, '张三', 71, '420101200001010031', '2000-01-01', '18911111111', '2023-07-01', 182, 1, 'E10ADC3949BA59ABBE56E057F20F883E');
+INSERT INTO `customer` VALUES (2, '李四', 72, '320101199802170022', '1998-02-17', '18600213421', '2023-08-12', 182, 1, 'E10ADC3949BA59ABBE56E057F20F883E');
+INSERT INTO `customer` VALUES (3, '王五', 71, '120100199510232110', '1995-10-23', '13600012675', '2023-08-12', 182, 1, 'E10ADC3949BA59ABBE56E057F20F883E');
+INSERT INTO `customer` VALUES (4, '赵六', 72, '240100199211070021', '1992-11-07', '15578666661', '2023-08-13', 182, 1, 'E10ADC3949BA59ABBE56E057F20F883E');
+INSERT INTO `customer` VALUES (5, '李阳', 71, '413026200303081813', '2025-06-03', '17656765678', NULL, 181, 0, 'E10ADC3949BA59ABBE56E057F20F883E');
+INSERT INTO `customer` VALUES (6, '白雪1', 71, '417627200401021919', '2024-05-07', '17678988768', '2025-06-21', 182, 0, 'E10ADC3949BA59ABBE56E057F20F883E');
+INSERT INTO `customer` VALUES (7, '李阳', 72, '413020200505091913', '2025-06-04', '16766788762', '2025-06-21', 182, 0, 'E10ADC3949BA59ABBE56E057F20F883E');
 
 -- ----------------------------
 -- Table structure for customerbind
@@ -443,7 +471,7 @@ CREATE TABLE `customerbind`  (
   `openId` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `createDate` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of customerbind
@@ -30034,7 +30062,7 @@ CREATE TABLE `disecategory`  (
   `DicaType` int(0) NOT NULL COMMENT '疾病类型',
   `DelMark` int(0) NOT NULL DEFAULT 1 COMMENT '删除标记',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 484 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 483 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of disecategory
@@ -33526,7 +33554,7 @@ CREATE TABLE `drugsdetailed`  (
   `Dosage` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用量',
   `Frequency` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '频次',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of drugsdetailed
@@ -33627,7 +33655,7 @@ CREATE TABLE `fmeditem`  (
   `RecordType` int(0) NULL DEFAULT NULL COMMENT '项目类型',
   `DelMark` int(0) NOT NULL DEFAULT 1 COMMENT '删除标记',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 70 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of fmeditem
@@ -33695,6 +33723,8 @@ INSERT INTO `fmeditem` VALUES (64, 'TTT', 'TTT', 'TT', 10.00, NULL, NULL, 'TTT',
 INSERT INTO `fmeditem` VALUES (65, 'TTT', '她她她', '天', 10.00, 3, 3, 'TTT', '2025-06-28 10:51:51', '2025-06-28 10:54:02', NULL, 0);
 INSERT INTO `fmeditem` VALUES (66, 'TTT', '她她她', '天', 10.00, 3, 3, 'GGGG', '2025-06-28 10:53:52', '2025-06-28 10:54:02', NULL, 0);
 INSERT INTO `fmeditem` VALUES (67, 'HHH', '哈哈哈', '次', 20.00, 2, 2, 'HHHH', '2025-06-28 10:53:52', '2025-06-28 10:54:02', NULL, 0);
+INSERT INTO `fmeditem` VALUES (68, 'TTT', '她她她', '天', 10.00, 3, 3, 'GGGG', '2025-06-30 22:40:04', '2025-06-30 22:40:12', NULL, 0);
+INSERT INTO `fmeditem` VALUES (69, 'HHH', '哈哈哈', '次', 20.00, 2, 2, 'HHHH', '2025-06-30 22:40:04', '2025-06-30 22:40:10', NULL, 0);
 
 -- ----------------------------
 -- Table structure for herbaldetailed
@@ -33708,7 +33738,7 @@ CREATE TABLE `herbaldetailed`  (
   `Price` decimal(8, 2) NOT NULL COMMENT '药品单价',
   `Footnote` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '脚注',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of herbaldetailed
@@ -33734,7 +33764,7 @@ CREATE TABLE `herbalprescription`  (
   `Advice` varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '医嘱',
   `State` int(0) NULL DEFAULT NULL COMMENT '状态',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of herbalprescription
@@ -33752,7 +33782,7 @@ CREATE TABLE `herbaltempdetailed`  (
   `Unit` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '药品单位',
   `Footnote` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '脚注',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of herbaltempdetailed
@@ -33776,7 +33806,7 @@ CREATE TABLE `herbaltemplate`  (
   `Scope` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '使用范围 全院/科室/个人',
   `DelMark` int(0) NOT NULL DEFAULT 1 COMMENT '删除标记',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of herbaltemplate
@@ -33798,7 +33828,7 @@ CREATE TABLE `invoice`  (
   `Back` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '冲红发票号码',
   `DailyState` int(0) NOT NULL DEFAULT 0 COMMENT '发票状态  0-未日结  1-已提交  2-已审核 ',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 213 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 240 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of invoice
@@ -33890,6 +33920,25 @@ INSERT INTO `invoice` VALUES (216, 'dmePLXmc', 50.00, 3, '2025-06-29 14:19:56', 
 INSERT INTO `invoice` VALUES (217, '1751178194829', 480.00, 1, '2025-06-29 14:23:14', 10, 101, 1, NULL, 0);
 INSERT INTO `invoice` VALUES (218, '1751184680571', 468.51, 1, '2025-06-29 16:11:20', 10, 101, 1, NULL, 0);
 INSERT INTO `invoice` VALUES (219, '1751184952785', 2.50, 1, '2025-06-29 16:15:52', 10, 101, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (220, '0PChhDU5', 50.00, 3, '2025-06-30 08:29:38', 1, 102, 186, NULL, 0);
+INSERT INTO `invoice` VALUES (221, '4lfYg9UG', 50.00, 3, '2025-06-30 09:32:57', 1, 103, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (223, '1751247336325', 80.00, 1, '2025-06-30 09:35:36', 10, 103, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (224, '1751247595878', 57.22, 1, '2025-06-30 09:39:55', 10, 103, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (225, 'R9pZ5UQU', 50.00, 3, '2025-06-30 11:19:04', 1, 104, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (226, 'R9pZ5UQU', 50.00, 7, '2025-06-30 11:19:10', 10, 104, 185, '225', 0);
+INSERT INTO `invoice` VALUES (227, 'G8uQPEBJ', 50.00, 3, '2025-06-30 21:53:51', 1, 105, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (228, 'UiQQz250', 50.00, 3, '2025-06-30 22:00:29', 1, 106, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (229, 'syyHaJoJ', 50.00, 3, '2025-06-30 22:13:01', 4, 107, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (230, 'dBGOykg6', 50.00, 3, '2025-06-30 22:15:28', 4, 108, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (231, 'RgpbRZWE', 50.00, 3, '2025-06-30 22:20:58', 1, 109, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (232, '1751294357808', 1329.80, 1, '2025-06-30 22:39:17', 1, 109, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (233, 'FbL55WoE', 50.00, 3, '2025-07-02 09:45:18', 10, 110, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (234, '1751420805213', 150.00, 1, '2025-07-02 09:46:45', 10, 110, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (235, '1751420948651', 96.32, 1, '2025-07-02 09:49:08', 10, 110, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (236, 'A4yjuuDj', 50.00, 3, '2025-07-02 11:00:54', 10, 111, 185, NULL, 0);
+INSERT INTO `invoice` VALUES (237, '1751425351593', 80.00, 1, '2025-07-02 11:02:31', 10, 111, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (238, '1751425458087', 8.54, 1, '2025-07-02 11:04:18', 10, 111, 1, NULL, 0);
+INSERT INTO `invoice` VALUES (239, 'Wq1eyMEh', 50.00, 3, '2025-07-11 20:14:59', 10, 112, 185, NULL, 0);
 
 -- ----------------------------
 -- Table structure for medical_result
@@ -33906,7 +33955,7 @@ CREATE TABLE `medical_result`  (
   `operator_id` int(0) NULL DEFAULT NULL COMMENT '操作员ID (关联 user.id)',
   `del_mark` int(0) NOT NULL DEFAULT 0 COMMENT '删除标记 (0=正常, 1=已删除)',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通用医疗结果表 (检查、检验、处置)' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通用医疗结果表 (检查、检验、处置)' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of medical_result
@@ -33923,6 +33972,11 @@ INSERT INTO `medical_result` VALUES (9, 101, 191, 1, 'hhhh1', 'https://sky-take-
 INSERT INTO `medical_result` VALUES (10, 101, 199, 2, '', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/06/665b19de-bb44-4c48-8d1b-deac687ffc8d.png', '2025-06-29 16:16:26', NULL, 0);
 INSERT INTO `medical_result` VALUES (11, 101, 198, 180, 'sssss', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/06/d646fc3a-be3a-488d-8cab-8c1296b2912d.png', '2025-06-29 16:21:25', NULL, 0);
 INSERT INTO `medical_result` VALUES (12, 101, 193, 180, 'sssss', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/06/d646fc3a-be3a-488d-8cab-8c1296b2912d.png', '2025-06-29 16:21:25', NULL, 0);
+INSERT INTO `medical_result` VALUES (13, 103, 206, 1, '没有有问题', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/06/bf99bf5f-29b1-441d-ab6d-965f2372f791.png', '2025-06-30 09:37:05', NULL, 0);
+INSERT INTO `medical_result` VALUES (14, 109, 208, 1, '', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/06/be4ada07-ff9d-4c5b-a492-6813f923357d.png', '2025-06-30 22:39:52', NULL, 0);
+INSERT INTO `medical_result` VALUES (15, 110, 219, 1, '还可以', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/07/ae60fc1d-dee2-4188-9076-bd79eeae0f45.png', '2025-07-02 09:47:28', NULL, 0);
+INSERT INTO `medical_result` VALUES (16, 111, 220, 1, 'hh1', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/07/165b605c-e7d3-4348-b6dd-94114228bafd.png', '2025-07-02 11:03:03', NULL, 0);
+INSERT INTO `medical_result` VALUES (17, 112, 221, 1, '没毛', 'https://sky-take-out039.oss-cn-hangzhou.aliyuncs.com/2025/07/595c9fa9-b444-4d03-a09f-fce7fd9e7ba8.png', '2025-07-11 20:24:16', NULL, 0);
 
 -- ----------------------------
 -- Table structure for medicalcard
@@ -33984,7 +34038,7 @@ CREATE TABLE `medicaldisease`  (
   `GetSiskDate` datetime(0) NULL DEFAULT NULL COMMENT '发病日期',
   `DiagnoseCate` int(0) NULL DEFAULT NULL COMMENT '诊断种类 1-初诊 2-终诊',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 106 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 131 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of medicaldisease
@@ -34027,8 +34081,11 @@ INSERT INTO `medicaldisease` VALUES (101, 59, 96, 2, 1, NULL, 1);
 INSERT INTO `medicaldisease` VALUES (102, 60, 97, 1, 1, NULL, 1);
 INSERT INTO `medicaldisease` VALUES (103, 61, 98, 1, 1, NULL, 1);
 INSERT INTO `medicaldisease` VALUES (104, 62, 99, 4, 1, NULL, 1);
-INSERT INTO `medicaldisease` VALUES (106, 63, 100, 9697, 1, NULL, 1);
-INSERT INTO `medicaldisease` VALUES (118, 64, 101, 2, 1, '2025-06-24 08:00:00', 1);
+INSERT INTO `medicaldisease` VALUES (120, 64, 101, 2, 1, '2025-06-24 08:00:00', 1);
+INSERT INTO `medicaldisease` VALUES (122, 63, 100, 9697, 1, '2025-06-03 08:00:00', 1);
+INSERT INTO `medicaldisease` VALUES (125, 65, 102, 27151, 2, NULL, 1);
+INSERT INTO `medicaldisease` VALUES (128, 67, 109, 1, 1, '2025-06-03 08:00:00', 1);
+INSERT INTO `medicaldisease` VALUES (130, 68, 110, 1, 1, '2025-06-03 08:00:00', 1);
 
 -- ----------------------------
 -- Table structure for medicalrecord
@@ -34051,7 +34108,7 @@ CREATE TABLE `medicalrecord`  (
   `Handling` varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '处理意见',
   `CaseState` int(0) NULL DEFAULT NULL COMMENT '病历状态 1-暂存 2-已提交 3-诊毕',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 64 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 71 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of medicalrecord
@@ -34103,8 +34160,14 @@ INSERT INTO `medicalrecord` VALUES (59, '600671', 96, 'eq', 'ew', 'eqw', 'eqw', 
 INSERT INTO `medicalrecord` VALUES (60, '600672', 97, '牙疼', '牙疼', '未治愈', '咳嗽', '无', '强', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `medicalrecord` VALUES (61, '600673', 98, 'dwa', 'daw', 'dwa', 'dwa', 'dwa', 'dwa', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `medicalrecord` VALUES (62, '600674', 99, 'fw', 'dw', 'dwa', 'dwa', 'dwa', 'daw', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `medicalrecord` VALUES (63, '600675', 100, '牙疼', '咳嗽', '未治愈', '无', '无', '强', NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `medicalrecord` VALUES (64, '600676', 101, '头疼', '咳嗽', '无', '无', '无', '强', NULL, NULL, NULL, '癌症q1dwd', '无', NULL);
+INSERT INTO `medicalrecord` VALUES (63, '600675', 100, '牙疼', '咳嗽', '未治愈', '无', '无', '强', NULL, NULL, NULL, '癌症', NULL, NULL);
+INSERT INTO `medicalrecord` VALUES (64, '600676', 101, '头疼', '咳嗽', '无', '无', '无', '强', NULL, NULL, NULL, '脑癌', '无', NULL);
+INSERT INTO `medicalrecord` VALUES (65, '600677', 102, '牙疼', '牙结石', '拔牙', '糖尿病', '无', '良好', '血常规', '别吃辣的别喝凉的', '癌症晚期', '癌症', '多吃点好的', NULL);
+INSERT INTO `medicalrecord` VALUES (66, '600678', 103, '头疼', '咳嗽', '未治愈', '无', '无', '强', NULL, NULL, NULL, '癌症', '吃点好的', NULL);
+INSERT INTO `medicalrecord` VALUES (67, '600684', 109, '头晕', '眼花', '无', '无', '无', '无', '吃点好的', '不要吃辣的', NULL, '牙疼导致', '无', NULL);
+INSERT INTO `medicalrecord` VALUES (68, '600685', 110, '头疼', '咳嗽', '无', '无', '无', '无', NULL, NULL, NULL, '头疼', '哈哈', NULL);
+INSERT INTO `medicalrecord` VALUES (69, '600686', 111, '头疼', '咳嗽', '无', '无', NULL, NULL, NULL, NULL, NULL, 'hh1', 'hh1', NULL);
+INSERT INTO `medicalrecord` VALUES (70, '600687', 112, '头疼', '咳嗽', '未治愈', NULL, NULL, NULL, NULL, NULL, NULL, '咳嗽', '无', NULL);
 
 -- ----------------------------
 -- Table structure for operation_log
@@ -34119,193 +34182,121 @@ CREATE TABLE `operation_log`  (
   `className` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 171 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 439 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of operation_log
 -- ----------------------------
-INSERT INTO `operation_log` VALUES (101, 11, 'admin', '2025-06-27 21:20:58', 'addConstantItem', 'com.neuedu.hisweb.controller.neusys.ConstantItemController', NULL);
-INSERT INTO `operation_log` VALUES (104, 11, 'admin', '2025-06-27 21:23:26', 'addDepartment', 'com.neuedu.hisweb.controller.neusys.DepartmentController', NULL);
-INSERT INTO `operation_log` VALUES (105, 11, 'admin', '2025-06-27 21:23:36', 'delDepartment', 'com.neuedu.hisweb.controller.neusys.DepartmentController', NULL);
-INSERT INTO `operation_log` VALUES (108, 10, 'ghy', '2025-06-27 21:24:09', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
-INSERT INTO `operation_log` VALUES (113, 1, 'bianque', '2025-06-27 21:29:00', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (117, 1, 'bianque', '2025-06-27 21:30:55', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (118, 14, 'liyang', '2025-06-28 10:28:54', 'addFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (119, 14, 'liyang', '2025-06-28 10:29:41', 'addFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (120, 14, 'liyang', '2025-06-28 10:32:36', 'addFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (121, 14, 'liyang', '2025-06-28 10:43:18', 'delBatchFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (122, 14, 'liyang', '2025-06-28 10:51:51', 'importFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (123, 14, 'liyang', '2025-06-28 10:53:52', 'importFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (124, 14, 'liyang', '2025-06-28 10:54:02', 'delBatchFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
-INSERT INTO `operation_log` VALUES (125, 11, 'admin', '2025-06-28 11:05:28', 'addScheduling', 'com.neuedu.hisweb.controller.neusys.SchedulingController', NULL);
-INSERT INTO `operation_log` VALUES (126, 11, 'admin', '2025-06-28 11:05:39', 'updateDepartment', 'com.neuedu.hisweb.controller.neusys.DepartmentController', NULL);
-INSERT INTO `operation_log` VALUES (127, 10, 'ghy', '2025-06-28 11:06:17', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
-INSERT INTO `operation_log` VALUES (128, 1, 'bianque', '2025-06-28 11:07:46', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (129, 1, 'bianque', '2025-06-28 11:07:49', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (130, 1, 'bianque', '2025-06-28 11:07:57', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (131, 1, 'bianque', '2025-06-28 15:53:17', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (132, 1, 'bianque', '2025-06-28 15:56:44', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (133, 1, 'bianque', '2025-06-28 16:28:26', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (134, 1, 'bianque', '2025-06-28 16:31:49', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (135, 10, 'ghy', '2025-06-28 16:49:46', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
-INSERT INTO `operation_log` VALUES (136, 1, 'bianque', '2025-06-28 16:51:23', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (137, 1, 'bianque', '2025-06-28 16:51:26', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (138, 1, 'bianque', '2025-06-28 16:51:39', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (139, 1, 'bianque', '2025-06-28 16:55:38', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (140, 1, 'bianque', '2025-06-28 16:55:38', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (141, 1, 'bianque', '2025-06-28 16:55:44', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (142, 1, 'bianque', '2025-06-28 16:55:49', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (143, 1, 'bianque', '2025-06-28 16:55:57', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (144, 1, 'bianque', '2025-06-28 16:56:02', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (145, 1, 'bianque', '2025-06-28 16:58:27', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (146, 1, 'bianque', '2025-06-28 17:02:08', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (147, 1, 'bianque', '2025-06-28 17:03:01', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (148, 1, 'bianque', '2025-06-28 17:03:27', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (149, 1, 'bianque', '2025-06-28 17:03:30', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (150, 1, 'bianque', '2025-06-28 17:03:37', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (151, 1, 'bianque', '2025-06-28 17:18:47', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (152, 1, 'bianque', '2025-06-28 17:18:50', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (153, 1, 'bianque', '2025-06-28 17:19:11', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (154, 1, 'bianque', '2025-06-28 17:20:12', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (155, 1, 'bianque', '2025-06-28 17:20:15', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (156, 1, 'bianque', '2025-06-28 17:20:22', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (157, 1, 'bianque', '2025-06-28 17:21:01', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (158, 10, 'ghy', '2025-06-28 17:25:04', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
-INSERT INTO `operation_log` VALUES (159, 1, 'bianque', '2025-06-28 17:25:28', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (160, 1, 'bianque', '2025-06-28 17:25:35', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (161, 1, 'bianque', '2025-06-28 17:25:39', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (162, 1, 'bianque', '2025-06-28 17:25:56', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (163, 1, 'bianque', '2025-06-28 17:25:59', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (164, 1, 'bianque', '2025-06-28 17:25:59', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (165, 1, 'bianque', '2025-06-28 17:26:05', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (166, 1, 'bianque', '2025-06-28 18:22:02', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (167, 1, 'bianque', '2025-06-28 18:22:04', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (168, 1, 'bianque', '2025-06-28 18:22:07', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (169, 14, 'liyang', '2025-06-28 18:46:53', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (170, 14, 'liyang', '2025-06-28 19:04:08', 'cancelExecuteCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (171, 14, 'liyang', '2025-06-28 20:19:19', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (172, 1, 'bianque', '2025-06-28 20:31:41', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (173, 1, 'bianque', '2025-06-28 20:31:50', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (174, 1, 'bianque', '2025-06-28 20:31:54', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (175, 14, 'liyang', '2025-06-28 20:32:16', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (176, 14, 'liyang', '2025-06-28 20:37:13', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (177, 1, 'bianque', '2025-06-28 22:51:05', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (178, 1, 'bianque', '2025-06-28 22:51:10', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (179, 1, 'bianque', '2025-06-28 22:51:11', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (180, 1, 'bianque', '2025-06-28 22:51:14', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (181, 11, 'admin', '2025-06-29 08:18:04', 'addScheduling', 'com.neuedu.hisweb.controller.neusys.SchedulingController', NULL);
-INSERT INTO `operation_log` VALUES (182, 10, 'ghy', '2025-06-29 08:18:49', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
-INSERT INTO `operation_log` VALUES (183, 1, 'bianque', '2025-06-29 08:20:16', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (184, 1, 'bianque', '2025-06-29 08:20:39', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (185, 1, 'bianque', '2025-06-29 08:20:48', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (186, 1, 'bianque', '2025-06-29 08:20:57', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (187, 1, 'bianque', '2025-06-29 08:21:02', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (188, 1, 'bianque', '2025-06-29 08:21:02', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (189, 1, 'bianque', '2025-06-29 08:21:11', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (190, 1, 'bianque', '2025-06-29 08:21:24', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (191, 1, 'bianque', '2025-06-29 08:21:31', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (192, 1, 'bianque', '2025-06-29 08:21:35', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (193, 1, 'bianque', '2025-06-29 08:21:42', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (194, 14, 'liyang', '2025-06-29 08:23:06', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (195, 14, 'liyang', '2025-06-29 08:23:25', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (196, 14, 'liyang', '2025-06-29 09:14:11', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (197, 14, 'liyang', '2025-06-29 09:22:11', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (198, 14, 'liyang', '2025-06-29 09:22:27', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (199, 14, 'liyang', '2025-06-29 09:22:59', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (200, 14, 'liyang', '2025-06-29 09:23:04', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (201, 1, 'bianque', '2025-06-29 10:44:17', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (202, 1, 'bianque', '2025-06-29 10:44:20', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (203, 1, 'bianque', '2025-06-29 10:44:26', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (204, 14, 'liyang', '2025-06-29 10:44:41', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (205, 14, 'liyang', '2025-06-29 10:45:16', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (206, 14, 'liyang', '2025-06-29 12:10:19', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (207, 1, 'bianque', '2025-06-29 12:10:56', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (208, 1, 'bianque', '2025-06-29 12:11:02', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (209, 1, 'bianque', '2025-06-29 12:11:10', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (210, 1, 'bianque', '2025-06-29 12:11:14', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (211, 1, 'bianque', '2025-06-29 12:11:14', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (212, 1, 'bianque', '2025-06-29 12:11:17', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (213, 14, 'liyang', '2025-06-29 12:11:35', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (214, 14, 'liyang', '2025-06-29 12:27:27', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (215, 14, 'liyang', '2025-06-29 12:27:28', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (216, 1, 'bianque', '2025-06-29 12:36:29', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (217, 1, 'bianque', '2025-06-29 12:36:40', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (218, 1, 'bianque', '2025-06-29 12:36:47', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (219, 1, 'bianque', '2025-06-29 12:36:54', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (220, 1, 'bianque', '2025-06-29 12:36:54', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (221, 1, 'bianque', '2025-06-29 12:37:06', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (222, 14, 'liyang', '2025-06-29 12:37:24', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (223, 14, 'liyang', '2025-06-29 12:37:38', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (224, 14, 'liyang', '2025-06-29 12:37:45', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (225, 14, 'liyang', '2025-06-29 12:38:40', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (226, 14, 'liyang', '2025-06-29 12:38:40', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (227, 14, 'liyang', '2025-06-29 13:59:04', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (228, 14, 'liyang', '2025-06-29 13:59:17', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (229, 14, 'liyang', '2025-06-29 13:59:17', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (230, 1, 'bianque', '2025-06-29 14:03:45', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (231, 1, 'bianque', '2025-06-29 14:07:01', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (232, 1, 'bianque', '2025-06-29 14:09:50', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (233, 1, 'bianque', '2025-06-29 14:10:46', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (234, 1, 'bianque', '2025-06-29 14:11:29', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
-INSERT INTO `operation_log` VALUES (235, 1, 'bianque', '2025-06-29 14:11:37', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (236, 10, 'ghy', '2025-06-29 14:19:56', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
-INSERT INTO `operation_log` VALUES (237, 1, 'bianque', '2025-06-29 14:21:01', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (238, 1, 'bianque', '2025-06-29 14:21:18', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (239, 1, 'bianque', '2025-06-29 14:21:25', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (240, 1, 'bianque', '2025-06-29 14:21:46', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (241, 1, 'bianque', '2025-06-29 14:21:53', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (242, 1, 'bianque', '2025-06-29 14:21:53', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (243, 1, 'bianque', '2025-06-29 14:22:08', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (244, 1, 'bianque', '2025-06-29 14:22:40', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (245, 1, 'bianque', '2025-06-29 14:22:43', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (246, 1, 'bianque', '2025-06-29 14:22:51', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (247, 1, 'bianque', '2025-06-29 14:23:00', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
-INSERT INTO `operation_log` VALUES (248, 1, 'bianque', '2025-06-29 14:23:04', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (249, 1, 'bianque', '2025-06-29 14:23:15', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (250, 14, 'liyang', '2025-06-29 14:23:35', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (251, 14, 'liyang', '2025-06-29 14:23:54', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (252, 1, 'bianque', '2025-06-29 14:31:51', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (253, 1, 'bianque', '2025-06-29 14:33:42', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (254, 1, 'bianque', '2025-06-29 14:34:13', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (255, 1, 'bianque', '2025-06-29 14:35:51', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (256, 1, 'bianque', '2025-06-29 14:36:01', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (257, 1, 'bianque', '2025-06-29 14:36:29', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (258, 1, 'bianque', '2025-06-29 14:40:38', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (259, 1, 'bianque', '2025-06-29 14:42:37', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (260, 1, 'bianque', '2025-06-29 15:21:22', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
-INSERT INTO `operation_log` VALUES (261, 1, 'bianque', '2025-06-29 15:22:04', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
-INSERT INTO `operation_log` VALUES (262, 1, 'bianque', '2025-06-29 15:37:19', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
-INSERT INTO `operation_log` VALUES (263, 1, 'bianque', '2025-06-29 15:46:56', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (264, 1, 'bianque', '2025-06-29 15:54:32', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (265, 1, 'bianque', '2025-06-29 15:55:31', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (266, 1, 'bianque', '2025-06-29 15:55:38', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (267, 1, 'bianque', '2025-06-29 16:01:27', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (268, 1, 'bianque', '2025-06-29 16:01:31', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (269, 1, 'bianque', '2025-06-29 16:02:25', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (270, 1, 'bianque', '2025-06-29 16:02:25', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (271, 1, 'bianque', '2025-06-29 16:02:39', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
-INSERT INTO `operation_log` VALUES (272, 1, 'bianque', '2025-06-29 16:02:59', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (273, 1, 'bianque', '2025-06-29 16:03:07', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (274, 1, 'bianque', '2025-06-29 16:06:25', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (275, 1, 'bianque', '2025-06-29 16:06:42', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
-INSERT INTO `operation_log` VALUES (276, 1, 'bianque', '2025-06-29 16:06:46', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (277, 1, 'bianque', '2025-06-29 16:10:49', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (278, 1, 'bianque', '2025-06-29 16:11:00', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
-INSERT INTO `operation_log` VALUES (279, 1, 'bianque', '2025-06-29 16:11:05', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
-INSERT INTO `operation_log` VALUES (280, 1, 'bianque', '2025-06-29 16:11:21', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (281, 14, 'liyang', '2025-06-29 16:11:56', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (282, 14, 'liyang', '2025-06-29 16:15:12', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (283, 1, 'bianque', '2025-06-29 16:15:47', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (284, 1, 'bianque', '2025-06-29 16:15:51', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (285, 1, 'bianque', '2025-06-29 16:15:51', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (286, 1, 'bianque', '2025-06-29 16:15:53', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
-INSERT INTO `operation_log` VALUES (287, 14, 'liyang', '2025-06-29 16:16:10', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (288, 14, 'liyang', '2025-06-29 16:16:26', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (289, 14, 'liyang', '2025-06-29 16:16:26', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (290, 14, 'liyang', '2025-06-29 16:19:22', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (291, 14, 'liyang', '2025-06-29 16:21:25', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (292, 14, 'liyang', '2025-06-29 16:21:25', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
-INSERT INTO `operation_log` VALUES (293, 1, 'bianque', '2025-06-29 16:45:53', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (329, 1, 'bianque', '2025-06-30 08:59:16', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (330, 1, 'bianque', '2025-06-30 09:00:46', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (331, 1, 'bianque', '2025-06-30 09:00:53', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (332, 1, 'bianque', '2025-06-30 09:02:22', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (333, 1, 'bianque', '2025-06-30 09:02:51', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (334, 1, 'bianque', '2025-06-30 09:03:03', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (335, 1, 'bianque', '2025-06-30 09:03:10', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (336, 1, 'bianque', '2025-06-30 09:03:10', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (337, 1, 'bianque', '2025-06-30 09:05:45', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (338, 11, 'admin', '2025-06-30 09:30:44', 'addConstantType', 'com.neuedu.hisweb.controller.neusys.ConstantTypeController', NULL);
+INSERT INTO `operation_log` VALUES (339, 10, 'ghy', '2025-06-30 09:32:57', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
+INSERT INTO `operation_log` VALUES (340, 1, 'bianque', '2025-06-30 09:34:20', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (341, 1, 'bianque', '2025-06-30 09:34:25', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (342, 1, 'bianque', '2025-06-30 09:35:13', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (343, 1, 'bianque', '2025-06-30 09:35:19', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (344, 1, 'bianque', '2025-06-30 09:35:36', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (345, 14, 'liyang', '2025-06-30 09:36:14', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (346, 14, 'liyang', '2025-06-30 09:37:05', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (347, 1, 'bianque', '2025-06-30 09:38:24', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (348, 1, 'bianque', '2025-06-30 09:38:43', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (349, 1, 'bianque', '2025-06-30 09:38:54', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (350, 1, 'bianque', '2025-06-30 09:39:01', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (351, 1, 'bianque', '2025-06-30 09:39:08', 'chat', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (352, 1, 'bianque', '2025-06-30 09:39:46', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (353, 1, 'bianque', '2025-06-30 09:39:56', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (354, 1, 'bianque', '2025-06-30 09:40:02', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (355, 1, 'bianque', '2025-06-30 09:40:05', 'finish', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
+INSERT INTO `operation_log` VALUES (356, 1, 'bianque', '2025-06-30 11:18:03', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (357, 1, 'bianque', '2025-06-30 11:18:10', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (358, 10, 'ghy', '2025-06-30 11:19:05', 'addUser', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
+INSERT INTO `operation_log` VALUES (359, 10, 'ghy', '2025-06-30 11:19:10', 'backOff', 'com.neuedu.hisweb.controller.neureg.RegisterController', NULL);
+INSERT INTO `operation_log` VALUES (360, 11, 'admin', '2025-06-30 15:34:37', 'addScheduling', 'com.neuedu.hisweb.controller.neusys.SchedulingController', NULL);
+INSERT INTO `operation_log` VALUES (361, 11, 'admin', '2025-06-30 15:34:56', 'addScheduling', 'com.neuedu.hisweb.controller.neusys.SchedulingController', NULL);
+INSERT INTO `operation_log` VALUES (362, 1, 'bianque', '2025-06-30 22:21:38', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (363, 1, 'bianque', '2025-06-30 22:22:18', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (364, 1, 'bianque', '2025-06-30 22:22:22', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (365, 1, 'bianque', '2025-06-30 22:22:25', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (366, 1, 'bianque', '2025-06-30 22:22:32', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (367, 1, 'bianque', '2025-06-30 22:22:39', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (368, 1, 'bianque', '2025-06-30 22:22:41', 'saveOrUpdateBatch', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (369, 1, 'bianque', '2025-06-30 22:22:42', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (370, 1, 'bianque', '2025-06-30 22:22:59', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (371, 1, 'bianque', '2025-06-30 22:25:40', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (372, 1, 'bianque', '2025-06-30 22:25:46', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (373, 1, 'bianque', '2025-06-30 22:29:42', 'delCheckTemplate', 'com.neuedu.hisweb.controller.neudoc.CheckTemplateController', NULL);
+INSERT INTO `operation_log` VALUES (374, 1, 'bianque', '2025-06-30 22:30:16', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (375, 1, 'bianque', '2025-06-30 22:32:59', 'addCheckTemplate', 'com.neuedu.hisweb.controller.neudoc.CheckTemplateController', NULL);
+INSERT INTO `operation_log` VALUES (376, 1, 'bianque', '2025-06-30 22:33:04', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (377, 1, 'bianque', '2025-06-30 22:37:07', 'delCheckTemplate', 'com.neuedu.hisweb.controller.neudoc.CheckTemplateController', NULL);
+INSERT INTO `operation_log` VALUES (378, 1, 'bianque', '2025-06-30 22:37:16', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (379, 1, 'bianque', '2025-06-30 22:37:27', 'addCheckTemplate', 'com.neuedu.hisweb.controller.neudoc.CheckTemplateController', NULL);
+INSERT INTO `operation_log` VALUES (380, 1, 'bianque', '2025-06-30 22:37:30', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (381, 1, 'bianque', '2025-06-30 22:37:42', 'delCheckTemplate', 'com.neuedu.hisweb.controller.neudoc.CheckTemplateController', NULL);
+INSERT INTO `operation_log` VALUES (382, 1, 'bianque', '2025-06-30 22:37:47', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (383, 1, 'bianque', '2025-06-30 22:37:54', 'addCheckTemplate', 'com.neuedu.hisweb.controller.neudoc.CheckTemplateController', NULL);
+INSERT INTO `operation_log` VALUES (384, 1, 'bianque', '2025-06-30 22:37:58', 'delCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (385, 1, 'bianque', '2025-06-30 22:38:32', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (386, 1, 'bianque', '2025-06-30 22:38:43', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (387, 1, 'bianque', '2025-06-30 22:38:52', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (388, 1, 'bianque', '2025-06-30 22:38:54', 'chat', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (389, 1, 'bianque', '2025-06-30 22:39:10', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (390, 1, 'bianque', '2025-06-30 22:39:18', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (391, 14, 'liyang', '2025-06-30 22:39:35', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (392, 14, 'liyang', '2025-06-30 22:39:52', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (393, 14, 'liyang', '2025-06-30 22:40:04', 'importFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
+INSERT INTO `operation_log` VALUES (394, 14, 'liyang', '2025-06-30 22:40:10', 'delFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
+INSERT INTO `operation_log` VALUES (395, 14, 'liyang', '2025-06-30 22:40:12', 'delFmeditem', 'com.neuedu.hisweb.controller.neusys.FmeditemController', NULL);
+INSERT INTO `operation_log` VALUES (396, 11, 'admin', '2025-07-02 09:44:44', 'addScheduling', 'com.neuedu.hisweb.controller.neusys.SchedulingController', NULL);
+INSERT INTO `operation_log` VALUES (397, 1, 'bianque', '2025-07-02 09:45:58', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (398, 1, 'bianque', '2025-07-02 09:46:01', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (399, 1, 'bianque', '2025-07-02 09:46:34', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (400, 1, 'bianque', '2025-07-02 09:46:38', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (401, 1, 'bianque', '2025-07-02 09:46:45', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (402, 14, 'liyang', '2025-07-02 09:47:03', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (403, 14, 'liyang', '2025-07-02 09:47:28', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (404, 1, 'bianque', '2025-07-02 09:48:16', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (405, 1, 'bianque', '2025-07-02 09:48:24', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (406, 1, 'bianque', '2025-07-02 09:48:32', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (407, 1, 'bianque', '2025-07-02 09:48:38', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (408, 1, 'bianque', '2025-07-02 09:48:41', 'chat', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (409, 1, 'bianque', '2025-07-02 09:49:05', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (410, 1, 'bianque', '2025-07-02 09:49:09', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (411, 1, 'bianque', '2025-07-02 11:01:32', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (412, 1, 'bianque', '2025-07-02 11:01:38', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (413, 1, 'bianque', '2025-07-02 11:02:23', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (414, 1, 'bianque', '2025-07-02 11:02:28', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (415, 1, 'bianque', '2025-07-02 11:02:32', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (416, 14, 'liyang', '2025-07-02 11:02:50', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (417, 14, 'liyang', '2025-07-02 11:03:03', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (418, 1, 'bianque', '2025-07-02 11:03:32', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (419, 1, 'bianque', '2025-07-02 11:03:41', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (420, 1, 'bianque', '2025-07-02 11:03:53', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (421, 1, 'bianque', '2025-07-02 11:03:56', 'chat', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (422, 1, 'bianque', '2025-07-02 11:04:16', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (423, 1, 'bianque', '2025-07-02 11:04:18', 'doPay', 'com.neuedu.hisweb.controller.neureg.PatientcostsController', NULL);
+INSERT INTO `operation_log` VALUES (424, 1, 'bianque', '2025-07-02 11:04:20', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (425, 11, 'admin', '2025-07-11 20:14:01', 'addScheduling', 'com.neuedu.hisweb.controller.neusys.SchedulingController', NULL);
+INSERT INTO `operation_log` VALUES (426, 1, 'bianque', '2025-07-11 20:15:34', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (427, 1, 'bianque', '2025-07-11 20:15:41', 'chatStream', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (428, 1, 'bianque', '2025-07-11 20:17:57', 'addCheckApply', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (429, 1, 'bianque', '2025-07-11 20:18:00', 'updateState', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (430, 1, 'bianque', '2025-07-11 20:18:13', 'saveMedicalRecord', 'com.neuedu.hisweb.controller.neudoc.MedicalRecordController', NULL);
+INSERT INTO `operation_log` VALUES (431, 1, 'bianque', '2025-07-11 20:18:41', 'addPrescription', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (432, 1, 'bianque', '2025-07-11 20:18:52', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (433, 1, 'bianque', '2025-07-11 20:19:01', 'add', 'com.neuedu.hisweb.controller.neudoc.PrescriptionDetailedController', NULL);
+INSERT INTO `operation_log` VALUES (434, 1, 'bianque', '2025-07-11 20:19:03', 'chat', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (435, 1, 'bianque', '2025-07-11 20:19:44', 'updatePrescriptionState', 'com.neuedu.hisweb.controller.neudoc.PrescriptionController', NULL);
+INSERT INTO `operation_log` VALUES (436, 1, 'bianque', '2025-07-11 20:19:59', 'chat', 'com.neuedu.hisweb.controller.neudoc.AIChatController', NULL);
+INSERT INTO `operation_log` VALUES (437, 14, 'liyang', '2025-07-11 20:22:40', 'executeCheck', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
+INSERT INTO `operation_log` VALUES (438, 14, 'liyang', '2025-07-11 20:24:16', 'saveResult', 'com.neuedu.hisweb.controller.neudoc.CheckApplyController', NULL);
 
 -- ----------------------------
 -- Table structure for patientcosts
@@ -34328,7 +34319,7 @@ CREATE TABLE `patientcosts`  (
   `FeeType` int(0) NOT NULL COMMENT '收费方式',
   `BackID` int(0) NULL DEFAULT NULL COMMENT '退费对应记录ID',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 409 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 466 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of patientcosts
@@ -34505,6 +34496,46 @@ INSERT INTO `patientcosts` VALUES (422, 101, 216, 279, 2, '匹多莫德口服液
 INSERT INTO `patientcosts` VALUES (423, 101, 218, 526, 2, '复方聚乙二醇电解口服散', 17.51, 1.00, 1, '2025-06-29 16:11:05', 1, '2025-06-29 16:11:20', 1, 185, NULL);
 INSERT INTO `patientcosts` VALUES (424, 101, 218, 61, 1, '4441', 441.00, -1.00, 2, '2025-06-29 16:15:12', 1, '2025-06-29 16:15:12', 1, 2, 420);
 INSERT INTO `patientcosts` VALUES (425, 101, 219, 4, 1, '中心吸氧', 2.50, 1.00, 122, '2025-06-29 16:15:51', 1, '2025-06-29 16:15:52', 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (426, 102, 220, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 08:29:38', 10, '2025-06-30 08:29:38', 10, 186, NULL);
+INSERT INTO `patientcosts` VALUES (427, 102, 220, 451, 2, '乌药颗粒', 34.32, 1.00, 1, '2025-06-30 08:30:30', 1, NULL, 1, 186, NULL);
+INSERT INTO `patientcosts` VALUES (428, 102, 220, 55, 1, '雌二醇测定（化X发光法、荧光免疫法）', 50.00, 1.00, 125, '2025-06-30 09:02:51', 1, NULL, 1, 3, NULL);
+INSERT INTO `patientcosts` VALUES (429, 102, 220, 36, 1, '尿蛋白电泳分析（凝胶法）', 70.00, 1.00, 125, '2025-06-30 09:02:51', 1, NULL, 1, 3, NULL);
+INSERT INTO `patientcosts` VALUES (430, 102, 220, 29, 1, '脑室碘水造影', 60.00, 1.00, 128, '2025-06-30 09:02:51', 1, NULL, 1, 7, NULL);
+INSERT INTO `patientcosts` VALUES (431, 102, 220, 5, 1, '低流量吸氧', 2.00, 1.00, 122, '2025-06-30 09:02:51', 1, NULL, 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (432, 102, 220, 2, 1, '中抢救', 150.00, 1.00, 133, '2025-06-30 09:02:51', 1, NULL, 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (433, 102, 220, 4, 1, '中心吸氧', 2.50, 1.00, 122, '2025-06-30 09:03:10', 1, NULL, 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (434, 103, 221, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 09:32:57', 10, '2025-06-30 09:32:57', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (435, 103, 223, 3, 1, '小抢救', 80.00, 1.00, 133, '2025-06-30 09:35:19', 1, '2025-06-30 09:35:36', 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (436, 103, 224, 264, 2, '枸橼酸钠(药用）', 20.80, 1.00, 1, '2025-06-30 09:39:46', 1, '2025-06-30 09:39:55', 1, 185, NULL);
+INSERT INTO `patientcosts` VALUES (437, 103, 224, 181, 2, '硫酸阿托品注射液', 36.42, 1.00, 1, '2025-06-30 09:39:46', 1, '2025-06-30 09:39:55', 1, 185, NULL);
+INSERT INTO `patientcosts` VALUES (438, 104, 225, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 11:19:04', 10, '2025-06-30 11:19:04', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (439, 104, 226, 1, 1, '挂号费', 50.00, -1.00, 1, '2025-06-30 11:19:10', 10, '2025-06-30 11:19:10', 10, 185, 438);
+INSERT INTO `patientcosts` VALUES (440, 105, 227, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 21:53:51', 4, '2025-06-30 21:53:51', 4, 185, NULL);
+INSERT INTO `patientcosts` VALUES (441, 106, 228, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 22:00:29', 4, '2025-06-30 22:00:29', 4, 185, NULL);
+INSERT INTO `patientcosts` VALUES (442, 107, 229, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 22:13:01', 4, '2025-06-30 22:13:01', 4, 185, NULL);
+INSERT INTO `patientcosts` VALUES (443, 108, 230, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 22:15:28', 4, '2025-06-30 22:15:28', 4, 185, NULL);
+INSERT INTO `patientcosts` VALUES (444, 109, 231, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-06-30 22:20:58', 1, '2025-06-30 22:20:58', 1, 185, NULL);
+INSERT INTO `patientcosts` VALUES (445, 109, 232, 55, 1, '雌二醇测定（化X发光法、荧光免疫法）', 50.00, 1.00, 125, '2025-06-30 22:22:25', 1, '2025-06-30 22:39:17', 1, 3, NULL);
+INSERT INTO `patientcosts` VALUES (446, 109, 232, 36, 1, '尿蛋白电泳分析（凝胶法）', 70.00, 1.00, 125, '2025-06-30 22:22:25', 1, '2025-06-30 22:39:17', 1, 3, NULL);
+INSERT INTO `patientcosts` VALUES (447, 109, 232, 29, 1, '脑室碘水造影', 60.00, 1.00, 128, '2025-06-30 22:22:25', 1, '2025-06-30 22:39:17', 1, 7, NULL);
+INSERT INTO `patientcosts` VALUES (448, 109, 232, 5, 1, '低流量吸氧', 2.00, 1.00, 122, '2025-06-30 22:22:25', 1, '2025-06-30 22:39:17', 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (449, 109, 232, 2, 1, '中抢救', 150.00, 1.00, 133, '2025-06-30 22:22:25', 1, '2025-06-30 22:39:17', 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (450, 109, 232, 4, 1, '中心吸氧', 2.50, 1.00, 122, '2025-06-30 22:22:42', 1, '2025-06-30 22:39:17', 1, 16, NULL);
+INSERT INTO `patientcosts` VALUES (451, 109, 232, 61, 1, '4441', 441.00, 1.00, 2, '2025-06-30 22:22:42', 1, '2025-06-30 22:39:17', 1, 2, NULL);
+INSERT INTO `patientcosts` VALUES (452, 109, 232, 61, 1, '4441', 441.00, 1.00, 2, '2025-06-30 22:25:46', 1, '2025-06-30 22:39:17', 1, 2, NULL);
+INSERT INTO `patientcosts` VALUES (453, 109, 232, 1259, 2, '阿莫西林胶囊(阿莫仙)', 89.53, 1.00, 1, '2025-06-30 22:39:10', 1, '2025-06-30 22:39:17', 1, 185, NULL);
+INSERT INTO `patientcosts` VALUES (454, 109, 232, 790, 2, '黄药脂', 23.77, 1.00, 1, '2025-06-30 22:39:10', 1, '2025-06-30 22:39:17', 1, 185, NULL);
+INSERT INTO `patientcosts` VALUES (455, 110, 233, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-07-02 09:45:18', 10, '2025-07-02 09:45:18', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (456, 110, 234, 2, 1, '中抢救', 150.00, 1.00, 133, '2025-07-02 09:46:38', 1, '2025-07-02 09:46:45', 10, 16, NULL);
+INSERT INTO `patientcosts` VALUES (457, 110, 235, 1259, 2, '阿莫西林胶囊(阿莫仙)', 89.53, 1.00, 1, '2025-07-02 09:49:05', 1, '2025-07-02 09:49:08', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (458, 110, 235, 10, 2, '山药颗粒', 6.79, 1.00, 1, '2025-07-02 09:49:05', 1, '2025-07-02 09:49:08', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (459, 111, 236, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-07-02 11:00:54', 10, '2025-07-02 11:00:54', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (460, 111, 237, 3, 1, '小抢救', 80.00, 1.00, 133, '2025-07-02 11:02:28', 1, '2025-07-02 11:02:31', 10, 16, NULL);
+INSERT INTO `patientcosts` VALUES (461, 111, 238, 196, 2, '盐酸阿夫唑嗪缓释片(桑塔)', 8.54, 1.00, 1, '2025-07-02 11:04:16', 1, '2025-07-02 11:04:18', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (462, 112, 239, 1, 1, '挂号费', 50.00, 1.00, 1, '2025-07-11 20:14:59', 10, '2025-07-11 20:14:59', 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (463, 112, 239, 1, 1, '大抢救', 200.00, 1.00, 133, '2025-07-11 20:18:00', 1, NULL, 10, 16, NULL);
+INSERT INTO `patientcosts` VALUES (464, 112, 239, 1259, 2, '阿莫西林胶囊(阿莫仙)', 89.53, 1.00, 1, '2025-07-11 20:19:44', 1, NULL, 10, 185, NULL);
+INSERT INTO `patientcosts` VALUES (465, 112, 239, 451, 2, '乌药颗粒', 34.32, 1.00, 1, '2025-07-11 20:19:44', 1, NULL, 10, 185, NULL);
 
 -- ----------------------------
 -- Table structure for prescription
@@ -34519,7 +34550,7 @@ CREATE TABLE `prescription`  (
   `PrescriptionTime` datetime(0) NOT NULL COMMENT '开立时间',
   `PrescriptionState` int(0) NOT NULL COMMENT '处方状态',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 71 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 83 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prescription
@@ -34554,6 +34585,14 @@ INSERT INTO `prescription` VALUES (71, 63, 100, 1, '哈哈', '2025-06-29 14:10:4
 INSERT INTO `prescription` VALUES (72, 64, 101, 1, '癌症', '2025-06-29 14:22:51', 2);
 INSERT INTO `prescription` VALUES (73, 64, 101, 1, '头疼', '2025-06-29 16:06:25', 2);
 INSERT INTO `prescription` VALUES (74, 64, 101, 1, '哈哈', '2025-06-29 16:10:49', 2);
+INSERT INTO `prescription` VALUES (75, 64, 101, 1, 'hhhh', '2025-06-29 16:55:02', 1);
+INSERT INTO `prescription` VALUES (76, 63, 100, 1, '头疼', '2025-06-29 18:09:10', 1);
+INSERT INTO `prescription` VALUES (77, 65, 102, 1, 'hhh1', '2025-06-30 08:30:07', 2);
+INSERT INTO `prescription` VALUES (78, 66, 103, 1, '癌症特效药', '2025-06-30 09:38:43', 2);
+INSERT INTO `prescription` VALUES (79, 67, 109, 1, '头疼', '2025-06-30 22:38:32', 2);
+INSERT INTO `prescription` VALUES (80, 68, 110, 1, '头疼', '2025-07-02 09:48:24', 2);
+INSERT INTO `prescription` VALUES (81, 69, 111, 1, 'hh1', '2025-07-02 11:03:41', 2);
+INSERT INTO `prescription` VALUES (82, 70, 112, 1, '咳嗽', '2025-07-11 20:18:41', 2);
 
 -- ----------------------------
 -- Table structure for prescriptiondetailed
@@ -34569,7 +34608,7 @@ CREATE TABLE `prescriptiondetailed`  (
   `Amount` decimal(8, 2) NOT NULL COMMENT '数量',
   `State` int(0) NOT NULL DEFAULT 2 COMMENT '状态',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 63 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of prescriptiondetailed
@@ -34619,6 +34658,20 @@ INSERT INTO `prescriptiondetailed` VALUES (45, 71, 1259, '遵医嘱', '遵医嘱
 INSERT INTO `prescriptiondetailed` VALUES (46, 72, 1259, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
 INSERT INTO `prescriptiondetailed` VALUES (47, 73, 279, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
 INSERT INTO `prescriptiondetailed` VALUES (48, 74, 526, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (49, 75, 10, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (50, 75, 2405, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (51, 76, 264, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (52, 76, 196, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (53, 77, 451, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (54, 78, 264, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (55, 78, 181, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (56, 79, 1259, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (57, 79, 790, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (58, 80, 1259, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (59, 80, 10, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (60, 81, 196, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (61, 82, 1259, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
+INSERT INTO `prescriptiondetailed` VALUES (62, 82, 451, '遵医嘱', '遵医嘱', '每日一次', 1.00, 2);
 
 -- ----------------------------
 -- Table structure for register
@@ -34648,7 +34701,7 @@ CREATE TABLE `register`  (
   `TimeInterval` int(0) NULL DEFAULT NULL,
   `Channel` int(0) NULL DEFAULT NULL,
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 101 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 113 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of register
@@ -34735,7 +34788,18 @@ INSERT INTO `register` VALUES (97, '600672', NULL, NULL, NULL, NULL, 22, '岁', 
 INSERT INTO `register` VALUES (98, '600673', NULL, NULL, NULL, NULL, 13, '岁', NULL, '2025-06-28', '下午', 1, 1, 1, 185, '0', '2025-06-28 16:49:46', 10, 2, '14', 6, 186);
 INSERT INTO `register` VALUES (99, '600674', NULL, NULL, NULL, NULL, 9, '岁', NULL, '2025-06-28', '下午', 1, 1, 1, 185, '0', '2025-06-28 17:25:04', 10, 2, '15', 8, 186);
 INSERT INTO `register` VALUES (100, '600675', NULL, NULL, NULL, NULL, 22, '岁', NULL, '2025-06-29', '下午', 1, 1, 1, 186, '0', '2025-06-29 08:18:48', 10, 2, '5', 1, 186);
-INSERT INTO `register` VALUES (101, '600676', NULL, NULL, NULL, NULL, 0, '岁', NULL, '2025-06-29', '下午', 1, 1, 1, 185, '0', '2025-06-29 14:19:56', 10, 2, '17', 1, 186);
+INSERT INTO `register` VALUES (101, '600676', NULL, NULL, NULL, NULL, 0, '岁', NULL, '2025-06-29', '下午', 1, 1, 1, 185, '0', '2025-06-29 14:19:56', 10, 3, '17', 1, 186);
+INSERT INTO `register` VALUES (102, '600677', NULL, NULL, NULL, NULL, 22, '岁', NULL, '2025-06-30', '上午', 1, 1, 1, 186, '0', '2025-06-30 08:29:38', 10, 1, '5', 1, 186);
+INSERT INTO `register` VALUES (103, '600678', NULL, NULL, NULL, NULL, 13, '岁', NULL, '2025-06-30', '上午', 1, 1, 1, 185, '0', '2025-06-30 09:32:57', 10, 3, '14', 4, 186);
+INSERT INTO `register` VALUES (104, '600679', NULL, NULL, NULL, NULL, 22, '岁', NULL, '2025-06-30', '上午', 1, 1, 1, 185, '0', '2025-06-30 11:19:04', 10, 4, '21', 8, 186);
+INSERT INTO `register` VALUES (105, '600680', NULL, NULL, NULL, NULL, 32, '岁', NULL, '2025-06-30', '下午', 1, 1, 1, 185, '1', '2025-06-30 21:53:51', 4, 1, '2', 1, 187);
+INSERT INTO `register` VALUES (106, '600681', NULL, NULL, NULL, NULL, 32, '岁', NULL, '2025-06-30', '下午', 1, 1, 1, 185, '1', '2025-06-30 22:00:29', 4, 1, '2', 0, 187);
+INSERT INTO `register` VALUES (107, '600682', NULL, NULL, NULL, NULL, 32, '岁', NULL, '2025-06-30', '上午', 1, 1, 1, 185, '1', '2025-06-30 22:13:01', 4, 1, '2', 0, 187);
+INSERT INTO `register` VALUES (108, '600683', NULL, NULL, NULL, NULL, 32, '岁', NULL, '2025-06-30', '上午', 1, 1, 1, 185, '1', '2025-06-30 22:15:28', 4, 1, '2', 0, 187);
+INSERT INTO `register` VALUES (109, '600684', NULL, NULL, NULL, NULL, 25, '岁', NULL, '2025-06-30', '上午', 1, 1, 1, 185, '1', '2025-06-30 22:20:58', 1, 2, '1', 0, 187);
+INSERT INTO `register` VALUES (110, '600685', NULL, NULL, NULL, NULL, 22, '岁', NULL, '2025-07-02', '上午', 1, 1, 1, 185, '0', '2025-07-02 09:45:18', 10, 2, '21', 4, 186);
+INSERT INTO `register` VALUES (111, '600686', NULL, NULL, NULL, NULL, 13, '岁', NULL, '2025-07-02', '上午', 1, 1, 1, 185, '0', '2025-07-02 11:00:54', 10, 2, '14', 8, 186);
+INSERT INTO `register` VALUES (112, '600687', NULL, NULL, NULL, NULL, 13, '岁', NULL, '2025-07-11', '下午', 1, 1, 1, 185, '0', '2025-07-11 20:14:59', 10, 1, '14', 0, 186);
 
 -- ----------------------------
 -- Table structure for registlevel
@@ -34771,7 +34835,7 @@ CREATE TABLE `registwork`  (
   `StartTime` datetime(0) NOT NULL COMMENT '日结起始时间',
   `EndTime` datetime(0) NOT NULL COMMENT '日结结束时间',
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of registwork
@@ -34824,7 +34888,7 @@ CREATE TABLE `scheduling`  (
   `DelMark` int(0) NOT NULL DEFAULT 1 COMMENT '删除标记',
   `regNum` int(0) NOT NULL DEFAULT 0,
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 132 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 142 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of scheduling
@@ -34907,6 +34971,16 @@ INSERT INTO `scheduling` VALUES (128, '2025-06-28', 1, 1, '上午', 14, 1, 1);
 INSERT INTO `scheduling` VALUES (129, '2025-06-28', 1, 1, '下午', 14, 1, 2);
 INSERT INTO `scheduling` VALUES (130, '2025-06-29', 1, 1, '上午', 14, 1, 0);
 INSERT INTO `scheduling` VALUES (131, '2025-06-29', 1, 1, '下午', 14, 1, 2);
+INSERT INTO `scheduling` VALUES (132, '2025-06-30', 1, 1, '上午', 14, 1, 5);
+INSERT INTO `scheduling` VALUES (133, '2025-06-30', 1, 1, '下午', 14, 1, 2);
+INSERT INTO `scheduling` VALUES (134, '2025-07-01', 1, 1, '上午', 14, 1, 0);
+INSERT INTO `scheduling` VALUES (135, '2025-07-01', 1, 1, '下午', 14, 1, 0);
+INSERT INTO `scheduling` VALUES (136, '2025-07-17', 1, 1, '上午', 14, 1, 0);
+INSERT INTO `scheduling` VALUES (137, '2025-07-17', 1, 1, '下午', 14, 1, 0);
+INSERT INTO `scheduling` VALUES (138, '2025-07-02', 1, 1, '上午', 14, 1, 2);
+INSERT INTO `scheduling` VALUES (139, '2025-07-02', 1, 1, '下午', 14, 1, 0);
+INSERT INTO `scheduling` VALUES (140, '2025-07-11', 1, 1, '上午', 14, 1, 0);
+INSERT INTO `scheduling` VALUES (141, '2025-07-11', 1, 1, '下午', 14, 1, 1);
 
 -- ----------------------------
 -- Table structure for settlecategory
@@ -34984,7 +35058,7 @@ CREATE TABLE `user`  (
 INSERT INTO `user` VALUES (1, 'bianque', 'D92973740A36903CF9F0107F01B3B4FF', '扁鹊', 172, 81, '是', 1, 1, 1, 1, NULL);
 INSERT INTO `user` VALUES (2, 'fwb', '8CBA64AF11E9142B7781BD242FDBE6C8', '范无病', 172, 83, '是', 1, 2, 1, 1, NULL);
 INSERT INTO `user` VALUES (3, 'hqb', '49589DBC6F6EFAC097414E5099D16C93', '霍去病', 172, 83, '是', 1, 2, 1, 1, NULL);
-INSERT INTO `user` VALUES (4, 'huatuo', 'huatuo123', '华佗', 172, 81, '是', 2, 1, 1, 1, NULL);
+INSERT INTO `user` VALUES (4, 'huatuo', '1B551E1022E7C371C15B693995A52504', '华佗', 172, 81, '是', 2, 1, 1, 1, NULL);
 INSERT INTO `user` VALUES (5, 'xll', '1B551E1022E7C371C15B693995A52504', '喜来乐', 172, 83, '是', 2, 2, 1, 1, NULL);
 INSERT INTO `user` VALUES (6, 'adq', '606A5D4F0D2158F2F4458D29E397DCFC', '安道全', 172, 83, '是', 2, 2, 1, 1, NULL);
 INSERT INTO `user` VALUES (8, 'dd', 'DAE2F05A224D7C55BFAB71996E90F4EB', '单独', 170, 84, '否', 9, 2, 1, 1, NULL);

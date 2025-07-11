@@ -15,4 +15,6 @@ import com.neuedu.hisweb.entity.vo.CustomerVo;
  */
 public interface ICustomerService extends IService<Customer> {
     Page<CustomerVo> selectPage(Page<CustomerVo> page, String keyword);
+
+    Customer selectByIdNumber(String idnumber);
 }
