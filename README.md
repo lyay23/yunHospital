@@ -48,9 +48,11 @@
 2. 使用IDEA打开文件夹`his_ns-master`中的`yml`文件中修改自己的MySQL用户名和密码
 3. Java版本不匹配的可在`pom.xml`中修改为自己的Java版本
 4. 在本地环境变量中配置自己的阿里云OSS的Key（用于检查员上传检查结果图片并且回显到医生端）
-5. 在本地环境中配置阿里云的大模型Key（用于评审患者病历以及药品信息）
-6. 使用VS Code 打开`his_ns_vue3-master`文件夹，打开终端运行`npm install`然后运行`npm run dev`
-7. 另外本项目开发了一个简易的移动端网页，只可以进行挂号（感兴趣的朋友可以自行开发），使用VS Code打开`my-vue3-project`，在终端运行`npm install` 以及`npm run dev:h5`,即可看到初始页面
+   参考链接 https://help.aliyun.com/zh/sdk/developer-reference/configure-the-alibaba-cloud-accesskey-environment-variable-on-linux-macos-and-windows-systems
+6. 在本地环境中配置阿里云的大模型Key（用于评审患者病历以及药品信息）
+   参考链接 https://help.aliyun.com/zh/model-studio/configure-api-key-through-environment-variables#e4cd73d544i3r
+8. 使用VS Code 打开`his_ns_vue3-master`文件夹，打开终端运行`npm install`然后运行`npm run dev`
+9. 另外本项目开发了一个简易的移动端网页，只可以进行挂号（感兴趣的朋友可以自行开发），使用VS Code打开`my-vue3-project`，在终端运行`npm install` 以及`npm run dev:h5`,即可看到初始页面
 
 ### 6. 页面展示
 
