@@ -1,9 +1,7 @@
 package com.neuedu.hisweb.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.neuedu.hisweb.entity.ConstantType;
 import com.neuedu.hisweb.entity.Invoice;
 import com.neuedu.hisweb.entity.Patientcosts;
 import com.neuedu.hisweb.entity.Register;
@@ -15,16 +13,17 @@ import com.neuedu.hisweb.mapper.RegisterMapper;
 import com.neuedu.hisweb.mapper.SchedulingMapper;
 import com.neuedu.hisweb.service.IRegisterService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.neuedu.hisweb.service.ISchedulingService;
 import com.neuedu.hisweb.utils.Utils;
-import com.neuedu.hisweb.utils.UserUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -43,6 +42,8 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
     private PatientcostsMapper patientcostsMapper;
     @Autowired
     private SchedulingMapper schedulingMapper;
+    @Autowired
+    private RedissonClient redissonClient;
 
     /**
      * *挂号
@@ -50,55 +51,76 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
      * @return
      */
     @Override
+    @CacheEvict(cacheNames = "scheduling:page", allEntries = true)
     public boolean saveRegister(RegParam param) {
+        if (param == null || param.getScheduling() == null || param.getScheduling().getId() == null) {
+            return false;
+        }
+        RLock lock = redissonClient.getLock("lock:register:" + param.getScheduling().getId());
+        boolean locked = false;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
         String date_str=df.format(new Date()).toString();
-        Register register=param.getRegister();
-        register.setRegistTime(date_str);
-        register.setVisitDate(date_str);//挂号时间
-        register.setVisitState(1);//本次看诊状态
-        register.setCaseNumber(String.valueOf(getBaseMapper().getMaxCaseNumber()+1));
-        if (param.getUserVo() != null) {
-            register.setRegisterID(param.getUserVo().getId());
+        try {
+            locked = lock.tryLock(2, 10, TimeUnit.SECONDS);
+            if (!locked) {
+                return false;
+            }
+            int updated = schedulingMapper.updateByRegisterWithQuota(param.getScheduling().getId());
+            if (updated == 0) {
+                return false;
+            }
+
+            Register register=param.getRegister();
+            register.setRegistTime(date_str);
+            register.setVisitDate(date_str);//挂号时间
+            register.setVisitState(1);//本次看诊状态
+            register.setCaseNumber(String.valueOf(getBaseMapper().getMaxCaseNumber()+1));
+            if (param.getUserVo() != null) {
+                register.setRegisterID(param.getUserVo().getId());
+            }
+            int rs=getBaseMapper().insert(register);
+
+            Invoice invoice=new Invoice();
+            invoice.setInvoiceNum(Utils.getInvoiceNum());
+            invoice.setMoney(param.getScheduling().getRegistFee());
+            invoice.setState(3);
+            invoice.setCreationTime(register.getRegistTime());
+            if (param.getUserVo() != null) {
+                invoice.setUserID(param.getUserVo().getId());
+            }
+            invoice.setRegistID(register.getId());
+            invoice.setFeeType(register.getSettleID());
+            rs+=invoiceMapper.insert(invoice);
+
+            Patientcosts patientcosts=new Patientcosts();
+            patientcosts.setRegistID(register.getId());
+            patientcosts.setInvoiceID(invoice.getId());
+            patientcosts.setName("挂号费");
+            patientcosts.setPrice(param.getScheduling().getRegistFee());
+            patientcosts.setDeptID(register.getDeptID());
+            patientcosts.setItemID(1);
+            patientcosts.setItemType(1);
+            patientcosts.setAmount(1);
+            patientcosts.setCreatetime(register.getRegistTime());
+            if (param.getUserVo() != null) {
+                patientcosts.setCreateOperID(param.getUserVo().getId());
+            }
+            patientcosts.setPayTime(register.getRegistTime());
+            if (param.getUserVo() != null) {
+                patientcosts.setRegisterID(param.getUserVo().getId());
+            }
+            patientcosts.setFeeType(register.getSettleID());
+            rs+=patientcostsMapper.insert(patientcosts);
+
+            return rs==3;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            if (locked) {
+                lock.unlock();
+            }
         }
-        int rs=getBaseMapper().insert(register);
-
-        Invoice invoice=new Invoice();
-        invoice.setInvoiceNum(Utils.getInvoiceNum());
-        invoice.setMoney(param.getScheduling().getRegistFee());
-        invoice.setState(3);
-        invoice.setCreationTime(register.getRegistTime());
-        if (param.getUserVo() != null) {
-            invoice.setUserID(param.getUserVo().getId());
-        }
-        invoice.setRegistID(register.getId());
-        invoice.setFeeType(register.getSettleID());
-        rs+=invoiceMapper.insert(invoice);
-
-        Patientcosts patientcosts=new Patientcosts();
-        patientcosts.setRegistID(register.getId());
-        patientcosts.setInvoiceID(invoice.getId());
-        patientcosts.setName("挂号费");
-        patientcosts.setPrice(param.getScheduling().getRegistFee());
-        patientcosts.setDeptID(register.getDeptID());
-        patientcosts.setItemID(1);
-        patientcosts.setItemType(1);
-        patientcosts.setAmount(1);
-        patientcosts.setCreatetime(register.getRegistTime());
-        if (param.getUserVo() != null) {
-            patientcosts.setCreateOperID(param.getUserVo().getId());
-        }
-        patientcosts.setPayTime(register.getRegistTime());
-        if (param.getUserVo() != null) {
-            patientcosts.setRegisterID(param.getUserVo().getId());
-        }
-        patientcosts.setFeeType(register.getSettleID());
-        rs+=patientcostsMapper.insert(patientcosts);
-
-        rs+=schedulingMapper.updateByRegister(param.getScheduling().getId());
-
-
-        return rs==4?true:false;
     }
 
     /**
@@ -110,7 +132,7 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
      * @return
      */
     @Override
-    public Page<RegisterVo> selectPage(Page<RegisterVo> page,Integer deptId,Integer docId,Integer state,String keyword,String regDate) {
+    public Page<RegisterVo> selectPage(Page<RegisterVo> page, Integer deptId, Integer docId, Integer state, String keyword, String regDate) {
         return getBaseMapper().selectPage(page,deptId,docId,state,keyword,regDate);
     }
 
@@ -120,6 +142,7 @@ public class RegisterServiceImpl extends ServiceImpl<RegisterMapper, Register> i
      * @return
      */
     @Override
+    @CacheEvict(cacheNames = "scheduling:page", allEntries = true)
     public boolean updateRegisterState(RegParam param) {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式

@@ -7,6 +7,8 @@ import com.neuedu.hisweb.entity.vo.SchedulingVo;
 import com.neuedu.hisweb.mapper.SchedulingMapper;
 import com.neuedu.hisweb.service.ISchedulingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,12 +31,15 @@ import java.util.stream.Collectors;
 public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Scheduling> implements ISchedulingService {
 
     @Override
+    @Cacheable(cacheNames = "scheduling:page",
+            key = "'pn=' + #page.current + ':count=' + #page.size + ':keyword=' + #keyword + ':deptId=' + #deptId + ':userId=' + #userId + ':regLevel=' + #regLevel + ':noon=' + #noon + ':start=' + #start + ':end=' + #end")
     public Page<SchedulingVo> selectPage(Page<SchedulingVo> page, String keyword, String deptId, String userId,String regLevel,String noon,String start, String end) {
         return baseMapper.selectPage(page,keyword,deptId,userId,regLevel,noon,start,end);
     }
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
+    @CacheEvict(cacheNames = "scheduling:page", allEntries = true)
     public boolean saveBatch(Collection<Scheduling> entityList) {
         try {
             // 先删除已存在的排班
@@ -56,6 +61,18 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
             ex.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    @CacheEvict(cacheNames = "scheduling:page", allEntries = true)
+    public boolean updateById(Scheduling entity) {
+        return super.updateById(entity);
+    }
+
+    @Override
+    @CacheEvict(cacheNames = "scheduling:page", allEntries = true)
+    public boolean removeById(Object id) {
+        return super.removeById(id);
     }
 
     /**

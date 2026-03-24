@@ -28,6 +28,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.Set;
+import com.neuedu.hisweb.entity.mq.PrescriptionFlowMessage;
+import com.neuedu.hisweb.mq.PrescriptionFlowProducer;
+import com.neuedu.hisweb.utils.UserUtils;
 
 /**
  * <p>
@@ -57,6 +60,8 @@ public class PrescriptionServiceImpl extends ServiceImpl<PrescriptionMapper, Pre
     @Autowired
     private IRegisterService registerService;
 
+    @Autowired
+    private PrescriptionFlowProducer prescriptionFlowProducer;
 
     @Override
     public Page<PrescriptionVo> selectPage(Page<PrescriptionVo> page, Integer registId) {
@@ -201,6 +206,16 @@ public class PrescriptionServiceImpl extends ServiceImpl<PrescriptionMapper, Pre
             }
         }
 
+        if (re) {
+            PrescriptionFlowMessage message = new PrescriptionFlowMessage();
+            message.setPrescriptionIds(ids);
+            message.setState(state);
+            if (UserUtils.getLoginUser() != null) {
+                message.setUserId(UserUtils.getLoginUser().getId());
+            }
+            message.setTime(LocalDateTime.now());
+            prescriptionFlowProducer.send(message);
+        }
         return re;
     }
 } 

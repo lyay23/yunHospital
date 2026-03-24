@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.entity.User;
 import com.neuedu.hisweb.entity.vo.UserVo;
+import com.neuedu.hisweb.service.AuthSessionService;
 import com.neuedu.hisweb.service.IUserService;
-import com.neuedu.hisweb.utils.JwtUtils;
 import com.neuedu.hisweb.utils.MD5Util;
 import com.neuedu.hisweb.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +25,8 @@ public class UserController {
     @Autowired
     private IUserService iUserService;
 
-    // 注入JWT工具类实例，用于生成JWT令牌
     @Autowired
-    private JwtUtils jwtUtils;
+    private AuthSessionService authSessionService;
 
     /**
      * 用户登录接口
@@ -60,7 +59,7 @@ public class UserController {
             // 登录成功
             UserUtils.setLoginUser(user);
             request.getSession().setAttribute("user", user);
-            String token = jwtUtils.createToken(user);
+            String token = authSessionService.issueTokenForUser(user);
             // 将token和用户信息封装到JsonResult中返回
             jsonResult = new JsonResult<>(user, token);
         }
@@ -74,6 +73,8 @@ public class UserController {
      */
     @PostMapping("/logout")
     public JsonResult<User> logout(HttpServletRequest request){
+        String token = request.getHeader("token");
+        authSessionService.invalidateToken(token);
         // 移除会话中的用户信息
         request.getSession().removeAttribute("user");
         // 使会话失效
@@ -135,6 +136,13 @@ public class UserController {
      */
     @PostMapping("/update")
     public JsonResult<User> updateUser(@RequestBody User user){
+        Integer oldUserType = null;
+        if (user.getId() != null) {
+            User oldUser = iUserService.getById(user.getId());
+            if (oldUser != null) {
+                oldUserType = oldUser.getUseType();
+            }
+        }
         // 如果请求中包含了密码，则对其进行加密
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPassword(MD5Util.getMD5(user.getPassword()));
@@ -145,12 +153,28 @@ public class UserController {
         // 调用服务层更新用户
         boolean rs = iUserService.updateById(user);
         if (rs) {
+            if (oldUserType != null && user.getUseType() != null && !oldUserType.equals(user.getUseType())) {
+                authSessionService.bumpUserVersion("USER", user.getId());
+            }
             // 修改成功，返回用户信息
             return new JsonResult<User>(user);
         } else {
             // 修改失败，返回错误信息
             return new JsonResult<>("修改失败");
         }
+    }
+
+    /**
+     * 踢下线接口（管理员）
+     * @param id 用户ID
+     * @return JsonResult对象
+     */
+    @PostMapping("/kick")
+    public JsonResult<User> kickUser(@RequestParam(value = "id", required = true) Integer id) {
+        authSessionService.kickUser("USER", id);
+        JsonResult<User> jsonResult = new JsonResult<>();
+        jsonResult.setResult(true);
+        return jsonResult;
     }
 
     /**

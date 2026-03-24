@@ -2,8 +2,8 @@ package com.neuedu.hisweb.controller.neureg;
 
 import com.neuedu.hisweb.entity.Customer;
 import com.neuedu.hisweb.entity.JsonResult;
+import com.neuedu.hisweb.service.AuthSessionService;
 import com.neuedu.hisweb.service.ICustomerService;
-import com.neuedu.hisweb.utils.JwtUtils;
 import com.neuedu.hisweb.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +22,7 @@ public class CustomerLoginController {
     private ICustomerService customerService;
 
     @Autowired
-    private JwtUtils jwtUtils;
+    private AuthSessionService authSessionService;
 
     // 使用一个静态内部类来接收登录请求的JSON数据
     public static class LoginRequest {
@@ -65,7 +65,7 @@ public class CustomerLoginController {
         // 使用MD5加密后比较密码,忽略大小写
         if (customer.getPassword().equalsIgnoreCase(MD5Util.getMD5(password))) {
             // 密码匹配，生成JWT
-            String token = jwtUtils.createToken(customer);
+            String token = authSessionService.issueTokenForCustomer(customer);
 
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);

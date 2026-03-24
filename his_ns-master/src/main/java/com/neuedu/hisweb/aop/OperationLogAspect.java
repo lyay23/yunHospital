@@ -2,7 +2,7 @@ package com.neuedu.hisweb.aop;
 
 import com.neuedu.hisweb.entity.OperationLog;
 import com.neuedu.hisweb.entity.User;
-import com.neuedu.hisweb.service.OperationLogService;
+import com.neuedu.hisweb.mq.AuditLogProducer;
 import com.neuedu.hisweb.utils.JwtUtils;
 import com.neuedu.hisweb.utils.UserUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,10 +22,10 @@ import java.time.LocalDateTime;
 @Component
 public class OperationLogAspect {
     @Autowired
-    private OperationLogService operationLogService;
+    private JwtUtils jwtUtils;
 
     @Autowired
-    private JwtUtils jwtUtils;
+    private AuditLogProducer auditLogProducer;
 
     @Around("execution(public * com.neuedu.hisweb.controller..*.*(..))")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -103,7 +103,7 @@ public class OperationLogAspect {
         log.setMethodName(methodName);
         log.setClassName(className);
 
-        operationLogService.save(log);
+        auditLogProducer.send(log);
         return result;
     }
 } 

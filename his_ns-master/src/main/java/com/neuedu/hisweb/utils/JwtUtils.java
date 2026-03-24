@@ -55,28 +55,31 @@ public class JwtUtils {
      * @return 生成的JWT令牌
      */
     public String createToken(Object object) {
-        // 计算过期时间（毫秒），将配置的秒转换为毫秒
+        return createTokenWithSession(object, object instanceof User ? ((User) object).getUseType() : null, 1L, String.valueOf(System.currentTimeMillis()));
+    }
+
+    public String createTokenWithSession(Object object, Integer userType, Long version, String tokenId) {
         Date expireDate = new Date(System.currentTimeMillis() + expireTime * 1000);
-
-        // 创建JWT构建器，添加通用声明
         JWTCreator.Builder builder = JWT.create()
-                .withClaim("secretkey", secretkey)  // 添加应用密钥作为声明
-                .withExpiresAt(expireDate);  // 设置过期时间
+                .withClaim("secretkey", secretkey)
+                .withClaim("ver", version)
+                .withClaim("jti", tokenId)
+                .withExpiresAt(expireDate);
 
-        // 根据用户类型添加不同的声明
         if (object instanceof Customer) {
             Customer customer = (Customer) object;
-            return builder.withClaim("id", customer.getId())  // 添加客户ID
-                    .sign(Algorithm.HMAC256(SECRET));  // 使用HMAC256算法签名
+            return builder.withClaim("id", customer.getId())
+                    .withClaim("kind", "CUSTOMER")
+                    .sign(Algorithm.HMAC256(SECRET));
         } else if (object instanceof User) {
             User user = (User) object;
-            return builder.withClaim("realName", user.getRealName())  // 添加真实姓名
-                    .withClaim("userName", user.getUserName())  // 添加用户名
-                    .withClaim("id", user.getId())  // 添加用户ID
-                    .sign(Algorithm.HMAC256(SECRET));  // 使用HMAC256算法签名
+            return builder.withClaim("realName", user.getRealName())
+                    .withClaim("userName", user.getUserName())
+                    .withClaim("id", user.getId())
+                    .withClaim("userType", userType)
+                    .withClaim("kind", "USER")
+                    .sign(Algorithm.HMAC256(SECRET));
         }
-
-        // 如果对象类型不支持，抛出异常
         throw new IllegalArgumentException("Unsupported object type: " + object.getClass().getName());
     }
 
@@ -141,9 +144,18 @@ public class JwtUtils {
             user.setUserName(decodedJWT.getClaim("userName").asString());
             user.setRealName(decodedJWT.getClaim("realName").asString());
             user.setId(decodedJWT.getClaim("id").asInt());
+            user.setUseType(decodedJWT.getClaim("userType").asInt());
             return user;
         } catch (JWTDecodeException e) {
             // 处理解码异常，返回null表示获取失败
+            return null;
+        }
+    }
+
+    public DecodedJWT parseToken(String token) {
+        try {
+            return JWT.decode(token);
+        } catch (JWTDecodeException e) {
             return null;
         }
     }

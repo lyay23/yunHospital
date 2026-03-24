@@ -9,10 +9,31 @@ spring:
     url: jdbc:mysql://localhost:3306/his02?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
     password: abc123
+  cache:
+    type: redis
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        acknowledge-mode: auto
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000ms
+          multiplier: 2.0
+          max-interval: 10000ms
 
 # Ollama4j 配置
 ollama:
@@ -59,3 +80,26 @@ logging:
 jwt:
   secretkey: hisweb  # 应用级别的密钥，用于额外安全验证
   expireTime: 3600                # JWT过期时间（秒），默认值为1年(31536000)
+
+his:
+  security:
+    session-ttl-seconds: 3600
+    token-prefix: "token:"
+    user-token-set-prefix: "user:tokens:"
+    user-ver-prefix: "user:ver:"
+  cache:
+    scheduling-ttl-seconds: 300
+    drugs-ttl-seconds: 300
+  mq:
+    audit-exchange: "his.audit.exchange"
+    audit-queue: "his.audit.queue"
+    audit-dlq: "his.audit.dlq"
+    audit-routing-key: "audit.log"
+    prescription-exchange: "his.prescription.exchange"
+    prescription-queue: "his.prescription.queue"
+    prescription-dlq: "his.prescription.dlq"
+    prescription-routing-key: "prescription.flow"
+    register-exchange: "his.register.exchange"
+    register-queue: "his.register.queue"
+    register-dlq: "his.register.dlq"
+    register-routing-key: "register.peak"

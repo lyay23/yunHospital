@@ -8,7 +8,9 @@ import com.neuedu.hisweb.entity.vo.RegParam;
 import com.neuedu.hisweb.entity.vo.RegisterVo;
 import com.neuedu.hisweb.entity.vo.SchedulingVo;
 import com.neuedu.hisweb.entity.vo.UserVo;
+import com.neuedu.hisweb.mq.RegisterPeakProducer;
 import com.neuedu.hisweb.service.IRegisterService;
+import com.neuedu.hisweb.utils.UserUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +37,15 @@ public class RegisterController {
     @Autowired
     private IRegisterService iService;
 
+    @Autowired
+    private RegisterPeakProducer registerPeakProducer;
+
     @PostMapping("/add")
     public JsonResult<Register> addUser(@RequestBody RegParam param, HttpSession session){
         Object user=session.getAttribute("user");
+        if (user == null) {
+            user = UserUtils.getLoginCustomer() != null ? UserUtils.getLoginCustomer() : UserUtils.getLoginUser();
+        }
         if(user instanceof Customer){
             param.setUserVo(new UserVo());
             param.getUserVo().setId(((Customer) user).getId());
@@ -52,6 +60,30 @@ public class RegisterController {
         boolean rs= iService.saveRegister(param);
         if(rs)return new JsonResult<Register>(param.getRegister());
         else return new JsonResult<>("添加失败");
+    }
+
+    /**
+     * 挂号削峰接口：请求先入队，异步处理
+     */
+    @PostMapping("/async")
+    public JsonResult<String> addUserAsync(@RequestBody RegParam param, HttpSession session){
+        Object user=session.getAttribute("user");
+        if (user == null) {
+            user = UserUtils.getLoginCustomer() != null ? UserUtils.getLoginCustomer() : UserUtils.getLoginUser();
+        }
+        if(user instanceof Customer){
+            param.setUserVo(new UserVo());
+            param.getUserVo().setId(((Customer) user).getId());
+            param.getUserVo().setRealName(((Customer) user).getRealName());
+            param.getUserVo().setUserName(((Customer) user).getRealName());
+        } else if (user instanceof User) {
+            param.setUserVo(new UserVo());
+            param.getUserVo().setId(((User) user).getId());
+            param.getUserVo().setRealName(((User) user).getRealName());
+            param.getUserVo().setUserName(((User) user).getUserName());
+        }
+        registerPeakProducer.send(param);
+        return new JsonResult<>("已进入排队，请稍后刷新查看结果");
     }
 
 
@@ -91,4 +123,3 @@ public class RegisterController {
         else return new JsonResult<>("诊毕失败");
     }
 }
-

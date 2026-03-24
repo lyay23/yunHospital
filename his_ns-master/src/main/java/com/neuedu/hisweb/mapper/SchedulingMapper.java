@@ -65,6 +65,15 @@ public interface SchedulingMapper extends BaseMapper<Scheduling> {
     @Update("update scheduling set regNum=regNum+1 where id=#{id}")
     int updateByRegister(Integer id);
 
+    @Update("""
+            update scheduling s
+            inner join user u on s.UserID = u.ID
+            inner join registlevel rl on rl.ID = u.RegistLeID
+            set s.regNum = s.regNum + 1
+            where s.id = #{id} and s.delMark=1 and s.regNum < rl.RegistQuota
+            """)
+    int updateByRegisterWithQuota(Integer id);
+
     @Update("update scheduling set regNum=regNum-1 where schedDate=date(#{visitDate}) and noon=#{noon} and userId=#{doctorId} ")
     int updateByBackRegister(String visitDate,String noon,Integer doctorId);
 

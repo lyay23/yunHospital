@@ -6,8 +6,8 @@ import com.neuedu.hisweb.entity.CustomerBind;
 import com.neuedu.hisweb.entity.JsonResult;
 import com.neuedu.hisweb.mapper.CustomerBindMapper;
 import com.neuedu.hisweb.mapper.CustomerMapper;
+import com.neuedu.hisweb.service.AuthSessionService;
 import com.neuedu.hisweb.service.IWechatService;
-import com.neuedu.hisweb.utils.JwtUtils;
 import com.neuedu.hisweb.utils.WechatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,9 +33,8 @@ public class WechatServiceImpl implements IWechatService {
     @Autowired
     private CustomerMapper customerMapper;
 
-    // 注入JWT工具类实例，用于生成JWT令牌
     @Autowired
-    private JwtUtils jwtUtils;
+    private AuthSessionService authSessionService;
 
     /**
      * 微信登录方法
@@ -68,7 +67,7 @@ public class WechatServiceImpl implements IWechatService {
             resMap.put("userInfo", customer);
 
             // 生成JWT令牌（通过注入的jwtUtils实例调用sign方法）
-            resMap.put("token", jwtUtils.createToken(customer));
+            resMap.put("token", authSessionService.issueTokenForCustomer(customer));
 
             return new JsonResult<>(resMap);
         }
